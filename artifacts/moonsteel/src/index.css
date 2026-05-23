@@ -270,6 +270,26 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Enhanced button transitions */
+  button, [role="button"], a {
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  /* Smooth link transitions */
+  a {
+    position: relative;
+  }
+
+  /* Hover state transitions for cards */
+  .layer-1, .layer-2, .layer-3 {
+    transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .motion-reveal {
       transition: none !important;

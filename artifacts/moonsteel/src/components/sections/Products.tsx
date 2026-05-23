@@ -48,7 +48,7 @@ const defaultProducts = [
 
 export function Products() {
   const [products, setProducts] = useState(defaultProducts);
-  const { viewport, listContainerVariants, listItemVariants } = useMotionReveal();
+  const { viewport, listContainerVariants, listItemVariants, scaleItemVariants } = useMotionReveal();
 
   useEffect(() => {
     let isMounted = true;
@@ -94,14 +94,14 @@ export function Products() {
           {products.map((product, i) => (
             <motion.div
               key={i}
-              variants={listItemVariants}
-              className="motion-reveal group layer-1 p-6 rounded-xl hover:border-primary/40 transition-colors"
+              variants={scaleItemVariants}
+              className="motion-reveal group layer-1 p-6 rounded-xl hover:border-primary/40 hover:shadow-lg transition-all duration-300"
             >
               <div className="mb-6 pb-6 border-b border-border">
                 <h3 className="text-xl font-display font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                   {product.name}
                 </h3>
-                <div className="inline-block rounded-md border border-primary/25 bg-primary/10 px-2 py-1 text-xs font-mono text-primary">
+                <div className="inline-block rounded-md border border-primary/25 bg-primary/10 px-2 py-1 text-xs font-mono text-primary group-hover:bg-primary/15 transition-colors">
                   {product.specs}
                 </div>
               </div>
@@ -112,7 +112,7 @@ export function Products() {
                 <span className="text-xs font-medium text-foreground">
                   {product.uses}
                 </span>
-                <ChevronRight className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all" />
+                <ChevronRight className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
               </div>
             </motion.div>
           ))}
