@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "../index.css";
+import { Header } from "@/components/layout/Header";
 import { AuthProvider } from "@/providers/AuthProvider";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
@@ -80,7 +81,12 @@ export default function RootLayout({
             }),
           }}
         />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <div className="tesla-theme min-h-screen bg-background">
+            <Header />
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

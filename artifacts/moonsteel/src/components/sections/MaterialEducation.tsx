@@ -1,11 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useMotionReveal } from "@/hooks/use-motion-reveal";
+import { SectionReveal } from "@/components/motion/SectionReveal";
 
 export function MaterialEducation() {
-  const { viewport, listContainerVariants, listItemVariants } = useMotionReveal();
-
   return (
     <section className="layer-1 py-20 border-y border-border">
       <div className="container mx-auto px-4 md:px-6">
@@ -19,17 +16,8 @@ export function MaterialEducation() {
             </p>
           </div>
 
-          <motion.div
-            className="grid md:grid-cols-2 gap-8"
-            initial="hidden"
-            whileInView="show"
-            viewport={viewport}
-            variants={listContainerVariants}
-          >
-            <motion.div
-              variants={listItemVariants}
-              className="motion-reveal layer-2 p-6 rounded-xl shadow-sm"
-            >
+          <SectionReveal className="grid md:grid-cols-2 gap-8">
+            <div className="layer-2 p-6 rounded-xl shadow-sm">
               <h3 className="font-display font-semibold text-lg mb-4 flex items-center gap-2">
                 <span className="w-3 h-3 bg-primary rounded-full"></span>
                 SS 304 (Moon Steel Standard)
@@ -52,12 +40,9 @@ export function MaterialEducation() {
                   <span className="text-muted-foreground">Non-porous surface. Approved for direct food contact and sterile medical use.</span>
                 </li>
               </ul>
-            </motion.div>
+            </div>
 
-            <motion.div
-              variants={listItemVariants}
-              className="motion-reveal layer-2 p-6 rounded-xl shadow-sm"
-            >
+            <div className="layer-2 p-6 rounded-xl shadow-sm">
               <h3 className="font-display font-semibold text-lg mb-4 flex items-center gap-2">
                 <span className="w-3 h-3 bg-destructive rounded-full"></span>
                 SS 200 Series (Common Alternative)
@@ -80,8 +65,8 @@ export function MaterialEducation() {
                   <span className="text-muted-foreground">Rust harbors bacteria. Will fail strict international health audits.</span>
                 </li>
               </ul>
-            </motion.div>
-          </motion.div>
+            </div>
+          </SectionReveal>
         </div>
       </div>
     </section>

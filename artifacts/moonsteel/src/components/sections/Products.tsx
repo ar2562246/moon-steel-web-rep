@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { useMotionReveal } from "@/hooks/use-motion-reveal";
 import { ChevronRight } from "lucide-react";
+import { SectionReveal } from "@/components/motion/SectionReveal";
 import { fetchProductCategories } from "@/features/admin/services/productCategories";
 import type { ProductCategory } from "@/features/admin/types";
 
@@ -48,7 +47,6 @@ const defaultProducts = [
 
 export function Products() {
   const [products, setProducts] = useState(defaultProducts);
-  const { viewport, listContainerVariants, listItemVariants } = useMotionReveal();
 
   useEffect(() => {
     let isMounted = true;
@@ -84,18 +82,11 @@ export function Products() {
           </p>
         </div>
 
-        <motion.div
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial="hidden"
-          whileInView="show"
-          viewport={viewport}
-          variants={listContainerVariants}
-        >
+        <SectionReveal className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product, i) => (
-            <motion.div
+            <div
               key={i}
-              variants={listItemVariants}
-              className="motion-reveal group layer-1 p-6 rounded-xl hover:border-primary/40 transition-colors"
+              className="group layer-1 p-6 rounded-xl hover:border-primary/40 transition-colors"
             >
               <div className="mb-6 pb-6 border-b border-border">
                 <h3 className="text-xl font-display font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
@@ -112,11 +103,11 @@ export function Products() {
                 <span className="text-xs font-medium text-foreground">
                   {product.uses}
                 </span>
-                <ChevronRight className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all" />
+                <ChevronRight className="w-5 h-5 text-primary opacity-0 md:group-hover:opacity-100 md:group-hover:translate-x-0 -translate-x-2 transition-[opacity,transform] duration-300" />
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </SectionReveal>
       </div>
     </section>
   );

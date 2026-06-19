@@ -8,6 +8,9 @@ import type { AdminTabKey } from "@/features/admin/types";
 import { CustomerLogosTab } from "@/features/admin/components/CustomerLogosTab";
 import { HeroImagesTab } from "@/features/admin/components/HeroImagesTab";
 import { ProductCategoriesTab } from "@/features/admin/components/ProductCategoriesTab";
+import { CatalogCategoriesTab } from "@/features/admin/components/CatalogCategoriesTab";
+import { CatalogProductsTab } from "@/features/admin/components/CatalogProductsTab";
+import { ProjectsTab } from "@/features/admin/components/ProjectsTab";
 
 type TabConfig = {
   key: AdminTabKey;
@@ -18,8 +21,10 @@ type TabConfig = {
 const tabConfig: TabConfig[] = [
   { key: "customer-logos", label: "Customer Logos" },
   { key: "hero-images", label: "Hero Images" },
-  { key: "products", label: "Products", placeholder: true },
-  { key: "projects", label: "Projects", placeholder: true },
+  { key: "products", label: "Product Lines" },
+  { key: "categories", label: "Categories" },
+  { key: "catalog-products", label: "Catalog Products" },
+  { key: "projects", label: "Projects" },
   { key: "testimonials", label: "Testimonials", placeholder: true },
 ];
 const defaultTab: AdminTabKey = "customer-logos";
@@ -74,6 +79,12 @@ export function AdminDashboard() {
             <HeroImagesTab />
           ) : tab.key === "products" ? (
             <ProductCategoriesTab />
+          ) : tab.key === "categories" ? (
+            <CatalogCategoriesTab />
+          ) : tab.key === "catalog-products" ? (
+            <CatalogProductsTab />
+          ) : tab.key === "projects" ? (
+            <ProjectsTab />
           ) : (
             <PlaceholderTab title={tab.label} />
           )}

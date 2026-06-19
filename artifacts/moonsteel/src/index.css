@@ -247,10 +247,13 @@
   .clients-carousel-track {
     @apply flex w-max items-center gap-6;
     animation: clients-marquee var(--clients-marquee-duration, 52s) linear infinite;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
 
   .clients-carousel-item {
-    @apply flex-none flex h-20 w-[140px] items-center justify-center rounded-xl border border-border/80 bg-layer-1 px-4 opacity-100 transition-all;
+    @apply flex-none flex h-20 w-[140px] items-center justify-center rounded-xl border border-border/80 bg-layer-1 px-4 opacity-100;
   }
 
   @media (max-width: 640px) {
@@ -264,42 +267,29 @@
   }
 
   .motion-reveal {
-    will-change: transform, opacity;
+    will-change: opacity;
     backface-visibility: hidden;
-    transform: translateZ(0);
     -webkit-font-smoothing: antialiased;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .motion-reveal {
-      transition: none !important;
+      opacity: 1 !important;
+      will-change: auto !important;
+    }
+
+    .clients-carousel-track {
       animation: none !important;
       transform: none !important;
-      opacity: 1 !important;
       will-change: auto !important;
     }
   }
 
-  /* iOS Safari can flicker transformed elements during scroll/reveal animations. */
+  /* iOS: opacity-only reveals — avoid extra transform layers that repaint during scroll. */
   @supports (-webkit-touch-callout: none) {
     .motion-reveal {
       -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      -webkit-transform: translate3d(0, 0, 0);
-      transform: translate3d(0, 0, 0);
-      -webkit-perspective: 1000;
-      perspective: 1000;
-      transform-style: preserve-3d;
-      contain: paint;
-    }
-
-    @media (max-width: 820px) {
-      .motion-reveal {
-        /* Keep opacity reveal but neutralize travel transforms on iOS mobile. */
-        -webkit-transform: translate3d(0, 0, 0) !important;
-        transform: translate3d(0, 0, 0) !important;
-        will-change: opacity;
-      }
+      will-change: opacity;
     }
   }
 

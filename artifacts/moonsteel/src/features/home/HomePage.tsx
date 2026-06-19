@@ -1,4 +1,5 @@
-import { Header } from "@/components/layout/Header";
+"use client";
+
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/sections/Hero";
 import { TrustBand } from "@/components/sections/TrustBand";
@@ -15,8 +16,6 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
       <main>
         <Hero />
         <TrustBand />

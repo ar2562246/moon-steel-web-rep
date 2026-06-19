@@ -2,6 +2,8 @@ export type AdminTabKey =
   | "customer-logos"
   | "hero-images"
   | "products"
+  | "categories"
+  | "catalog-products"
   | "projects"
   | "testimonials";
 
@@ -28,3 +30,6 @@ export type ProductCategory = {
   sort_order: number;
   created_at: string;
 };
+
+export type { Project } from "@/features/projects/types";
+export type { CatalogCategory, CatalogProduct } from "@/features/catalog/types";

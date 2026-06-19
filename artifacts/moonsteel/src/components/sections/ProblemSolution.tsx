@@ -1,12 +1,9 @@
 "use client";
 
 import { CheckCircle2, XCircle } from "lucide-react";
-import { motion } from "framer-motion";
-import { useMotionReveal } from "@/hooks/use-motion-reveal";
+import { SectionReveal } from "@/components/motion/SectionReveal";
 
 export function ProblemSolution() {
-  const { viewport, listContainerVariants, listItemVariants } = useMotionReveal();
-
   return (
     <section className="py-24 bg-muted text-foreground relative overflow-hidden">
       <div className="container relative z-10 mx-auto px-4 md:px-6">
@@ -19,18 +16,8 @@ export function ProblemSolution() {
           </p>
         </div>
 
-        <motion.div
-          className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto"
-          initial="hidden"
-          whileInView="show"
-          viewport={viewport}
-          variants={listContainerVariants}
-        >
-          {/* The Problem */}
-          <motion.div
-            variants={listItemVariants}
-            className="motion-reveal apple-surface p-8"
-          >
+        <SectionReveal className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
+          <div className="apple-surface p-8">
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border">
               <XCircle className="w-8 h-8 text-destructive" />
               <h3 className="text-2xl font-display font-semibold text-foreground">The Typical Workshop</h3>
@@ -49,13 +36,9 @@ export function ProblemSolution() {
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </div>
 
-          {/* The Solution */}
-          <motion.div
-            variants={listItemVariants}
-            className="motion-reveal surface-primary-callout p-8 rounded-xl shadow-sm relative overflow-hidden"
-          >
+          <div className="surface-primary-callout p-8 rounded-xl shadow-sm relative overflow-hidden">
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-primary/20 relative z-10">
               <CheckCircle2 className="w-8 h-8 text-primary" />
               <h3 className="text-2xl font-display font-semibold text-foreground">Moon Steel Standard</h3>
@@ -74,8 +57,8 @@ export function ProblemSolution() {
                 </li>
               ))}
             </ul>
-          </motion.div>
-        </motion.div>
+          </div>
+        </SectionReveal>
       </div>
     </section>
   );

@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient, hasSupabaseEnv } from "@/lib/supabase/client";
+import { formatSupabaseAuthError } from "@/lib/supabase/errors";
 import { useAuth } from "@/providers/AuthProvider";
 
 export function LoginForm() {
@@ -16,6 +18,8 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
 
   const redirectTo = searchParams.get("redirect") || "/admin";
+  const resetSuccess = searchParams.get("reset") === "success";
+  const authError = searchParams.get("error") === "auth";
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,10 +34,18 @@ export function LoginForm() {
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      let data;
+      let signInError;
+
+      try {
+        ({ data, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        }));
+      } catch (networkErr) {
+        setError(formatSupabaseAuthError(networkErr));
+        return;
+      }
 
       if (signInError) {
         setError(signInError.message);
@@ -64,12 +76,28 @@ export function LoginForm() {
   };
 
   return (
-    <main className="layer-0 flex min-h-screen items-center justify-center px-4 py-12">
+    <main className="layer-0 flex min-h-screen items-center justify-center px-4 pb-12 pt-28">
       <section className="layer-1 w-full max-w-md rounded-xl p-6 md:p-8">
         <h1 className="text-2xl font-semibold text-foreground">Admin Login</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Sign in with your admin credentials.
         </p>
+
+        {resetSuccess ? (
+          <p className="mt-4 rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-sm text-foreground">
+            Password updated. Sign in with your new password.
+          </p>
+        ) : null}
+
+        {authError ? (
+          <p className="mt-4 text-sm text-destructive">
+            Reset link expired or invalid.{" "}
+            <Link href="/login/forgot-password" className="underline">
+              Request a new link
+            </Link>
+            .
+          </p>
+        ) : null}
 
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div className="space-y-1">
@@ -88,9 +116,17 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium text-foreground" htmlFor="password">
-              Password
-            </label>
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-sm font-medium text-foreground" htmlFor="password">
+                Password
+              </label>
+              <Link
+                href="/login/forgot-password"
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               id="password"
               type="password"
