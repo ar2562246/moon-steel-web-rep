@@ -104,14 +104,19 @@ RESEND_FROM_EMAIL=Moon Steel <noreply@yourdomain.com>
 
 ---
 
-## Phase 4 — Optional / future
+## Phase 4 — Hardening & observability
 
-- Customer portal / quotation system
-- Multi-language (hreflang)
-- E-commerce integration
-- Remove unused `api-server` + Drizzle scaffold
-- Playwright E2E smoke tests
-- Vercel Analytics / Sentry
+**Goal:** Remove dead code, add monitoring and automated smoke tests.  
+**Status:** Code complete — customer portal skipped per product decision
+
+| # | Task | Owner | Status | Notes |
+|---|------|-------|--------|-------|
+| 4.1 | Customer portal / quotation system | — | **Skipped** | Out of scope |
+| 4.2 | Multi-language (hreflang) | — | **Deferred** | Future |
+| 4.3 | E-commerce integration | — | **Deferred** | Future |
+| 4.4 | Remove unused `api-server` + Drizzle scaffold | Code | **Done** | Site is Next.js + Supabase only |
+| 4.5 | Playwright E2E smoke tests | Code | **Done** | `e2e/smoke.spec.ts` + CI job |
+| 4.6 | Vercel Analytics / Speed Insights | Code | **Done** | Auto-enabled on Vercel deploys |
 
 ---
 
@@ -131,7 +136,7 @@ RESEND_FROM_EMAIL=Moon Steel <noreply@yourdomain.com>
 See audit for full table. **Open P0 items:**
 
 1. Missing PNG/JPG marketing images in repo (Phase 1.9 — documented)
-2. Vercel root directory still on `artifacts/api-server` until manually changed (Phase 1.1)
+2. Vercel root directory still on `artifacts/api-server` until manually changed (Phase 1.1) — **change to `artifacts/moonsteel`** (api-server removed in Phase 4)
 3. Run Supabase SQL migrations in dashboard (Phase 2.2 — scripts in repo)
 4. Set `SUPABASE_SERVICE_ROLE_KEY` (+ optional Resend vars) on Vercel (Phase 2.1)
 5. Run `testimonials.sql` in Supabase for CMS testimonials (Phase 3.3)
@@ -146,3 +151,4 @@ See audit for full table. **Open P0 items:**
 | 2026-07-05 | 1 | Removed duplicate `/tesla` and `/apple-design` pages; build verified |
 | 2026-07-05 | 2 | Contact API + ContactForm wiring; Supabase SQL (profiles, cms_core, contact_inquiries); middleware session refresh; CI workflow; error/not-found/loading pages |
 | 2026-07-05 | 3 | SSR homepage data; next/image + Supabase remote patterns; testimonials CMS; /projects index |
+| 2026-07-05 | 4 | Removed api-server/Drizzle scaffold; Playwright smoke tests; Vercel Analytics + Speed Insights |

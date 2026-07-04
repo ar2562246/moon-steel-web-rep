@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../index.css";
 import { Header } from "@/components/layout/Header";
+import { VercelInsights } from "@/components/VercelInsights";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -90,6 +91,7 @@ export default function RootLayout({
           </div>
         </AuthProvider>
         <Toaster />
+        <VercelInsights />
       </body>
     </html>
   );

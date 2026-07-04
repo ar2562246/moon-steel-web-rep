@@ -1,5 +1,0 @@
-{
-  "framework": "nextjs",
-  "installCommand": "corepack pnpm install --frozen-lockfile --config.strict-dep-builds=false",
-  "buildCommand": "cd ../.. && corepack pnpm --filter @workspace/moonsteel run build && node scripts/vercel-sync-next-output.mjs"
-}
