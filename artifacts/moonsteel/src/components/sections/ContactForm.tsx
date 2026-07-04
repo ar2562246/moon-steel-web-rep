@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin, Phone, Mail, Clock, FileUp, Send } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Name is required"),
@@ -36,6 +36,8 @@ const formSchema = z.object({
 export function ContactForm() {
   const { toast } = useToast();
   const [fileName, setFileName] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const honeypotRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,16 +52,52 @@ export function ContactForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Quote Request Received",
-      description: "We'll get back to you within 24 hours.",
-    });
-    
-    form.reset();
-    setFileName(null);
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          fileName: fileName ?? undefined,
+          website: honeypotRef.current?.value ?? "",
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { error?: string }
+        | { ok?: boolean }
+        | null;
+
+      if (!response.ok) {
+        const errorMessage =
+          payload && "error" in payload && payload.error
+            ? payload.error
+            : "Please try again or contact us by phone.";
+        toast({
+          variant: "destructive",
+          title: "Submission failed",
+          description: errorMessage,
+        });
+        return;
+      }
+
+      toast({
+        title: "Quote Request Received",
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      form.reset();
+      setFileName(null);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Submission failed",
+        description: "Network error. Please try again or call us directly.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,6 +176,15 @@ export function ContactForm() {
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <input
+                  ref={honeypotRef}
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="hidden"
+                  aria-hidden="true"
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
@@ -261,9 +308,14 @@ export function ContactForm() {
                   <p className="text-xs text-muted-foreground">Accepts .pdf, .dxf, .dwg, .jpg, .png</p>
                 </div>
 
-                <Button type="submit" size="lg" className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium group">
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isSubmitting}
+                  className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium group"
+                >
                   <Send className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                  Submit Request
+                  {isSubmitting ? "Submitting..." : "Submit Request"}
                 </Button>
               </form>
             </Form>
