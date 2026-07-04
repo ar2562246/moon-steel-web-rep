@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import "../index.css";
 import { Header } from "@/components/layout/Header";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+const ogImage = "/ms3-logo.svg";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -25,9 +27,9 @@ export const metadata: Metadata = {
     siteName: "Moon Steel",
     images: [
       {
-        url: "/images/hero-kitchen-stainless.png",
-        width: 1200,
-        height: 630,
+        url: ogImage,
+        width: 512,
+        height: 512,
         alt: "Moon Steel commercial stainless steel fabrication",
       },
     ],
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
     title: "Moon Steel | Commercial Stainless Steel Fabrication",
     description:
       "Commercial kitchen-grade stainless steel fabrication for hospitality, healthcare, and industrial environments.",
-    images: ["/images/hero-kitchen-stainless.png"],
+    images: [ogImage],
   },
   robots: {
     index: true,
@@ -87,6 +89,7 @@ export default function RootLayout({
             {children}
           </div>
         </AuthProvider>
+        <Toaster />
       </body>
     </html>
   );
