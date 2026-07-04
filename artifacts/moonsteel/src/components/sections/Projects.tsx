@@ -1,58 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SectionReveal } from "@/components/motion/SectionReveal";
-import { fetchPublishedProjects } from "@/features/admin/services/projects";
-import { defaultProjects } from "@/features/projects/defaultProjects";
+import { CmsImage } from "@/components/ui/CmsImage";
 import { getProjectCoverImage } from "@/features/projects/images";
 import type { Project } from "@/features/projects/types";
 
-export function Projects() {
-  const [projects, setProjects] = useState<Project[]>(defaultProjects);
+type ProjectsProps = {
+  initialProjects: Project[];
+};
 
-  useEffect(() => {
-    let isMounted = true;
-    fetchPublishedProjects()
-      .then((rows) => {
-        if (!isMounted || rows.length === 0) return;
-        setProjects(rows);
-      })
-      .catch(() => {
-        // Keep default projects when DB is not ready.
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
+export function Projects({ initialProjects }: ProjectsProps) {
   return (
     <section id="projects" className="layer-1 py-24 border-y border-border">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="apple-section-title mb-6 section-title-accent">
-            Proven Installations.
-          </h2>
+          <h2 className="apple-section-title mb-6 section-title-accent">Proven Installations.</h2>
           <p className="apple-section-copy">
-            Our fabrication speaks for itself. Explore recent high-performance stainless steel installations across various rigorous environments.
+            Our fabrication speaks for itself. Explore recent high-performance stainless steel
+            installations across various rigorous environments.
           </p>
         </div>
 
         <SectionReveal className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {projects.map((project) => (
+          {initialProjects.map((project) => (
             <Link
               key={project.id}
               href={`/projects/${project.slug}`}
               className="group block cursor-pointer"
             >
-              <div className="layer-2 aspect-[4/3] overflow-hidden mb-4 relative rounded-xl">
-                <img
+              <div className="layer-2 relative mb-4 aspect-[4/3] overflow-hidden rounded-xl">
+                <CmsImage
                   src={getProjectCoverImage(project)}
                   alt={project.title}
-                  className="h-full w-full object-cover md:transition-transform md:duration-700 md:group-hover:scale-105"
-                  loading="lazy"
-                  decoding="async"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover md:transition-transform md:duration-700 md:group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 md:group-hover:opacity-100 md:transition-opacity md:duration-300" />
                 {project.industry ? (
@@ -64,12 +47,19 @@ export function Projects() {
               <h3 className="text-lg font-display font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
                 {project.title}
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {project.scope}
-              </p>
+              <p className="text-sm text-muted-foreground">{project.scope}</p>
             </Link>
           ))}
         </SectionReveal>
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/projects"
+            className="inline-flex min-h-10 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground hover:border-primary/40 hover:text-primary"
+          >
+            View all projects
+          </Link>
+        </div>
       </div>
     </section>
   );

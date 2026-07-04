@@ -91,13 +91,16 @@ RESEND_FROM_EMAIL=Moon Steel <noreply@yourdomain.com>
 
 ## Phase 3 — Performance & CMS (Week 3–4)
 
-| # | Task | Priority | Effort |
-|---|------|----------|--------|
-| 3.1 | SSR homepage hero + key sections | P2 | 8–16h |
-| 3.2 | Adopt `next/image` + Supabase remote patterns | P2 | 4–8h |
-| 3.3 | Implement testimonials CMS tab | P2 | 8–16h |
-| 3.4 | Add `/projects` index page | P3 | 4h |
-| 3.5 | Consolidate product lines vs catalog (long-term) | P3 | 16h+ |
+**Goal:** Faster homepage, optimized images, testimonials CMS, projects index.  
+**Status:** Code complete — run `testimonials.sql` in Supabase
+
+| # | Task | Owner | Status | Notes |
+|---|------|-------|--------|-------|
+| 3.1 | SSR homepage hero + key sections | Code | **Done** | `resolveHomePageData()` in server `page.tsx` |
+| 3.2 | Adopt `next/image` + Supabase remote patterns | Code | **Done** | `CmsImage`; hero, logos, projects |
+| 3.3 | Implement testimonials CMS tab | Code | **Done** | Admin tab + homepage section + SQL |
+| 3.4 | Add `/projects` index page | Code | **Done** | SSR grid + sitemap entry |
+| 3.5 | Consolidate product lines vs catalog | Code | **Deferred** | Long-term; two systems documented |
 
 ---
 
@@ -131,6 +134,7 @@ See audit for full table. **Open P0 items:**
 2. Vercel root directory still on `artifacts/api-server` until manually changed (Phase 1.1)
 3. Run Supabase SQL migrations in dashboard (Phase 2.2 — scripts in repo)
 4. Set `SUPABASE_SERVICE_ROLE_KEY` (+ optional Resend vars) on Vercel (Phase 2.1)
+5. Run `testimonials.sql` in Supabase for CMS testimonials (Phase 3.3)
 
 ---
 
@@ -141,3 +145,4 @@ See audit for full table. **Open P0 items:**
 | 2026-07-05 | 1 | Initial plan; Toaster, headers, redirects, sitemap, OG fallback, unauthorized UX, image asset README |
 | 2026-07-05 | 1 | Removed duplicate `/tesla` and `/apple-design` pages; build verified |
 | 2026-07-05 | 2 | Contact API + ContactForm wiring; Supabase SQL (profiles, cms_core, contact_inquiries); middleware session refresh; CI workflow; error/not-found/loading pages |
+| 2026-07-05 | 3 | SSR homepage data; next/image + Supabase remote patterns; testimonials CMS; /projects index |

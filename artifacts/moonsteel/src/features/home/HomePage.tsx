@@ -9,22 +9,32 @@ import { Comparison } from "@/components/sections/Comparison";
 import { MaterialEducation } from "@/components/sections/MaterialEducation";
 import { Process } from "@/components/sections/Process";
 import { Projects } from "@/components/sections/Projects";
+import { Testimonials } from "@/components/sections/Testimonials";
 import { Industries } from "@/components/sections/Industries";
 import { ContactForm } from "@/components/sections/ContactForm";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import type { HomePageData } from "@/features/home/queries";
 
-export default function HomePage() {
+type HomePageProps = {
+  data: HomePageData;
+};
+
+export default function HomePage({ data }: HomePageProps) {
   return (
     <div className="min-h-screen bg-background">
       <main>
-        <Hero />
-        <TrustBand />
+        <Hero initialHeroImages={data.heroImages} />
+        <TrustBand
+          initialLogos={data.customerLogos}
+          initialSliderSpeed={data.logoSliderSpeed}
+        />
         <ProblemSolution />
-        <Products />
+        <Products initialCategories={data.productCategories} />
         <Comparison />
         <MaterialEducation />
         <Process />
-        <Projects />
+        <Projects initialProjects={data.projects} />
+        <Testimonials initialTestimonials={data.testimonials} />
         <Industries />
         <ContactForm />
       </main>

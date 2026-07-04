@@ -9,6 +9,7 @@ Run these scripts in order in the **Supabase SQL Editor** (Dashboard → SQL →
 | 3 | `projects.sql` | Portfolio projects + storage |
 | 4 | `catalog.sql` | Product catalog + storage |
 | 5 | `contact_inquiries.sql` | Quote form lead storage |
+| 6 | `testimonials.sql` | Homepage testimonials CMS |
 
 After running `profiles.sql`, promote your admin user:
 

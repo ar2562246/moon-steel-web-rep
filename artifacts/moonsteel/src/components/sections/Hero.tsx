@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+"use client";
+
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CmsImage } from "@/components/ui/CmsImage";
 import { ArrowRight, Download, Zap } from "lucide-react";
-import { fetchHeroImages } from "@/features/admin/services/heroImages";
+import type { HeroImage } from "@/features/admin/types";
 
 type HeroStripe = {
   src: string | null;
@@ -31,53 +34,28 @@ const arcPattern = [
   },
 ];
 
-export function Hero() {
-  const [hoveredStripe, setHoveredStripe] = useState<number | null>(null);
-  const [managedImages, setManagedImages] = useState<{ slot: number; image_url: string; label: string | null }[]>([]);
+type HeroProps = {
+  initialHeroImages?: HeroImage[];
+};
 
-  useEffect(() => {
-    let isMounted = true;
-    const load = async () => {
-      try {
-        const rows = await fetchHeroImages();
-        if (!isMounted) return;
-        setManagedImages(
-          rows.map((row) => ({
-            slot: row.slot,
-            image_url: row.image_url,
-            label: row.label,
-          })),
-        );
-      } catch {
-        if (!isMounted) return;
-        setManagedImages([]);
-      }
-    };
-    void load();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+export function Hero({ initialHeroImages = [] }: HeroProps) {
+  const [hoveredStripe, setHoveredStripe] = useState<number | null>(null);
 
   const heroImages = useMemo<HeroStripe[]>(() => {
     const bySlot = new Map<number, { image_url: string; label: string | null }>();
-    managedImages.forEach((img) => bySlot.set(img.slot, { image_url: img.image_url, label: img.label }));
+    initialHeroImages.forEach((img) =>
+      bySlot.set(img.slot, { image_url: img.image_url, label: img.label }),
+    );
 
     return Array.from({ length: 4 }, (_, index) => {
       const slot = index + 1;
       const managed = bySlot.get(slot);
       if (!managed) {
-        return {
-          src: null,
-          label: null,
-        };
+        return { src: null, label: null };
       }
-      return {
-        src: managed.image_url,
-        label: managed.label,
-      };
+      return { src: managed.image_url, label: managed.label };
     });
-  }, [managedImages]);
+  }, [initialHeroImages]);
 
   return (
     <section className="relative overflow-hidden bg-background pt-20 md:pt-24">
@@ -88,7 +66,6 @@ export function Hero() {
             "lg:min-h-[calc(90vh-6rem)] lg:grid-cols-2 lg:content-stretch lg:items-center lg:gap-x-12 lg:gap-y-0"
           }
         >
-          {/* Copy: same horizontal measure as imagery (max-w-xl), centered on small screens, flush left in first column on lg */}
           <div className="relative flex w-full justify-center lg:justify-start">
             <div
               className="pointer-events-none absolute inset-0 -z-10 hidden lg:block"
@@ -147,91 +124,94 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Desktop: vertical rail — vertically centered with copy, same max-w-xl as text */}
           <div className="relative z-20 hidden min-h-0 w-full lg:flex lg:items-center lg:justify-end">
             <div className="flex h-[min(80vh,760px)] w-full max-w-xl flex-col overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm">
-            {heroImages.map((stripe, i) => {
-              const active = hoveredStripe === i;
-              const hasHover = hoveredStripe !== null;
-              return (
-                <div
-                  key={`hero-slot-${i + 1}`}
-                  onMouseEnter={() => setHoveredStripe(i)}
-                  onMouseLeave={() => setHoveredStripe(null)}
-                  className={`group relative overflow-hidden border-t border-border/50 first:border-t-0 transition-all duration-500 ease-in-out ${
-                    active ? "flex-[5]" : hasHover ? "flex-[0.9]" : "flex-1"
-                  }`}
-                >
-                  {stripe.src ? (
-                    <>
-                      <img
-                        src={stripe.src}
-                        alt={stripe.label ?? `Hero image ${i + 1}`}
-                        className={`h-full w-full object-cover object-center transition-all duration-500 ease-in-out ${
-                          active
-                            ? "scale-100 grayscale-0 brightness-100 contrast-100"
-                            : "scale-100 grayscale-[0.25] brightness-90 contrast-90"
-                        }`}
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
-                      {stripe.label ? (
-                        <div
-                          className={`absolute bottom-3 right-3 rounded bg-black/45 px-2 py-1 text-xs font-medium text-white transition-all duration-500 ease-in-out ${
-                            active ? "opacity-100" : "opacity-70"
+              {heroImages.map((stripe, i) => {
+                const active = hoveredStripe === i;
+                const hasHover = hoveredStripe !== null;
+                return (
+                  <div
+                    key={`hero-slot-${i + 1}`}
+                    onMouseEnter={() => setHoveredStripe(i)}
+                    onMouseLeave={() => setHoveredStripe(null)}
+                    className={`group relative overflow-hidden border-t border-border/50 first:border-t-0 transition-all duration-500 ease-in-out ${
+                      active ? "flex-[5]" : hasHover ? "flex-[0.9]" : "flex-1"
+                    }`}
+                  >
+                    {stripe.src ? (
+                      <>
+                        <CmsImage
+                          src={stripe.src}
+                          alt={stripe.label ?? `Hero image ${i + 1}`}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 40vw"
+                          priority={i === 0}
+                          className={`object-cover object-center transition-all duration-500 ease-in-out ${
+                            active
+                              ? "scale-100 grayscale-0 brightness-100 contrast-100"
+                              : "scale-100 grayscale-[0.25] brightness-90 contrast-90"
                           }`}
-                        >
-                          {stripe.label}
-                        </div>
-                      ) : null}
-                    </>
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted/25 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                      Empty hero image
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
+                        {stripe.label ? (
+                          <div
+                            className={`absolute bottom-3 right-3 rounded bg-black/45 px-2 py-1 text-xs font-medium text-white transition-all duration-500 ease-in-out ${
+                              active ? "opacity-100" : "opacity-70"
+                            }`}
+                          >
+                            {stripe.label}
+                          </div>
+                        ) : null}
+                      </>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted/25 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                        Empty hero image
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Mobile / tablet: carousel shares max-w-xl + horizontal alignment with copy */}
           <div className="flex w-full justify-center lg:hidden">
             <div className="w-full max-w-xl">
-            <div className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 px-1 sm:mx-0 sm:px-0 md:gap-4">
-              {heroImages.map((stripe, index) => (
-                <article
-                  key={`hero-mobile-slot-${index + 1}`}
-                  className="relative h-40 min-w-[78%] snap-start overflow-hidden rounded-lg border border-border/70 sm:h-44 sm:min-w-[64%] md:h-52 md:min-w-[46%]"
-                >
-                  {stripe.src ? (
-                    <>
-                      <img
-                        src={stripe.src}
-                        alt={stripe.label ?? "Hero image"}
-                        className="h-full w-full object-cover object-center"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
-                      {stripe.label ? (
-                        <div className="absolute bottom-3 right-3 rounded bg-black/45 px-2 py-1 text-xs font-medium text-white">
-                          {stripe.label}
-                        </div>
-                      ) : null}
-                    </>
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted/25 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                      Empty hero image
-                    </div>
-                  )}
-                </article>
-              ))}
-            </div>
+              <div className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 px-1 sm:mx-0 sm:px-0 md:gap-4">
+                {heroImages.map((stripe, index) => (
+                  <article
+                    key={`hero-mobile-slot-${index + 1}`}
+                    className="relative h-40 min-w-[78%] snap-start overflow-hidden rounded-lg border border-border/70 sm:h-44 sm:min-w-[64%] md:h-52 md:min-w-[46%]"
+                  >
+                    {stripe.src ? (
+                      <>
+                        <CmsImage
+                          src={stripe.src}
+                          alt={stripe.label ?? "Hero image"}
+                          fill
+                          sizes="80vw"
+                          priority={index === 0}
+                          className="object-cover object-center"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
+                        {stripe.label ? (
+                          <div className="absolute bottom-3 right-3 rounded bg-black/45 px-2 py-1 text-xs font-medium text-white">
+                            {stripe.label}
+                          </div>
+                        ) : null}
+                      </>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted/25 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                        Empty hero image
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Nested "arc field" background pattern */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {arcPattern.map((arc, i) => (
           <div

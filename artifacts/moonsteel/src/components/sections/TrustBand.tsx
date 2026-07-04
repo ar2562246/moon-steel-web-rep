@@ -2,91 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { fetchCustomerLogos, fetchLogoSliderSpeed } from "@/features/admin/services/customerLogos";
+import { CmsImage } from "@/components/ui/CmsImage";
 import type { CustomerLogo } from "@/features/admin/types";
 
-const LOGOS_CACHE_KEY = "moonsteel:customer-logos";
-const LOGO_SPEED_CACHE_KEY = "moonsteel:logo-slider-speed";
+type TrustBandProps = {
+  initialLogos?: CustomerLogo[];
+  initialSliderSpeed?: number;
+};
 
-function preloadImage(url: string): Promise<void> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-    img.src = url;
-  });
-}
-
-export function TrustBand() {
-  const [logos, setLogos] = useState<CustomerLogo[]>([]);
-  const [sliderSpeed, setSliderSpeed] = useState(52);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    // Render cached logos immediately (helps with perceived mobile load time).
-    try {
-      const cached = window.sessionStorage.getItem(LOGOS_CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached) as CustomerLogo[];
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setLogos(parsed);
-        }
-      }
-    } catch {
-      // Ignore cache parse/storage errors.
-    }
-
-    fetchCustomerLogos()
-      .then((rows) => {
-        if (isMounted) setLogos(rows);
-        try {
-          window.sessionStorage.setItem(LOGOS_CACHE_KEY, JSON.stringify(rows));
-        } catch {
-          // Ignore storage write errors.
-        }
-      })
-      .catch(() => {
-        // Keep static fallback list when logos cannot be loaded.
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    // Use cached speed instantly to avoid visual jump.
-    try {
-      const cachedSpeed = window.sessionStorage.getItem(LOGO_SPEED_CACHE_KEY);
-      if (cachedSpeed) {
-        const parsed = Number(cachedSpeed);
-        if (Number.isFinite(parsed) && parsed >= 12 && parsed <= 120) {
-          setSliderSpeed(parsed);
-        }
-      }
-    } catch {
-      // Ignore cache parse/storage errors.
-    }
-
-    fetchLogoSliderSpeed()
-      .then((seconds) => {
-        if (isMounted) setSliderSpeed(seconds);
-        try {
-          window.sessionStorage.setItem(LOGO_SPEED_CACHE_KEY, String(seconds));
-        } catch {
-          // Ignore storage write errors.
-        }
-      })
-      .catch(() => {
-        // Keep default when settings cannot be loaded.
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+export function TrustBand({ initialLogos = [], initialSliderSpeed = 52 }: TrustBandProps) {
+  const [logos] = useState<CustomerLogo[]>(initialLogos);
+  const [sliderSpeed] = useState(initialSliderSpeed);
+  const [imagesLoaded, setImagesLoaded] = useState(initialLogos.length === 0);
 
   useEffect(() => {
     if (logos.length === 0) {
@@ -95,11 +22,19 @@ export function TrustBand() {
     }
 
     let cancelled = false;
-    setImagesLoaded(false);
-
     const urls = [...new Set(logos.map((l) => l.image_url).filter(Boolean))];
 
-    Promise.all(urls.map(preloadImage)).then(() => {
+    Promise.all(
+      urls.map(
+        (url) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = url;
+          }),
+      ),
+    ).then(() => {
       if (!cancelled) setImagesLoaded(true);
     });
 
@@ -112,8 +47,6 @@ export function TrustBand() {
   const marqueeLogos = useMemo(() => {
     if (logos.length === 0) return [];
 
-    // Build a sufficiently long base set so the marquee never exposes blanks,
-    // even when only a few logos are uploaded.
     const minItemsPerSet = 6;
     const repeatCount = Math.max(2, Math.ceil(minItemsPerSet / logos.length));
     const baseSet = Array.from({ length: repeatCount }).flatMap((_, repeatIdx) =>
@@ -123,7 +56,6 @@ export function TrustBand() {
       })),
     );
 
-    // Duplicate the base set for seamless infinite translateX loop.
     return [...baseSet, ...baseSet].map((item, idx) => ({
       ...item,
       loopKey: `${item.key}-loop-${idx}`,
@@ -153,9 +85,7 @@ export function TrustBand() {
         </div>
 
         <div className="text-center mb-10">
-          <p className="apple-eyebrow">
-            Trusted by Industry Leaders
-          </p>
+          <p className="apple-eyebrow">Trusted by Industry Leaders</p>
         </div>
 
         {hasLogos && imagesLoaded ? (
@@ -177,12 +107,13 @@ export function TrustBand() {
                   className="clients-carousel-item flex items-center justify-center"
                   aria-label="View customer logo"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <CmsImage
                     src={logo.image_url}
                     alt="Customer logo"
+                    width={160}
+                    height={44}
+                    sizes="160px"
                     loading="eager"
-                    decoding="async"
                     className="max-h-10 w-auto max-w-full object-contain sm:max-h-[44px]"
                   />
                 </a>

@@ -1,5 +1,6 @@
 import path from "path";
 import type { NextConfig } from "next";
+import { getImageRemotePatterns } from "./src/lib/images";
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -12,6 +13,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: getImageRemotePatterns(),
+  },
   turbopack: {
     root: path.join(__dirname, "../.."),
   },
