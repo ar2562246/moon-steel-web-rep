@@ -9,15 +9,6 @@
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@swc/core",
-      "esbuild",
-      "msw",
-      "sharp",
-      "unrs-resolver"
-    ]
-  },
   "devDependencies": {
     "@rollup/rollup-win32-x64-msvc": "4.59.0",
     "@tailwindcss/oxide-win32-x64-msvc": "4.2.1",
