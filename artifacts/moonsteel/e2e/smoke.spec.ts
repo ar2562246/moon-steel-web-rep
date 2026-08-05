@@ -11,6 +11,13 @@ test.describe("marketing site smoke tests", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
+  test("product cards are visible on first load without interaction", async ({ page }) => {
+    await page.goto("/products");
+    const firstCard = page.getByRole("heading", { level: 2 }).first();
+    await expect(firstCard).toBeVisible();
+    await expect(page.locator(".motion-reveal").first()).toHaveCSS("opacity", "1");
+  });
+
   test("projects index page loads", async ({ page }) => {
     await page.goto("/projects");
     await expect(page.getByRole("heading", { level: 1, name: "Our Projects" })).toBeVisible();

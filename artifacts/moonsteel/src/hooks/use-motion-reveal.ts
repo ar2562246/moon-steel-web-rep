@@ -4,9 +4,12 @@ import { useReducedMotion } from "framer-motion";
 import { useSyncExternalStore } from "react";
 
 /**
- * Stable viewport — low amount, once only (avoids iOS re-entry jitter).
+ * Stable viewport — once only (avoids iOS re-entry jitter).
+ *
+ * `amount: "some"` rather than a ratio: a fractional threshold never resolves for
+ * grids taller than the viewport (e.g. the full product catalog), leaving them hidden.
  */
-export const REVEAL_VIEWPORT = { once: true, amount: 0.12 } as const;
+export const REVEAL_VIEWPORT = { once: true, amount: "some" } as const;
 
 const ease = [0.25, 0.1, 0.25, 1] as const;
 
