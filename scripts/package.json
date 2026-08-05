@@ -5,10 +5,17 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "import:wc-products": "tsx ./src/import-wc-products.ts",
+    "cleanup:catalog-categories": "tsx ./src/cleanup-catalog-categories.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "tsx": "catalog:"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.104.1",
+    "csv-parse": "^7.0.2",
+    "dotenv": "^17.4.2"
   }
 }
