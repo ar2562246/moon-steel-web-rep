@@ -1,0 +1,71 @@
+[
+  {
+    "slug": "pizza-hut-mcr-reference",
+    "client_name": "Pizza Hut (MCR Pvt Ltd)",
+    "industry": "Restaurants",
+    "client_match": "Pizza Hut",
+    "issued_on": "2010-12-03",
+    "quote": "Moon Steel Fabricators has supplied locally fabricated kitchen equipment — work tables, sink tables, oven hoods, exhaust hoods, burner hoods, dishwashing hoods, and cold room racks — to Pizza Hut branches in Pakistan and overseas to our entire satisfaction for 15 years.",
+    "source_file": "Pizza hut.jpeg",
+    "rotate": 180
+  },
+  {
+    "slug": "habib-bank-canteen-reference",
+    "client_name": "Habib Bank Ltd",
+    "industry": "Others",
+    "client_match": "Habib Bank Plaza",
+    "issued_on": "2010-11-05",
+    "quote": "Moon Steel Fabricators fabricated kitchen equipment for our staff canteen — hot bain-marie, cold bain-marie, work tables, sink tables, and SS racks — to our entire satisfaction.",
+    "source_file": "Habib Bank.jpeg",
+    "rotate": 180
+  },
+  {
+    "slug": "fnd-consultants-reference",
+    "client_name": "FND (Fahim, Nanji & De Souza)",
+    "industry": "Partners",
+    "client_match": "FND (Fahim, Nanji & De Souza)",
+    "issued_on": null,
+    "quote": "Client reference letter from FND consultants confirming Moon Steel Fabricators as a project fabrication partner.",
+    "source_file": "FND.jpeg",
+    "rotate": 180
+  },
+  {
+    "slug": "tcs-reference",
+    "client_name": "TCS Courier",
+    "industry": "Others",
+    "client_match": "TCS Courier",
+    "issued_on": null,
+    "quote": "Client reference letter from TCS Courier for stainless steel fabrication supplied by Moon Steel Fabricators.",
+    "source_file": "TCS.jpeg",
+    "rotate": 180
+  },
+  {
+    "slug": "burger-king-reference",
+    "client_name": "Burger King",
+    "industry": "Restaurants",
+    "client_match": "Burger King",
+    "issued_on": null,
+    "quote": "Client reference letter confirming supply of locally fabricated commercial kitchen equipment for Burger King.",
+    "source_file": "Burger King.jpg",
+    "rotate": 180
+  },
+  {
+    "slug": "yamaha-motors-reference",
+    "client_name": "Yamaha Motors",
+    "industry": "Others",
+    "client_match": "Yamaha Motors",
+    "issued_on": null,
+    "quote": "Client reference letter from Yamaha Motors for stainless steel fabrication by Moon Steel Fabricators.",
+    "source_file": "Yamaha_motors.jpeg",
+    "rotate": 180
+  },
+  {
+    "slug": "mcr-pizza-hut-franchise-reference",
+    "client_name": "MCR (Pizza Hut Franchise)",
+    "industry": "Restaurants",
+    "client_match": "Pizza Hut",
+    "issued_on": null,
+    "quote": "Additional franchise reference from MCR Pvt Ltd for Moon Steel kitchen equipment supplied to Pizza Hut operations.",
+    "source_file": "[Originals]/MCR.jpg"
+  }
+]

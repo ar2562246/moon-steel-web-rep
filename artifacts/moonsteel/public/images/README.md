@@ -2,7 +2,9 @@
 
 The site references PNG/JPG assets under `/images/` for Open Graph previews, hero fallbacks, and default catalog/project thumbnails.
 
-**Currently in repo:** only SVG logos in `public/` (`ms3-logo.svg`, `favicon.svg`).
+**Currently in repo:** SVG logos in `public/` (`ms3-logo.svg`, `favicon.svg`) and leadership
+portraits in `public/images/team/` (`muhammad-suleman.jpg`, `ovais-suleman.jpg`,
+`abdul-rahman.jpg`) used by the About page.
 
 ## Required assets (add before full production launch)
 

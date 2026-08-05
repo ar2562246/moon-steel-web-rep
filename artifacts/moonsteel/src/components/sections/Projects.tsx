@@ -52,12 +52,18 @@ export function Projects({ initialProjects }: ProjectsProps) {
           ))}
         </SectionReveal>
 
-        <div className="mt-12 text-center">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/projects"
             className="inline-flex min-h-10 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground hover:border-primary/40 hover:text-primary"
           >
             View all projects
+          </Link>
+          <Link
+            href="/clients"
+            className="inline-flex min-h-10 items-center rounded-full border border-border px-5 text-sm font-medium text-foreground hover:border-primary/40 hover:text-primary"
+          >
+            View clients & references
           </Link>
         </div>
       </div>

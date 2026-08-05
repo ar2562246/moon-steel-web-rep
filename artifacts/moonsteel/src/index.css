@@ -266,18 +266,29 @@
     }
   }
 
+  /*
+   * Reveal is opt-in progressive enhancement: content is visible by default so
+   * server-rendered markup paints immediately instead of waiting on hydration.
+   * Where scroll-driven animations exist, the timeline resolves before first
+   * paint, so on-screen sections are already opaque and never flash.
+   */
   .motion-reveal {
-    will-change: opacity;
-    backface-visibility: hidden;
+    opacity: 1;
     -webkit-font-smoothing: antialiased;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .motion-reveal {
-      opacity: 1 !important;
-      will-change: auto !important;
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .motion-reveal {
+        animation: section-reveal-fade 1ms linear both;
+        animation-timeline: view();
+        /* Complete early so sections taller than the viewport finish fading. */
+        animation-range: entry 0% entry 25%;
+      }
     }
+  }
 
+  @media (prefers-reduced-motion: reduce) {
     .clients-carousel-track {
       animation: none !important;
       transform: none !important;
@@ -285,14 +296,15 @@
     }
   }
 
-  /* iOS: opacity-only reveals — avoid extra transform layers that repaint during scroll. */
-  @supports (-webkit-touch-callout: none) {
-    .motion-reveal {
-      -webkit-backface-visibility: hidden;
-      will-change: opacity;
-    }
-  }
+}
 
+@keyframes section-reveal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes clients-marquee {

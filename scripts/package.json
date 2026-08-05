@@ -7,15 +7,20 @@
     "hello": "tsx ./src/hello.ts",
     "import:wc-products": "tsx ./src/import-wc-products.ts",
     "cleanup:catalog-categories": "tsx ./src/cleanup-catalog-categories.ts",
+    "fix:product-newlines": "tsx ./src/fix-product-newlines.ts",
+    "enhance:product-details": "tsx ./src/enhance-product-details.ts",
+    "import:clients": "tsx ./src/import-clients.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pg": "^8.20.4",
     "tsx": "catalog:"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",
     "csv-parse": "^7.0.2",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "pg": "^8.22.0"
   }
 }

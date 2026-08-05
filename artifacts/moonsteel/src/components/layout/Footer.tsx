@@ -135,10 +135,12 @@ export function Footer() {
           <div>
             <h4 className="font-display font-semibold text-foreground mb-6 text-sm">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Products & Specs</a></li>
-              <li><a href="#comparison" className="text-sm text-muted-foreground hover:text-primary transition-colors">Material Comparison</a></li>
-              <li><a href="#projects" className="text-sm text-muted-foreground hover:text-primary transition-colors">Project Portfolio</a></li>
-              <li><a href="#contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Request a Quote</a></li>
+              <li><a href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Products & Specs</a></li>
+              <li><a href="/projects" className="text-sm text-muted-foreground hover:text-primary transition-colors">Project Portfolio</a></li>
+              <li><a href="/clients" className="text-sm text-muted-foreground hover:text-primary transition-colors">Clients</a></li>
+              <li><a href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</a></li>
+              <li><a href="/collaboration/food-fusion" className="text-sm text-muted-foreground hover:text-primary transition-colors">Food Fusion Collab</a></li>
+              <li><a href="/#contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Request a Quote</a></li>
             </ul>
           </div>
 

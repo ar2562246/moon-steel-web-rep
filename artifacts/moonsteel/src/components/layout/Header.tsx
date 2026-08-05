@@ -11,18 +11,21 @@ const logoUrl = "/ms3-logo.svg";
 
 const navLinks = [
   { name: "Products", href: "/products", sectionId: "products" },
-  { name: "Comparison", href: "#comparison", sectionId: "comparison" },
+  { name: "Projects", href: "/projects", sectionId: "projects" },
+  { name: "Clients", href: "/clients", sectionId: "clients" },
   { name: "Process", href: "#process", sectionId: "process" },
-  { name: "Projects", href: "#projects", sectionId: "projects" },
+  { name: "About", href: "/about", sectionId: "about" },
 ] as const;
 
-const homeSectionIds = ["comparison", "process", "projects"] as const;
+const homeSectionIds = ["process"] as const;
 
 function isNavLinkActive(sectionId: string, pathname: string, activeSection: string | null) {
   if (sectionId === "products") return pathname.startsWith("/products");
   if (sectionId === "projects") {
     return pathname.startsWith("/projects") || (pathname === "/" && activeSection === "projects");
   }
+  if (sectionId === "clients") return pathname.startsWith("/clients");
+  if (sectionId === "about") return pathname.startsWith("/about");
   if (pathname === "/") return activeSection === sectionId;
   return false;
 }

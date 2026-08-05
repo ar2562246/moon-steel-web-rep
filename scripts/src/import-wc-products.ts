@@ -72,7 +72,12 @@ function stripHtml(html: string): string {
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n\n")
     .replace(/<[^>]+>/g, "")
+    // WooCommerce CSV often stores line breaks as the literal characters "\r\n" / "\n"
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\n")
     .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();

@@ -9,6 +9,7 @@ import { Comparison } from "@/components/sections/Comparison";
 import { MaterialEducation } from "@/components/sections/MaterialEducation";
 import { Process } from "@/components/sections/Process";
 import { Projects } from "@/components/sections/Projects";
+import { FoodFusionCollab } from "@/components/sections/FoodFusionCollab";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { Industries } from "@/components/sections/Industries";
 import { ContactForm } from "@/components/sections/ContactForm";
@@ -34,6 +35,7 @@ export default function HomePage({ data }: HomePageProps) {
         <MaterialEducation />
         <Process />
         <Projects initialProjects={data.projects} />
+        <FoodFusionCollab />
         <Testimonials initialTestimonials={data.testimonials} />
         <Industries />
         <ContactForm />

@@ -59,7 +59,7 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
             <p className="text-muted-foreground">No products found in this category.</p>
           ) : (
             <SectionReveal className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => (
+              {products.map((product, index) => (
                 <Link
                   key={product.id}
                   href={getCatalogProductPath(product.slug)}
@@ -70,7 +70,8 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
                       src={getCatalogProductCover(product)}
                       alt={product.name}
                       className="h-full w-full object-cover md:transition-transform md:duration-700 md:group-hover:scale-105"
-                      loading="lazy"
+                      loading={index < 6 ? "eager" : "lazy"}
+                      decoding="async"
                     />
                   </div>
                   <div className="space-y-3 p-6">
@@ -87,7 +88,7 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
                     <h2 className="text-xl font-display font-semibold text-foreground group-hover:text-primary transition-colors">
                       {product.name}
                     </h2>
-                    <p className="line-clamp-3 text-sm text-muted-foreground">{product.details}</p>
+                    <p className="line-clamp-3 whitespace-pre-line text-sm text-muted-foreground">{product.details}</p>
                     <div className="flex items-center justify-between pt-2 text-sm text-primary">
                       <span>View product</span>
                       <ChevronRight className="h-4 w-4 opacity-0 md:group-hover:opacity-100 md:group-hover:translate-x-0 -translate-x-2 transition-[opacity,transform]" />
