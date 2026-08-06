@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ClientsPageView } from "@/app/clients/ClientsPageView";
+import type { CustomerLogo } from "@/features/admin/types";
 import { defaultClientReferences, defaultClients } from "@/features/clients/defaultClients";
 import {
+  listCustomerLogos,
   listPublishedClientReferences,
   listPublishedClients,
 } from "@/features/clients/queries";
@@ -15,19 +17,24 @@ async function resolveClientsPageData() {
   if (hasSupabaseServerEnv()) {
     try {
       const supabase = await createSupabaseServerClient();
-      const [clients, references] = await Promise.all([
+      const [clients, references, logos] = await Promise.all([
         listPublishedClients(supabase),
         listPublishedClientReferences(supabase),
+        listCustomerLogos(supabase),
       ]);
-      if (clients.length > 0 || references.length > 0) {
-        return { clients, references };
+      if (clients.length > 0 || references.length > 0 || logos.length > 0) {
+        return { clients, references, logos };
       }
     } catch {
       // Fall through to defaults.
     }
   }
 
-  return { clients: defaultClients, references: defaultClientReferences };
+  return {
+    clients: defaultClients,
+    references: defaultClientReferences,
+    logos: [] as CustomerLogo[],
+  };
 }
 
 export const metadata: Metadata = {
@@ -47,11 +54,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ClientsPage() {
-  const { clients, references } = await resolveClientsPageData();
+  const { clients, references, logos } = await resolveClientsPageData();
 
   return (
     <>
-      <ClientsPageView clients={clients} references={references} />
+      <ClientsPageView clients={clients} references={references} logos={logos} />
       <Footer />
       <WhatsAppButton />
     </>

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { CustomerLogo } from "@/features/admin/types";
 import {
   CLIENT_REFERENCE_SELECT,
   CLIENT_SELECT,
@@ -30,4 +31,14 @@ export async function listPublishedClientReferences(
 
   if (error) throw error;
   return (data ?? []) as ClientReference[];
+}
+
+export async function listCustomerLogos(supabase: SupabaseClient): Promise<CustomerLogo[]> {
+  const { data, error } = await supabase
+    .from("customer_logos")
+    .select("id,image_url,created_at")
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []) as CustomerLogo[];
 }

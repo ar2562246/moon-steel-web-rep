@@ -362,9 +362,9 @@ export function CatalogProductsTab() {
                   {gallery.map((entry, index) => {
                     const src = entry.kind === "url" ? entry.url : entry.preview;
                     return (
-                      <div key={entry.id} className="layer-2 relative overflow-hidden rounded-lg">
+                      <div key={entry.id} className="layer-2 relative overflow-hidden rounded-lg bg-muted">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="" className="aspect-[4/3] w-full object-cover" />
+                        <img src={src} alt="" className="aspect-[4/3] w-full object-contain" />
                         {index === 0 ? (
                           <span className="absolute left-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
                             Cover

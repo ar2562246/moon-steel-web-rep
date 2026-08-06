@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+import { listPublishedBlogSlugs } from "@/features/blog/queries";
+import { getBlogPath } from "@/features/blog/types";
 import { defaultCatalogProducts } from "@/features/catalog/defaultCatalog";
 import { getCatalogProductPath } from "@/features/catalog/paths";
 import { listPublishedCatalogProductSlugs } from "@/features/catalog/queries";
@@ -24,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${siteUrl}/materials`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${siteUrl}/projects`,
       lastModified: now,
       changeFrequency: "weekly",
@@ -34,6 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.75,
     },
     {
       url: `${siteUrl}/about`,
@@ -63,12 +77,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  let blogRoutes: MetadataRoute.Sitemap = [];
+
   if (hasSupabaseServerEnv()) {
     try {
       const supabase = await createSupabaseServerClient();
-      const [projectRows, productRows] = await Promise.all([
+      const [projectRows, productRows, blogRows] = await Promise.all([
         listPublishedProjectSlugs(supabase),
         listPublishedCatalogProductSlugs(supabase),
+        listPublishedBlogSlugs(supabase),
       ]);
 
       if (projectRows.length > 0) {
@@ -88,10 +105,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           priority: 0.8,
         }));
       }
+
+      blogRoutes = blogRows.map((row) => ({
+        url: `${siteUrl}${getBlogPath(row.slug)}`,
+        lastModified: new Date(row.updated_at),
+        changeFrequency: "monthly",
+        priority: 0.65,
+      }));
     } catch {
       // Keep default routes when Supabase is unavailable.
     }
   }
 
-  return [...staticRoutes, ...catalogProductRoutes, ...projectRoutes];
+  return [...staticRoutes, ...catalogProductRoutes, ...projectRoutes, ...blogRoutes];
 }

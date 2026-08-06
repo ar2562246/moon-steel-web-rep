@@ -6,7 +6,7 @@ import { TrustBand } from "@/components/sections/TrustBand";
 import { ProblemSolution } from "@/components/sections/ProblemSolution";
 import { Products } from "@/components/sections/Products";
 import { Comparison } from "@/components/sections/Comparison";
-import { MaterialEducation } from "@/components/sections/MaterialEducation";
+import { MaterialCta } from "@/components/sections/MaterialCta";
 import { Process } from "@/components/sections/Process";
 import { Projects } from "@/components/sections/Projects";
 import { FoodFusionCollab } from "@/components/sections/FoodFusionCollab";
@@ -32,7 +32,7 @@ export default function HomePage({ data }: HomePageProps) {
         <ProblemSolution />
         <Products initialCategories={data.productCategories} />
         <Comparison />
-        <MaterialEducation />
+        <MaterialCta />
         <Process />
         <Projects initialProjects={data.projects} />
         <FoodFusionCollab />

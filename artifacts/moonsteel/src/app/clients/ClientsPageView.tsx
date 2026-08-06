@@ -3,15 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CmsImage } from "@/components/ui/CmsImage";
+import type { CustomerLogo } from "@/features/admin/types";
 import { groupClientsByIndustry } from "@/features/clients/types";
 import type { Client, ClientReference } from "@/features/clients/types";
 
 type ClientsPageViewProps = {
   clients: Client[];
   references: ClientReference[];
+  logos?: CustomerLogo[];
 };
 
-export function ClientsPageView({ clients, references }: ClientsPageViewProps) {
+export function ClientsPageView({ clients, references, logos = [] }: ClientsPageViewProps) {
   const groups = groupClientsByIndustry(clients);
   const [activeRef, setActiveRef] = useState<ClientReference | null>(null);
 
@@ -26,6 +28,45 @@ export function ClientsPageView({ clients, references }: ClientsPageViewProps) {
             partners who specify our work.
           </p>
         </div>
+
+        {logos.length > 0 ? (
+          <section className="mb-12" aria-label="Client logos">
+            <div className="layer-1 rounded-2xl px-4 py-5 md:px-6 md:py-6">
+              <div className="mb-4 max-w-2xl">
+                <h2 className="text-xl font-display font-semibold text-foreground md:text-2xl">
+                  Brands we work with
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Organizations that trust Moon Steel for commercial stainless fabrication.
+                </p>
+              </div>
+              <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 md:gap-x-5 md:gap-y-4">
+                {logos.map((logo, index) => {
+                  const size = index % 5;
+                  const sizeClass =
+                    size === 0
+                      ? "h-10 max-w-[7.5rem] sm:h-11 sm:max-w-[8.5rem]"
+                      : size === 1 || size === 2
+                        ? "h-7 max-w-[5.5rem] sm:h-8 sm:max-w-[6.5rem]"
+                        : "h-8 max-w-[6.5rem] sm:h-9 sm:max-w-[7.5rem]";
+
+                  return (
+                    <li key={logo.id} className="flex items-center justify-center">
+                      <CmsImage
+                        src={logo.image_url}
+                        alt="Client logo"
+                        width={140}
+                        height={48}
+                        sizes="140px"
+                        className={`w-auto object-contain opacity-90 ${sizeClass}`}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </section>
+        ) : null}
 
         {references.length > 0 ? (
           <section id="references" className="mb-20">

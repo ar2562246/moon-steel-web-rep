@@ -5,7 +5,8 @@ export type AdminTabKey =
   | "categories"
   | "catalog-products"
   | "projects"
-  | "testimonials";
+  | "testimonials"
+  | "blogs";
 
 export type CustomerLogo = {
   id: string;

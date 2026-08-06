@@ -11,6 +11,7 @@ Run these scripts in order in the **Supabase SQL Editor** (Dashboard → SQL →
 | 5 | `contact_inquiries.sql` | Quote form lead storage |
 | 6 | `testimonials.sql` | Homepage testimonials CMS |
 | 7 | `clients.sql` | Client directory + reference letters + storage |
+| 8 | `blogs.sql` | Blog posts CMS + cover image storage |
 
 After running `profiles.sql`, promote your admin user:
 

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { SectionReveal } from "@/components/motion/SectionReveal";
-import { getCatalogCategoryFilterPath, getCatalogProductCover, getCatalogProductPath } from "@/features/catalog/paths";
+import { ProductCardImage } from "@/app/products/ProductCardImage";
+import { getCatalogCategoryFilterPath, getCatalogProductPath } from "@/features/catalog/paths";
 import type { CatalogCategorySummary, CatalogProduct } from "@/features/catalog/types";
 import { cn } from "@/lib/utils";
 
@@ -65,15 +66,7 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
                   href={getCatalogProductPath(product.slug)}
                   className="group layer-1 overflow-hidden rounded-xl transition-colors hover:border-primary/40"
                 >
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img
-                      src={getCatalogProductCover(product)}
-                      alt={product.name}
-                      className="h-full w-full object-cover md:transition-transform md:duration-700 md:group-hover:scale-105"
-                      loading={index < 6 ? "eager" : "lazy"}
-                      decoding="async"
-                    />
-                  </div>
+                  <ProductCardImage product={product} priority={index < 6} />
                   <div className="space-y-3 p-6">
                     <div className="flex flex-wrap gap-1.5">
                       {product.categories.map((category) => (

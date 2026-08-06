@@ -11,9 +11,11 @@ const logoUrl = "/ms3-logo.svg";
 
 const navLinks = [
   { name: "Products", href: "/products", sectionId: "products" },
+  { name: "Materials", href: "/materials", sectionId: "materials" },
   { name: "Projects", href: "/projects", sectionId: "projects" },
   { name: "Clients", href: "/clients", sectionId: "clients" },
   { name: "Process", href: "#process", sectionId: "process" },
+  { name: "Blog", href: "/blog", sectionId: "blog" },
   { name: "About", href: "/about", sectionId: "about" },
 ] as const;
 
@@ -21,10 +23,12 @@ const homeSectionIds = ["process"] as const;
 
 function isNavLinkActive(sectionId: string, pathname: string, activeSection: string | null) {
   if (sectionId === "products") return pathname.startsWith("/products");
+  if (sectionId === "materials") return pathname.startsWith("/materials");
   if (sectionId === "projects") {
     return pathname.startsWith("/projects") || (pathname === "/" && activeSection === "projects");
   }
   if (sectionId === "clients") return pathname.startsWith("/clients");
+  if (sectionId === "blog") return pathname.startsWith("/blog");
   if (sectionId === "about") return pathname.startsWith("/about");
   if (pathname === "/") return activeSection === sectionId;
   return false;
@@ -150,7 +154,7 @@ export function Header() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-5 lg:gap-7 md:flex">
             {navLinks.map((link) => (
               <button
                 key={link.name}

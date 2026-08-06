@@ -28,7 +28,7 @@ const team = [
   {
     name: "Muhammad Suleman",
     role: "Chief Executive Officer",
-    detail: "Second generation — leads the company and oversees fabrication standards.",
+    detail: "Leads the company and oversees fabrication standards.",
     phone: "+92-321-8228314",
     tel: "+923218228314",
     photo: "/images/team/muhammad-suleman.jpg",
@@ -36,7 +36,7 @@ const team = [
   {
     name: "Ovais Suleman",
     role: "Sales and Project Management",
-    detail: "Third generation — client projects, scheduling, and site coordination.",
+    detail: "Client projects, scheduling, and site coordination.",
     phone: "+92-300-2276057",
     tel: "+923002276057",
     photo: "/images/team/ovais-suleman.jpg",
@@ -44,7 +44,7 @@ const team = [
   {
     name: "Abdul Rahman",
     role: "Business Development",
-    detail: "Third generation — new business, consultants, and technical proposals.",
+    detail: "New business, consultants, and technical proposals.",
     phone: "+92-300-2562246",
     tel: "+923002562246",
     photo: "/images/team/abdul-rahman.jpg",
