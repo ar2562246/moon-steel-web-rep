@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Check, Star } from "lucide-react";
 import { SectionReveal } from "@/components/motion/SectionReveal";
+import { CmsImage } from "@/components/ui/CmsImage";
 import {
   Accordion,
   AccordionContent,
@@ -46,35 +47,18 @@ function Stars({ count, max = 6 }: { count: number; max?: number }) {
   );
 }
 
-function FinishSwatch({ visual }: { visual: string }) {
-  if (visual === "brushed") {
-    return (
-      <div
-        className="h-28 w-full rounded-lg border border-border"
-        style={{
-          background:
-            "repeating-linear-gradient(90deg, #d7dbe0 0px, #d7dbe0 1px, #eceff2 1px, #eceff2 4px)",
-        }}
+function FinishSwatch({ image, name }: { image: string; name: string }) {
+  return (
+    <div className="relative h-36 w-full overflow-hidden bg-muted">
+      <CmsImage
+        src={image}
+        alt={`${name} stainless steel surface finish`}
+        fill
+        sizes="(max-width: 768px) 50vw, 25vw"
+        className="object-cover"
       />
-    );
-  }
-  if (visual === "mirror") {
-    return (
-      <div className="h-28 w-full rounded-lg border border-border bg-gradient-to-br from-slate-100 via-white to-slate-300" />
-    );
-  }
-  if (visual === "hairline") {
-    return (
-      <div
-        className="h-28 w-full rounded-lg border border-border"
-        style={{
-          background:
-            "repeating-linear-gradient(0deg, #cfd4da 0px, #cfd4da 1px, #e8ebef 1px, #e8ebef 3px)",
-        }}
-      />
-    );
-  }
-  return <div className="h-28 w-full rounded-lg border border-border bg-slate-200" />;
+    </div>
+  );
 }
 
 function InlineCta({ href, label }: { href: string; label: string }) {
@@ -314,7 +298,7 @@ export function MaterialsPageView() {
           <SectionReveal className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {finishes.map((finish) => (
               <article key={finish.name} className="layer-1 overflow-hidden rounded-xl">
-                <FinishSwatch visual={finish.visual} />
+                <FinishSwatch image={finish.image} name={finish.name} />
                 <div className="p-4">
                   <h3 className="font-display font-semibold text-foreground">{finish.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{finish.use}</p>
@@ -322,6 +306,10 @@ export function MaterialsPageView() {
               </article>
             ))}
           </SectionReveal>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Finish photos are real-world metal surfaces (Commons / Flickr). Visual references for surface character —
+            request physical samples for final specification.
+          </p>
         </section>
 
         {/* Chemistry */}

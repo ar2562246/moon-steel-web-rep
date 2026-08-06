@@ -256,6 +256,31 @@
     @apply flex-none flex h-20 w-[140px] items-center justify-center rounded-xl border border-border/80 bg-layer-1 px-4 opacity-100;
   }
 
+  .categories-carousel-scroller {
+    @apply overflow-x-auto overflow-y-hidden px-4 md:px-6;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    cursor: grab;
+  }
+
+  .categories-carousel-scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+  .categories-carousel-scroller:active {
+    cursor: grabbing;
+  }
+
+  .categories-carousel-track {
+    @apply flex w-max items-stretch gap-5 md:gap-6;
+  }
+
+  .categories-carousel-item {
+    @apply w-[240px] shrink-0 sm:w-[280px];
+  }
+
   @media (max-width: 640px) {
     .clients-carousel-track {
       @apply gap-2.5;
@@ -263,6 +288,14 @@
 
     .clients-carousel-item {
       @apply h-[60px] w-[105px] rounded-lg px-2;
+    }
+
+    .categories-carousel-track {
+      @apply gap-3;
+    }
+
+    .categories-carousel-item {
+      @apply w-[210px];
     }
   }
 

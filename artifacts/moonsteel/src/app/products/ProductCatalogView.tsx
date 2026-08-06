@@ -14,84 +14,165 @@ type ProductCatalogViewProps = {
   activeCategory?: string;
 };
 
+function categoryLinkClass(active: boolean) {
+  return cn(
+    "block rounded-lg px-3 py-2 text-sm transition-colors",
+    active
+      ? "bg-primary/10 font-medium text-primary"
+      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+  );
+}
+
+function CategoryNav({
+  categories,
+  activeCategory,
+  className,
+}: {
+  categories: CatalogCategorySummary[];
+  activeCategory?: string;
+  className?: string;
+}) {
+  return (
+    <nav aria-label="Product categories" className={className}>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Categories
+      </p>
+      <ul className="space-y-0.5">
+        <li>
+          <Link href="/products" className={categoryLinkClass(!activeCategory)}>
+            All products
+          </Link>
+        </li>
+        {categories.map((category) => (
+          <li key={category.id}>
+            <Link
+              href={getCatalogCategoryFilterPath(category.slug)}
+              className={categoryLinkClass(activeCategory === category.slug)}
+            >
+              {category.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+function MobileCategoryChips({
+  categories,
+  activeCategory,
+}: {
+  categories: CatalogCategorySummary[];
+  activeCategory?: string;
+}) {
+  return (
+    <nav
+      aria-label="Product categories"
+      className="mb-8 flex gap-2 overflow-x-auto pb-1 lg:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      <Link
+        href="/products"
+        className={cn(
+          "shrink-0 rounded-full border px-4 py-2 text-sm transition-colors",
+          !activeCategory
+            ? "border-primary bg-primary/10 text-primary"
+            : "border-border text-muted-foreground hover:text-foreground"
+        )}
+      >
+        All products
+      </Link>
+      {categories.map((category) => (
+        <Link
+          key={category.id}
+          href={getCatalogCategoryFilterPath(category.slug)}
+          className={cn(
+            "shrink-0 rounded-full border px-4 py-2 text-sm transition-colors",
+            activeCategory === category.slug
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {category.name}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 export function ProductCatalogView({ products, categories, activeCategory }: ProductCatalogViewProps) {
+  const activeName = categories.find((category) => category.slug === activeCategory)?.name;
+
   return (
     <main className="pt-28 pb-24">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="mb-12 max-w-3xl">
-            <h1 className="apple-section-title mb-4 section-title-accent">Product Catalog</h1>
-            <p className="apple-section-copy">
-              Browse commercial stainless steel equipment by category. Each product has a dedicated page with
-              specifications and installation details.
-            </p>
-          </div>
+      <div className="container mx-auto px-4 md:px-6">
+        {categories.length > 0 ? (
+          <MobileCategoryChips categories={categories} activeCategory={activeCategory} />
+        ) : null}
 
+        <div
+          className={cn(
+            "grid gap-8",
+            categories.length > 0 ? "lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start" : null
+          )}
+        >
           {categories.length > 0 ? (
-            <div className="mb-10 flex flex-wrap gap-2">
-              <Link
-                href="/products"
-                className={cn(
-                  "rounded-full border px-4 py-2 text-sm transition-colors",
-                  !activeCategory
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                )}
-              >
-                All products
-              </Link>
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={getCatalogCategoryFilterPath(category.slug)}
-                  className={cn(
-                    "rounded-full border px-4 py-2 text-sm transition-colors",
-                    activeCategory === category.slug
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </div>
+            <aside className="hidden lg:block lg:sticky lg:top-28">
+              <div className="rounded-xl border border-border/70 bg-background/80 p-4">
+                <CategoryNav categories={categories} activeCategory={activeCategory} />
+              </div>
+            </aside>
           ) : null}
 
-          {products.length === 0 ? (
-            <p className="text-muted-foreground">No products found in this category.</p>
-          ) : (
-            <SectionReveal className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {products.map((product, index) => (
-                <Link
-                  key={product.id}
-                  href={getCatalogProductPath(product.slug)}
-                  className="group layer-1 overflow-hidden rounded-xl transition-colors hover:border-primary/40"
-                >
-                  <ProductCardImage product={product} priority={index < 6} />
-                  <div className="space-y-3 p-6">
-                    <div className="flex flex-wrap gap-1.5">
-                      {product.categories.map((category) => (
-                        <span
-                          key={category.id}
-                          className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
-                        >
-                          {category.name}
-                        </span>
-                      ))}
+          <div>
+            <div className="mb-6 flex items-baseline justify-between gap-4">
+              <h1 className="text-lg font-display font-semibold text-foreground">
+                {activeName ?? "All products"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {products.length} {products.length === 1 ? "product" : "products"}
+              </p>
+            </div>
+
+            {products.length === 0 ? (
+              <p className="text-muted-foreground">No products found in this category.</p>
+            ) : (
+              <SectionReveal className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {products.map((product, index) => (
+                  <Link
+                    key={product.id}
+                    href={getCatalogProductPath(product.slug)}
+                    className="group layer-1 overflow-hidden rounded-xl transition-colors hover:border-primary/40"
+                  >
+                    <ProductCardImage product={product} priority={index < 6} />
+                    <div className="space-y-3 p-6">
+                      <div className="flex flex-wrap gap-1.5">
+                        {product.categories.map((category) => (
+                          <span
+                            key={category.id}
+                            className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
+                          >
+                            {category.name}
+                          </span>
+                        ))}
+                      </div>
+                      <h3 className="text-xl font-display font-semibold text-foreground transition-colors group-hover:text-primary">
+                        {product.name}
+                      </h3>
+                      <p className="line-clamp-3 whitespace-pre-line text-sm text-muted-foreground">
+                        {product.details}
+                      </p>
+                      <div className="flex items-center justify-between pt-2 text-sm text-primary">
+                        <span>View product</span>
+                        <ChevronRight className="h-4 w-4 -translate-x-2 opacity-0 transition-[opacity,transform] md:group-hover:translate-x-0 md:group-hover:opacity-100" />
+                      </div>
                     </div>
-                    <h2 className="text-xl font-display font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {product.name}
-                    </h2>
-                    <p className="line-clamp-3 whitespace-pre-line text-sm text-muted-foreground">{product.details}</p>
-                    <div className="flex items-center justify-between pt-2 text-sm text-primary">
-                      <span>View product</span>
-                      <ChevronRight className="h-4 w-4 opacity-0 md:group-hover:opacity-100 md:group-hover:translate-x-0 -translate-x-2 transition-[opacity,transform]" />
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </SectionReveal>
-          )}
+                  </Link>
+                ))}
+              </SectionReveal>
+            )}
+          </div>
         </div>
-      </main>
+      </div>
+    </main>
   );
 }

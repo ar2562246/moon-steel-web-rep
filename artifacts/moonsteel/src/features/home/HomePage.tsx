@@ -30,7 +30,7 @@ export default function HomePage({ data }: HomePageProps) {
           initialSliderSpeed={data.logoSliderSpeed}
         />
         <ProblemSolution />
-        <Products initialCategories={data.productCategories} />
+        <Products categories={data.catalogCategories} />
         <Comparison />
         <MaterialCta />
         <Process />

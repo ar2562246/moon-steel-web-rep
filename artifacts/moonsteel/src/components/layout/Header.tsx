@@ -10,18 +10,20 @@ import { cn } from "@/lib/utils";
 const logoUrl = "/ms3-logo.svg";
 
 const navLinks = [
+  { name: "Home", href: "/", sectionId: "home" },
   { name: "Products", href: "/products", sectionId: "products" },
   { name: "Materials", href: "/materials", sectionId: "materials" },
   { name: "Projects", href: "/projects", sectionId: "projects" },
   { name: "Clients", href: "/clients", sectionId: "clients" },
   { name: "Process", href: "#process", sectionId: "process" },
-  { name: "Blog", href: "/blog", sectionId: "blog" },
   { name: "About", href: "/about", sectionId: "about" },
+  { name: "Blog", href: "/blog", sectionId: "blog" },
 ] as const;
 
 const homeSectionIds = ["process"] as const;
 
 function isNavLinkActive(sectionId: string, pathname: string, activeSection: string | null) {
+  if (sectionId === "home") return pathname === "/" && activeSection === null;
   if (sectionId === "products") return pathname.startsWith("/products");
   if (sectionId === "materials") return pathname.startsWith("/materials");
   if (sectionId === "projects") {
@@ -92,6 +94,16 @@ export function Header() {
   const navigate = useCallback(
     (href: string, sectionId: string) => {
       setMobileMenuOpen(false);
+
+      if (sectionId === "home") {
+        if (pathname === "/") {
+          setActiveSection(null);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+        router.push("/");
+        return;
+      }
 
       if (href.startsWith("/")) {
         router.push(href);

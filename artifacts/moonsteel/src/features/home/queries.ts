@@ -1,6 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { CustomerLogo, HeroImage, ProductCategory } from "@/features/admin/types";
-import { defaultProductLines } from "@/features/home/defaultProductLines";
+import type { CustomerLogo, HeroImage } from "@/features/admin/types";
+import {
+  defaultCatalogCategories,
+  defaultCatalogProducts,
+} from "@/features/catalog/defaultCatalog";
+import {
+  buildCatalogCategoryCards,
+  listPublishedCatalogCategories,
+  listPublishedCatalogProducts,
+} from "@/features/catalog/queries";
+import type { CatalogCategoryCard } from "@/features/catalog/types";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjects } from "@/features/projects/queries";
 import { defaultTestimonials } from "@/features/testimonials/defaultTestimonials";
@@ -15,10 +24,14 @@ export type HomePageData = {
   heroImages: HeroImage[];
   customerLogos: CustomerLogo[];
   logoSliderSpeed: number;
-  productCategories: ProductCategory[];
+  catalogCategories: CatalogCategoryCard[];
   projects: Project[];
   testimonials: Testimonial[];
 };
+
+function defaultCategoryCards() {
+  return buildCatalogCategoryCards(defaultCatalogCategories, defaultCatalogProducts);
+}
 
 async function fetchHeroImages(supabase: SupabaseClient) {
   const { data, error } = await supabase
@@ -57,36 +70,38 @@ async function fetchLogoSliderSpeed(supabase: SupabaseClient) {
   return DEFAULT_LOGO_SLIDER_SPEED;
 }
 
-async function fetchProductCategories(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("product_categories")
-    .select("id,title,specs,description,uses,sort_order,created_at")
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: true });
-
-  if (error) throw error;
-  return (data ?? []) as ProductCategory[];
-}
-
 export async function resolveHomePageData(): Promise<HomePageData> {
   if (hasSupabaseServerEnv()) {
     try {
       const supabase = await createSupabaseServerClient();
-      const [heroImages, customerLogos, logoSliderSpeed, productCategories, projects, testimonials] =
-        await Promise.all([
-          fetchHeroImages(supabase),
-          fetchCustomerLogos(supabase),
-          fetchLogoSliderSpeed(supabase),
-          fetchProductCategories(supabase),
-          listPublishedProjects(supabase),
-          listPublishedTestimonials(supabase),
-        ]);
+      const [
+        heroImages,
+        customerLogos,
+        logoSliderSpeed,
+        categories,
+        products,
+        projects,
+        testimonials,
+      ] = await Promise.all([
+        fetchHeroImages(supabase),
+        fetchCustomerLogos(supabase),
+        fetchLogoSliderSpeed(supabase),
+        listPublishedCatalogCategories(supabase),
+        listPublishedCatalogProducts(supabase),
+        listPublishedProjects(supabase),
+        listPublishedTestimonials(supabase),
+      ]);
+
+      const catalogCategories =
+        categories.length > 0
+          ? buildCatalogCategoryCards(categories, products)
+          : defaultCategoryCards();
 
       return {
         heroImages,
         customerLogos,
         logoSliderSpeed,
-        productCategories: productCategories.length > 0 ? productCategories : defaultProductLines,
+        catalogCategories,
         projects: projects.length > 0 ? projects : defaultProjects,
         testimonials: testimonials.length > 0 ? testimonials : defaultTestimonials,
       };
@@ -99,7 +114,7 @@ export async function resolveHomePageData(): Promise<HomePageData> {
     heroImages: [],
     customerLogos: [],
     logoSliderSpeed: DEFAULT_LOGO_SLIDER_SPEED,
-    productCategories: defaultProductLines,
+    catalogCategories: defaultCategoryCards(),
     projects: defaultProjects,
     testimonials: defaultTestimonials,
   };

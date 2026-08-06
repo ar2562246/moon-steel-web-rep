@@ -26,6 +26,10 @@ export type CatalogProduct = {
 
 export type CatalogCategorySummary = Pick<CatalogCategory, "id" | "slug" | "name">;
 
+export type CatalogCategoryCard = CatalogCategorySummary & {
+  image_url: string;
+};
+
 export const CATALOG_CATEGORY_SELECT =
   "id,slug,name,description,sort_order,published,created_at,updated_at";
 

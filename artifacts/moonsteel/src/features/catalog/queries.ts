@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   attachProductPath,
+  getCatalogProductCover,
   getCatalogProductImages,
   normalizeCatalogProduct,
 } from "@/features/catalog/paths";
@@ -8,6 +9,7 @@ import {
   CATALOG_CATEGORY_SELECT,
   CATALOG_PRODUCT_SELECT,
   type CatalogCategory,
+  type CatalogCategoryCard,
   type CatalogCategorySummary,
   type CatalogProduct,
   type CatalogProductRow,
@@ -179,6 +181,25 @@ export async function listProductsByCategoryId(supabase: SupabaseClient, categor
 export function productMatchesCategory(product: CatalogProduct, categorySlug?: string) {
   if (!categorySlug) return true;
   return product.categories.some((category) => category.slug === categorySlug);
+}
+
+/** First published product image for each category (by product sort order). */
+export function buildCatalogCategoryCards(
+  categories: CatalogCategorySummary[],
+  products: CatalogProduct[]
+): CatalogCategoryCard[] {
+  return categories.map((category) => {
+    const coverProduct = products.find((product) =>
+      product.categories.some((item) => item.slug === category.slug || item.id === category.id)
+    );
+
+    return {
+      id: category.id,
+      slug: category.slug,
+      name: category.name,
+      image_url: coverProduct ? getCatalogProductCover(coverProduct) : "",
+    };
+  });
 }
 
 export { getCatalogProductImages, attachProductPath };

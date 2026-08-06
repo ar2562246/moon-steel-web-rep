@@ -215,21 +215,29 @@ export const finishes = [
     name: "No.4 Satin",
     use: "Most commercial kitchens",
     visual: "brushed",
+    image: "/images/finishes/no4-satin.jpg",
+    credit: "Wikimedia Commons — Brushed metal (public domain)",
   },
   {
     name: "Mirror",
     use: "Decorative",
     visual: "mirror",
+    image: "/images/finishes/mirror.jpg",
+    credit: "Flickr / mckaysavage — Chennai stainless (CC BY 2.0)",
   },
   {
     name: "Hairline",
     use: "Architectural",
     visual: "hairline",
+    image: "/images/finishes/hairline.jpg",
+    credit: "Wikimedia Commons — Brushed aluminium",
   },
   {
     name: "2B",
     use: "Industrial",
     visual: "industrial",
+    image: "/images/finishes/mill-2b.jpg",
+    credit: "Wikimedia Commons — 316L unpolished",
   },
 ] as const;
 
