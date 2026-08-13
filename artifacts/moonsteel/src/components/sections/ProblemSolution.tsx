@@ -9,10 +9,10 @@ export function ProblemSolution() {
       <div className="container relative z-10 mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="apple-section-title mb-6">
-            The Market is Full of Shortcuts.
+            What Separates Professional Fabrication From Commodity Work
           </h2>
           <p className="apple-section-copy">
-            Most local competitors quietly substitute cheaper materials to win on price. The result? Equipment that warps, rusts, and fails health inspections within a few years.
+            Commodity stainless work is often unspecified. Moon Steel fabricates to named grades, controlled thickness, and documented dimensions.
           </p>
         </div>
 
@@ -20,15 +20,15 @@ export function ProblemSolution() {
           <div className="apple-surface p-8">
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border">
               <XCircle className="w-8 h-8 text-destructive" />
-              <h3 className="text-2xl font-display font-semibold text-foreground">The Typical Workshop</h3>
+              <h3 className="text-2xl font-display font-semibold text-foreground">Commodity Fabrication</h3>
             </div>
             <ul className="space-y-5">
               {[
-                "Uses SS 200 series (cheaper, magnetic, rusts quickly)",
-                "Reduces gauge thickness to save costs (causes warping)",
-                "Spot or MIG welding that breaks under stress",
-                "Mill finish with sharp, hazardous edges",
-                "Fails commercial kitchen hygiene requirements"
+                "Material grade may not be specified",
+                "Thickness selected primarily around price",
+                "Basic MIG or spot welding",
+                "Sharp or unfinished edges",
+                "Limited dimensional documentation",
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 shrink-0" />
@@ -45,11 +45,11 @@ export function ProblemSolution() {
             </div>
             <ul className="space-y-5 relative z-10">
               {[
-                "100% Certified SS 304 (high nickel, non-magnetic, corrosion resistant)",
-                "Accurate, heavy-duty gauge thickness specified for load",
-                "Precision Laser Welding, ground flat and polished",
-                "Food-grade #4 satin finish with radiused, deburred edges",
-                "Built to meet commercial kitchen hygiene requirements"
+                "Specified AISI 304 or 316 stainless steel",
+                "Controlled material thickness",
+                "Precision cutting and controlled welding",
+                "Ground, deburred and finished edges",
+                "Designed for hygienic commercial food environments",
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />

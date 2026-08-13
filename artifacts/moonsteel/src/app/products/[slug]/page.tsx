@@ -12,6 +12,8 @@ import {
 } from "@/features/catalog/paths";
 import { getCatalogProductBySlug, listPublishedCatalogProductSlugs } from "@/features/catalog/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { breadcrumbJsonLd, ORGANIZATION_ID } from "@/lib/json-ld";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getSiteUrl } from "@/lib/site";
 
 const siteUrl = getSiteUrl();
@@ -106,18 +108,26 @@ export default async function CatalogProductPage({ params }: PageProps) {
     category: product.categories.map((category) => category.name).join(", "),
     brand: {
       "@type": "Brand",
-      name: "Moon Steel",
+      name: "Moon Steel Fabricators",
     },
     manufacturer: {
       "@type": "Organization",
-      name: "Moon Steel",
+      "@id": ORGANIZATION_ID,
+      name: "Moon Steel Fabricators",
       url: siteUrl,
     },
   };
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd data={jsonLd} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Products", path: "/products" },
+          { name: product.name, path: product.path },
+        ])}
+      />
       <ProductDetailView product={product} />
       <Footer />
       <WhatsAppButton />

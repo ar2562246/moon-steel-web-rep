@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { CmsImage } from "@/components/ui/CmsImage";
 import type { CustomerLogo } from "@/features/admin/types";
+import { logoAltFromUrl } from "@/lib/logo-alt";
 
 type TrustBandProps = {
   initialLogos?: CustomerLogo[];
@@ -39,19 +40,19 @@ export function TrustBand({ initialLogos = [], initialSliderSpeed = 52 }: TrustB
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16 border-b border-border/50 pb-16">
           <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
             <p className="text-5xl md:text-6xl font-display font-semibold text-foreground leading-none">50+</p>
-            <p className="text-sm font-medium text-muted-foreground mt-3">Years Experience</p>
+            <p className="text-sm font-medium text-muted-foreground mt-3">Years fabricating steel</p>
           </div>
           <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
             <p className="text-5xl md:text-6xl font-display font-semibold text-foreground leading-none">850+</p>
             <p className="text-sm font-medium text-muted-foreground mt-3">Projects Delivered</p>
           </div>
           <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
-            <p className="text-5xl md:text-6xl font-display font-semibold text-foreground leading-none">100%</p>
-            <p className="text-sm font-medium text-muted-foreground mt-3">Certified SS 304</p>
+            <p className="text-4xl md:text-5xl font-display font-semibold text-foreground leading-none">304 / 316</p>
+            <p className="text-sm font-medium text-muted-foreground mt-3">Specified per project</p>
           </div>
           <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
-            <p className="text-5xl md:text-6xl font-display font-semibold text-primary leading-none">0</p>
-            <p className="text-sm font-medium text-muted-foreground mt-3">Compromises</p>
+            <p className="text-4xl md:text-5xl font-display font-semibold text-primary leading-none">Karachi</p>
+            <p className="text-sm font-medium text-muted-foreground mt-3">Korangi Industrial Area</p>
           </div>
         </div>
 
@@ -70,24 +71,17 @@ export function TrustBand({ initialLogos = [], initialSliderSpeed = 52 }: TrustB
               }
             >
               {marqueeLogos.map(({ logo, loopKey }) => (
-                <a
-                  key={loopKey}
-                  href={logo.image_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="clients-carousel-item"
-                  aria-label="View customer logo"
-                >
+                <div key={loopKey} className="clients-carousel-item">
                   <CmsImage
                     src={logo.image_url}
-                    alt="Customer logo"
+                    alt={logoAltFromUrl(logo.image_url)}
                     width={176}
                     height={52}
                     sizes="176px"
                     loading="lazy"
                     className="max-h-12 w-auto max-w-full object-contain sm:max-h-[52px]"
                   />
-                </a>
+                </div>
               ))}
             </div>
           </div>

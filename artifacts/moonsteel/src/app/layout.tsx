@@ -2,46 +2,38 @@ import type { Metadata } from "next";
 import "../index.css";
 import { Header } from "@/components/layout/Header";
 import { VercelInsights } from "@/components/VercelInsights";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
-import { absoluteUrl, getSiteUrl } from "@/lib/site";
+import { organizationGraph } from "@/lib/json-ld";
+import { getSiteUrl } from "@/lib/site";
 
 const siteUrl = getSiteUrl();
-const ogImage = "/ms3-logo.svg";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Moon Steel | Commercial Stainless Steel Fabrication",
-    template: "%s | Moon Steel",
+    default: "Commercial Kitchen Equipment Manufacturer in Pakistan | Moon Steel Fabricators",
+    template: "%s | Moon Steel Fabricators",
   },
   description:
-    "Moon Steel provides commercial stainless steel fabrication for hotels, hospitals, restaurants, and industrial kitchens in Pakistan.",
+    "Moon Steel Fabricators fabricates AISI 304 and AISI 316 commercial kitchen equipment and custom stainless steel work for hotels, restaurants, QSRs, hospitals, and industrial facilities in Pakistan.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     url: siteUrl,
-    title: "Moon Steel | Commercial Stainless Steel Fabrication",
+    title: "Commercial Kitchen Equipment Manufacturer in Pakistan | Moon Steel Fabricators",
     description:
-      "Commercial kitchen-grade stainless steel fabrication: prep stations, sink units, exhaust systems, and custom industrial solutions.",
-    siteName: "Moon Steel",
-    images: [
-      {
-        url: ogImage,
-        width: 512,
-        height: 512,
-        alt: "Moon Steel commercial stainless steel fabrication",
-      },
-    ],
+      "AISI 304 and AISI 316 stainless steel fabrication for commercial kitchens — from drawings to fabrication and installation in Karachi.",
+    siteName: "Moon Steel Fabricators",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Moon Steel | Commercial Stainless Steel Fabrication",
+    title: "Commercial Kitchen Equipment Manufacturer in Pakistan | Moon Steel Fabricators",
     description:
-      "Commercial kitchen-grade stainless steel fabrication for hospitality, healthcare, and industrial environments.",
-    images: [ogImage],
+      "AISI 304 and AISI 316 stainless steel fabrication for hotels, restaurants, QSRs, hospitals, and industrial facilities.",
   },
   robots: {
     index: true,
@@ -60,31 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "LocalBusiness",
-              name: "Moon Steel",
-              url: siteUrl,
-              logo: absoluteUrl("/ms3-logo.svg"),
-              description:
-                "Commercial stainless steel fabrication for kitchens, healthcare, and industrial food-service operations.",
-              address: {
-                "@type": "PostalAddress",
-                streetAddress: "Plot 142, Sector 24, Korangi Industrial Area",
-                addressLocality: "Karachi",
-                addressCountry: "PK",
-              },
-              contactPoint: {
-                "@type": "ContactPoint",
-                telephone: "+92-21-35121145-46",
-                contactType: "sales",
-              },
-            }),
-          }}
-        />
+        <JsonLd data={organizationGraph()} />
         <AuthProvider>
           <div className="tesla-theme min-h-screen bg-background">
             <Header />

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ProjectsIndexView } from "@/app/projects/ProjectsIndexView";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjects } from "@/features/projects/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
 async function resolveProjects() {
@@ -22,7 +24,7 @@ async function resolveProjects() {
 }
 
 export const metadata: Metadata = {
-  title: "Projects",
+  title: "Stainless Steel Fabrication Projects in Pakistan",
   description:
     "Explore Moon Steel commercial stainless steel fabrication projects — kitchens, hospitals, restaurants, and industrial installations.",
   alternates: {
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: absoluteUrl("/projects"),
-    title: "Projects | Moon Steel",
+    title: "Stainless Steel Fabrication Projects in Pakistan | Moon Steel Fabricators",
     description:
       "Commercial stainless steel fabrication portfolio — proven installations across Pakistan.",
   },
@@ -42,6 +44,12 @@ export default async function ProjectsPage() {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Projects", path: "/projects" },
+        ])}
+      />
       <ProjectsIndexView projects={projects} />
       <Footer />
       <WhatsAppButton />

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoodFusionCollabView } from "@/app/collaboration/food-fusion/FoodFusionCollabView";
+import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -14,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: absoluteUrl("/collaboration/food-fusion"),
-    title: "Moon Steel × Food Fusion | Moon Steel",
+    title: "Moon Steel × Food Fusion | Moon Steel Fabricators",
     description:
       "Food Fusion designs it. We fabricate it in Karachi — laser-cut stainless steel kitchen tools for Pakistan's largest food brand.",
   },
@@ -23,6 +25,12 @@ export const metadata: Metadata = {
 export default function FoodFusionCollabPage() {
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Food Fusion", path: "/collaboration/food-fusion" },
+        ])}
+      />
       <FoodFusionCollabView />
       <Footer />
       <WhatsAppButton />

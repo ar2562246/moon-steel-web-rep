@@ -17,7 +17,7 @@ const steps = [
   {
     icon: Hammer,
     title: "Fabrication",
-    description: "Engineered in our Karachi facility using certified SS 304 and precision machinery.",
+    description: "Engineered in our Karachi facility using specified AISI 304 or 316 stainless steel.",
   },
   {
     icon: Truck,

@@ -6,33 +6,33 @@ import { SectionReveal } from "@/components/motion/SectionReveal";
 const comparisons = [
   {
     feature: "Steel Grade",
-    moon: "Certified SS 304",
-    others: "Uncertified SS 200 Series",
+    moon: "Specified AISI 304 or 316",
+    others: "Grade often unspecified",
   },
   {
     feature: "Gauge Thickness",
-    moon: "Spec-accurate (Heavy Duty)",
-    others: "Reduced / Compromised",
+    moon: "Specified for the load",
+    others: "Selected primarily around price",
   },
   {
     feature: "Welds",
-    moon: "Precision Laser Welding, ground & polished",
-    others: "Spot/MIG, unfinished",
+    moon: "Controlled welding, ground and finished",
+    others: "Basic MIG or spot welding",
   },
   {
     feature: "Finish",
-    moon: "#4 Food-grade satin",
+    moon: "#4 food-grade satin where specified",
     others: "Mill finish",
   },
   {
     feature: "Edges",
-    moon: "Radiused, deburred (Safe)",
-    others: "Sharp, hazardous",
+    moon: "Ground, deburred, and finished",
+    others: "Sharp or unfinished",
   },
   {
-    feature: "Lifespan",
-    moon: "10–15+ years",
-    others: "2–4 years",
+    feature: "Documentation",
+    moon: "Named grade, thickness, and dimensions",
+    others: "Limited dimensional documentation",
   },
 ];
 
@@ -65,7 +65,7 @@ export function Comparison() {
               </div>
               <div className="col-span-4 p-5 border-l border-border/70">
                 <span className="font-display text-sm font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  Typical Workshop
+                  Commodity Fabrication
                 </span>
               </div>
             </div>
@@ -97,7 +97,7 @@ export function Comparison() {
 
                   <div className="md:col-span-4 p-5 border-t md:border-t-0 md:border-l border-border/70">
                     <p className="text-xs uppercase tracking-[0.06em] text-muted-foreground mb-2 md:hidden">
-                      Typical Workshop
+                      Commodity Fabrication
                     </p>
                     <div className="flex items-center gap-2">
                       <X className="w-4 h-4 text-destructive shrink-0" />

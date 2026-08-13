@@ -5,6 +5,8 @@ import { getDefaultProjectBySlug } from "@/features/projects/defaultProjects";
 import { getProjectImages, normalizeProject, toAbsoluteImageUrl } from "@/features/projects/images";
 import { getProjectBySlug, listPublishedProjectSlugs } from "@/features/projects/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { breadcrumbJsonLd, ORGANIZATION_ID } from "@/lib/json-ld";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getSiteUrl } from "@/lib/site";
 
 const siteUrl = getSiteUrl();
@@ -61,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const description =
     project.description ??
-    `${project.title} — ${project.scope}. Commercial stainless steel fabrication by Moon Steel.`;
+    `${project.title} — ${project.scope}. Commercial stainless steel fabrication by Moon Steel Fabricators.`;
 
   const images = getProjectImages(project);
   const cover = images[0] ?? project.image_url;
@@ -111,16 +113,21 @@ export default async function ProjectPage({ params }: PageProps) {
     material: project.materials ?? undefined,
     provider: {
       "@type": "LocalBusiness",
-      name: "Moon Steel",
+      "@id": ORGANIZATION_ID,
+      name: "Moon Steel Fabricators",
       url: siteUrl,
     },
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={jsonLd} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Projects", path: "/projects" },
+          { name: project.title, path: `/projects/${project.slug}` },
+        ])}
       />
       <ProjectDetailView project={project} />
     </>

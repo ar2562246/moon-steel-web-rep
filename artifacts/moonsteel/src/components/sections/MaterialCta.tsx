@@ -20,7 +20,7 @@ const grades = [
     grade: "AISI 304",
     badge: "Moon Steel standard",
     summary: "18/8 chromium-nickel stainless. It stays food-safe through daily wash-down, acidic food, and commercial detergents.",
-    points: ["18% chromium, 8% nickel", "Easy to clean, food-grade finish", "Mill certificates with every order"],
+    points: ["18% chromium, 8% nickel", "Easy to clean, food-grade finish", "Mill certificates available on request"],
     featured: true,
   },
   {

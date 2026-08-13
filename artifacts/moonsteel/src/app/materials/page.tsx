@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { MaterialsPageView } from "@/app/materials/MaterialsPageView";
 import { faqs } from "@/app/materials/materials-data";
+import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: absoluteUrl("/materials"),
-    title: "Stainless Steel Grades for Commercial Kitchens | Moon Steel",
+    title: "Stainless Steel Grades for Commercial Kitchens | Moon Steel Fabricators",
     description:
       "Choose AISI 304 or 316 with interactive tools, comparison cards, thickness guide, and mill-certified fabrication guidance.",
   },
@@ -47,9 +49,12 @@ const faqSchema = {
 export default function MaterialsPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      <JsonLd data={faqSchema} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Materials", path: "/materials" },
+        ])}
       />
       <MaterialsPageView />
       <Footer />

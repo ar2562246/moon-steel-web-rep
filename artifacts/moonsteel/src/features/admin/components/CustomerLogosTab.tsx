@@ -19,6 +19,7 @@ import { fetchLogoSliderSpeed, saveLogoSliderSpeed } from "@/features/admin/serv
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { CustomerLogo } from "@/features/admin/types";
+import { logoAltFromUrl } from "@/lib/logo-alt";
 
 export function CustomerLogosTab() {
   const { toast } = useToast();
@@ -178,7 +179,7 @@ export function CustomerLogosTab() {
               >
                 <AdminSidebarThumb
                   src={logo.image_url}
-                  alt="Customer logo"
+                  alt={logoAltFromUrl(logo.image_url)}
                   contain
                   className="min-h-[4.5rem] w-28 self-stretch bg-background"
                 />
@@ -269,7 +270,7 @@ export function CustomerLogosTab() {
         <div className="space-y-4">
           <AdminEditableImage
             src={selectedLogo.image_url}
-            alt="Customer logo"
+            alt={logoAltFromUrl(selectedLogo.image_url)}
             fileName={`customer-logo-${selectedLogo.id}.png`}
             className="layer-2 aspect-[4/3] w-full rounded-lg bg-background"
             imgClassName="object-contain p-6"

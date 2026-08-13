@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { GreaseTrapPageView } from "@/app/grease-traps/GreaseTrapPageView";
 import { faqs, greaseTrapProducts, pickGreaseTrapCatalogImages } from "@/app/grease-traps/grease-traps-data";
 import { getCatalogProductBySlug } from "@/features/catalog/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: absoluteUrl("/grease-traps"),
-    title: "Commercial Stainless Steel Grease Traps | Moon Steel",
+    title: "Commercial Stainless Steel Grease Traps | Moon Steel Fabricators",
     description:
       "Fabricated AISI 304 grease traps with gross tank volumes for Small, Medium, and Large commercial kitchens — plus a sizing calculator.",
   },
@@ -72,9 +74,12 @@ export default async function GreaseTrapsPage() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      <JsonLd data={faqSchema} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Grease Traps", path: "/grease-traps" },
+        ])}
       />
       <GreaseTrapPageView catalogImages={catalogImages} />
       <Footer />

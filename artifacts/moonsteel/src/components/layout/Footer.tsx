@@ -28,7 +28,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-              Precision stainless steel fabrication for commercial kitchens, hospitals, and industrial facilities. Built with certified SS 304. No compromises.
+              AISI 304 and AISI 316 stainless steel fabrication for commercial kitchens, hospitals, and industrial facilities. Manufactured in Karachi, Pakistan.
             </p>
             <div className="flex items-center gap-2">
               <a
@@ -156,10 +156,6 @@ export function Footer() {
 
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} Moon Steel Fabricators. All rights reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-          </div>
         </div>
       </div>
 

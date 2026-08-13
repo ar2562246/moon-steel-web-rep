@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { AboutPageView } from "@/app/about/AboutPageView";
+import { breadcrumbJsonLd, ORGANIZATION_ID } from "@/lib/json-ld";
 import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
 const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "Stainless Steel Fabricators in Karachi Since 1947",
   description:
     "Moon Steel Fabricators is a three-generation family business in Karachi, fabricating customized stainless steel equipment for commercial kitchens, hospitals, and laboratories since 1947.",
   alternates: {
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: absoluteUrl("/about"),
-    title: "About Us | Moon Steel",
+    title: "Stainless Steel Fabricators in Karachi Since 1947 | Moon Steel Fabricators",
     description:
       "Three generations of stainless steel fabrication in Karachi — from Ghulam Haider in 1947 to Muhammad Suleman and his sons today.",
   },
@@ -25,15 +27,17 @@ export const metadata: Metadata = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": ORGANIZATION_ID,
   name: "Moon Steel Fabricators",
   url: siteUrl,
   foundingDate: "1947",
   description:
-    "Pioneers in stainless steel fabrication in Pakistan — customized equipment for commercial kitchens, laboratories, hotels, and hospitals.",
+    "Family stainless steel fabrication business in Karachi — customized equipment for commercial kitchens, laboratories, hotels, and hospitals.",
   address: {
     "@type": "PostalAddress",
     streetAddress: "Plot 142, Sector 24, Korangi Industrial Area",
     addressLocality: "Karachi",
+    addressRegion: "Sindh",
     addressCountry: "PK",
   },
   telephone: "+92-21-35121145",
@@ -63,10 +67,12 @@ const organizationSchema = {
 export default function AboutPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      <JsonLd data={organizationSchema} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ])}
       />
       <AboutPageView />
       <Footer />

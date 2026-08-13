@@ -6,6 +6,7 @@ import { CmsImage } from "@/components/ui/CmsImage";
 import type { CustomerLogo } from "@/features/admin/types";
 import { groupClientsByIndustry } from "@/features/clients/types";
 import type { Client, ClientReference } from "@/features/clients/types";
+import { logoAltFromUrl } from "@/lib/logo-alt";
 
 type ClientsPageViewProps = {
   clients: Client[];
@@ -54,7 +55,7 @@ export function ClientsPageView({ clients, references, logos = [] }: ClientsPage
                     <li key={logo.id} className="flex items-center justify-center">
                       <CmsImage
                         src={logo.image_url}
-                        alt="Client logo"
+                        alt={logoAltFromUrl(logo.image_url)}
                         width={140}
                         height={48}
                         sizes="140px"

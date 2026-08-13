@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("marketing site smoke tests", () => {
   test("homepage loads with hero heading", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Precision Stainless Steel");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Built for Commercial Kitchens");
   });
 
   test("products catalog page loads", async ({ page }) => {
