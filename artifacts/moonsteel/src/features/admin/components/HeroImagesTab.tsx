@@ -1,10 +1,11 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { Download, ImageDown, ImagePlus, Save, Trash2, Upload, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Download, ImageDown, Save, Trash2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FileDropzone, filterFilesByAccept } from "@/components/ui/FileDropzone";
 import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
 import { AdminImageActionButton } from "@/features/admin/components/AdminImageActions";
 import {
@@ -71,10 +72,22 @@ export function HeroImagesTab() {
     };
   }, [previewUrls]);
 
-  const onPickFile = (slot: number) => (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    if (!file || !file.type.startsWith("image/")) return;
-    setSelected((prev) => ({ ...prev, [slot]: file }));
+  const assignImageFiles = (files: File[], startSlot: number) => {
+    const images = filterFilesByAccept(files, "image/*");
+    if (images.length === 0) return;
+
+    setSelected((prev) => {
+      const next = { ...prev };
+      const emptySlots = slots.filter(
+        (slot) => slot !== startSlot && !next[slot] && !bySlot.get(slot),
+      );
+      const order = [startSlot, ...emptySlots];
+      images.forEach((file, index) => {
+        const slot = order[index];
+        if (slot) next[slot] = file;
+      });
+      return next;
+    });
   };
 
   const onUpload = async (slot: number) => {
@@ -352,20 +365,15 @@ export function HeroImagesTab() {
               }}
             />
           ) : (
-            <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-[color,background-color,border-color] hover:border-primary hover:bg-primary/5 hover:text-primary">
-              <input
-                key={`hero-empty-${selectedSlot}-${fileInputKeys[selectedSlot]}`}
-                type="file"
-                accept="image/*"
-                onChange={onPickFile(selectedSlot)}
-                className="sr-only"
-              />
-              <ImagePlus className="h-8 w-8" strokeWidth={1.75} />
-              <span className="text-sm font-medium">Add hero photo</span>
-              <span className="text-xs">
-                Widescreen 16:9 · up to {WEB_HERO_MAX_WIDTH}×{WEB_HERO_MAX_HEIGHT} for fast loads
-              </span>
-            </label>
+            <FileDropzone
+              accept="image/*"
+              multiple
+              inputKey={`hero-empty-${selectedSlot}-${fileInputKeys[selectedSlot]}`}
+              className="aspect-video rounded-xl"
+              label="Drop hero photos or click"
+              hint={`Widescreen 16:9 · extra files fill empty slots · up to ${WEB_HERO_MAX_WIDTH}×${WEB_HERO_MAX_HEIGHT}`}
+              onFiles={(files) => assignImageFiles(files, selectedSlot)}
+            />
           )}
           {displaySrc ? (
             <p className="text-xs text-muted-foreground">
@@ -400,15 +408,16 @@ export function HeroImagesTab() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`hero-file-${selectedSlot}`}>Replace file</Label>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <input
-              id={`hero-file-${selectedSlot}`}
-              key={`hero-file-${selectedSlot}-${fileInputKeys[selectedSlot]}`}
-              type="file"
+          <Label>Replace file</Label>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+            <FileDropzone
               accept="image/*"
-              onChange={onPickFile(selectedSlot)}
-              className="layer-1 w-full rounded-md px-3 py-2 text-sm"
+              multiple
+              inputKey={`hero-file-${selectedSlot}-${fileInputKeys[selectedSlot]}`}
+              className="w-full py-4"
+              label="Drop a replacement, or several to fill empty slots"
+              hint="First file replaces this slot"
+              onFiles={(files) => assignImageFiles(files, selectedSlot)}
             />
             {pendingFile ? (
               <Button

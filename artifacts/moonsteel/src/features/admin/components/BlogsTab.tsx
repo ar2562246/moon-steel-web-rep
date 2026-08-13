@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { ExternalLink, Plus, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ import { useBlogs } from "@/features/admin/hooks/useBlogs";
 import { useCatalogProducts } from "@/features/admin/hooks/useCatalogProducts";
 import { formatBlogDate, getBlogCoverImageUrl, getBlogPath, type BlogPost } from "@/features/blog/types";
 import { slugify } from "@/lib/slugify";
+import { FileDropzone, filterFilesByAccept } from "@/components/ui/FileDropzone";
 import { useToast } from "@/hooks/use-toast";
 
 function Field({
@@ -197,6 +198,14 @@ export function BlogsTab() {
     setCoverFile(null);
     setForm((f) => ({ ...f, cover_image_url: "" }));
     setCoverUrlInput("");
+    setFileInputKey((key) => key + 1);
+  };
+
+  const setCoverFromFiles = (files: File[]) => {
+    const [file] = filterFilesByAccept(files, "image/*");
+    if (!file) return;
+    setCoverFile(file);
+    setForm((f) => ({ ...f, cover_image_url: "" }));
     setFileInputKey((key) => key + 1);
   };
 
@@ -495,39 +504,28 @@ export function BlogsTab() {
                 />
               </div>
             ) : (
-              <label className="flex aspect-[16/10] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-[color,background-color,border-color,transform,box-shadow] duration-150 hover:border-primary hover:bg-primary/5 hover:text-primary hover:shadow-sm active:scale-[0.97] active:bg-primary/10 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30">
-                <input
-                  key={`blog-cover-${fileInputKey}`}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] ?? null;
-                    setCoverFile(file);
-                    if (file) setForm((f) => ({ ...f, cover_image_url: "" }));
-                  }}
-                  className="sr-only"
-                />
-                <Plus className="h-8 w-8" strokeWidth={2} />
-                <span className="text-xs font-medium">Add cover</span>
-              </label>
+              <FileDropzone
+                accept="image/*"
+                multiple
+                inputKey={`blog-cover-${fileInputKey}`}
+                className="aspect-[16/10] rounded-lg"
+                label="Drop a cover photo or click"
+                hint="If you drop several files, the first image is used"
+                onFiles={setCoverFromFiles}
+              />
             )}
 
             <div className="space-y-3">
               {!coverSrc ? null : (
-                <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-primary hover:underline">
-                  <input
-                    key={`blog-cover-replace-${fileInputKey}`}
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0] ?? null;
-                      setCoverFile(file);
-                      if (file) setForm((f) => ({ ...f, cover_image_url: "" }));
-                    }}
-                  />
-                  Replace cover file
-                </label>
+                <FileDropzone
+                  accept="image/*"
+                  multiple
+                  inputKey={`blog-cover-replace-${fileInputKey}`}
+                  className="py-4"
+                  label="Drop a replacement cover or click"
+                  hint="First image replaces the current cover"
+                  onFiles={setCoverFromFiles}
+                />
               )}
               <div className="flex min-w-0 gap-2">
                 <Input

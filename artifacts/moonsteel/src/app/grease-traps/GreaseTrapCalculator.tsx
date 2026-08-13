@@ -169,7 +169,7 @@ export function GreaseTrapCalculator() {
               </ul>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
-                  href="/#contact"
+                  href="/contact"
                   className="inline-flex min-h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
                   Request a quote
@@ -195,7 +195,7 @@ export function GreaseTrapCalculator() {
               </p>
               <div className="mt-5">
                 <Link
-                  href="/#contact"
+                  href="/contact"
                   className="inline-flex min-h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
                   Request a custom size

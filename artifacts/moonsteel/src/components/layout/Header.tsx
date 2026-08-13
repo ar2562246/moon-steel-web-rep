@@ -16,6 +16,7 @@ const navLinks = [
   { name: "Materials", href: "/materials", sectionId: "materials" },
   { name: "About", href: "/about", sectionId: "about" },
   { name: "Blog", href: "/blog", sectionId: "blog" },
+  { name: "Contact", href: "/contact", sectionId: "contact" },
 ] as const;
 
 const homeSectionIds = ["process"] as const;
@@ -27,6 +28,7 @@ function isNavLinkActive(sectionId: string, pathname: string, activeSection: str
   if (sectionId === "clients") return pathname.startsWith("/clients");
   if (sectionId === "blog") return pathname.startsWith("/blog");
   if (sectionId === "about") return pathname.startsWith("/about");
+  if (sectionId === "contact") return pathname.startsWith("/contact");
   if (pathname === "/") return activeSection === sectionId;
   return false;
 }
@@ -176,11 +178,8 @@ export function Header() {
                 {link.name}
               </button>
             ))}
-            <Button
-              onClick={() => navigate("#contact", "contact")}
-              className="bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Request Quote
+            <Button asChild className="bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90">
+              <Link href="/contact">Request Quote</Link>
             </Button>
           </nav>
 
@@ -208,11 +207,10 @@ export function Header() {
               {link.name}
             </button>
           ))}
-          <Button
-            onClick={() => navigate("#contact", "contact")}
-            className="mt-2 w-full bg-primary font-medium text-primary-foreground"
-          >
-            Request Quote
+          <Button asChild className="mt-2 w-full bg-primary font-medium text-primary-foreground">
+            <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
+              Request Quote
+            </Link>
           </Button>
         </div>
       ) : null}

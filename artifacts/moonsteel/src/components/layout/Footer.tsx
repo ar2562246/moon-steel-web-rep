@@ -1,4 +1,12 @@
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import {
+  EMAIL,
+  PHONE_DISPLAY,
+  PHONE_TEL,
+  STREET_ADDRESS,
+  WHATSAPP_DISPLAY,
+  WHATSAPP_HREF,
+} from "@/lib/contact/details";
 const logoUrl = "/ms3-logo.svg";
 
 export function Footer() {
@@ -78,7 +86,7 @@ export function Footer() {
                 </svg>
               </a>
               <a
-                href="https://wa.me/923312562246"
+                href={WHATSAPP_HREF}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Chat with Moon Steel on WhatsApp"
@@ -106,17 +114,39 @@ export function Footer() {
               <li className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
                 <span>
-                  Plot 142, Sector 24, Korangi Industrial Area<br />
+                  {STREET_ADDRESS}<br />
                   Karachi-Pakistan
                 </span>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="w-5 h-5 text-primary shrink-0" />
-                <a href="tel:+922135121145" className="hover:text-primary transition-colors">+92-21-35121145-46</a>
+                <a href={`tel:${PHONE_TEL}`} className="hover:text-primary transition-colors">{PHONE_DISPLAY}</a>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-5 w-5 shrink-0"
+                  fill="none"
+                >
+                  <circle cx="12" cy="12" r="11" fill="#25D366" />
+                  <path
+                    fill="#FFFFFF"
+                    d="M17.34 14.15c-.28-.14-1.63-.8-1.88-.89-.25-.09-.43-.14-.61.14-.18.28-.7.89-.86 1.08-.16.18-.31.21-.58.07-.28-.14-1.17-.43-2.23-1.36-.82-.73-1.38-1.62-1.54-1.9-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.46.14-.16.18-.28.28-.46.09-.18.05-.35-.02-.5-.07-.14-.61-1.47-.84-2.02-.22-.52-.45-.45-.61-.45h-.52c-.18 0-.46.07-.7.35-.24.28-.91.89-.91 2.16s.93 2.5 1.06 2.67c.14.18 1.81 2.75 4.38 3.85.61.26 1.09.42 1.46.54.61.19 1.17.16 1.61.1.49-.07 1.63-.67 1.86-1.32.23-.65.23-1.21.16-1.32-.07-.12-.25-.19-.52-.33Z"
+                  />
+                </svg>
+                <a
+                  href={WHATSAPP_HREF}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  WhatsApp {WHATSAPP_DISPLAY}
+                </a>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="w-5 h-5 text-primary shrink-0" />
-                <a href="mailto:info@moonsteelfab.com" className="hover:text-primary transition-colors">info@moonsteelfab.com</a>
+                <a href={`mailto:${EMAIL}`} className="hover:text-primary transition-colors">{EMAIL}</a>
               </li>
             </ul>
           </div>
@@ -148,7 +178,8 @@ export function Footer() {
               <li><a href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</a></li>
               <li><a href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</a></li>
               <li><a href="/collaboration/food-fusion" className="text-sm text-muted-foreground hover:text-primary transition-colors">Food Fusion Collab</a></li>
-              <li><a href="/#contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Request a Quote</a></li>
+              <li><a href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</a></li>
+              <li><a href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Request a Quote</a></li>
             </ul>
           </div>
 

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("marketing site smoke tests", () => {
   test("homepage loads with hero heading", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Built for Commercial Kitchens");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Commercial kitchen equipment");
   });
 
   test("products catalog page loads", async ({ page }) => {
@@ -52,8 +52,8 @@ test.describe("marketing site smoke tests", () => {
     await expect(page.getByRole("heading", { name: "Admin Login" })).toBeVisible();
   });
 
-  test("contact section is reachable from homepage", async ({ page }) => {
-    await page.goto("/#contact");
+  test("contact page loads", async ({ page }) => {
+    await page.goto("/contact");
     await expect(page.locator("#contact")).toBeVisible();
     await expect(page.getByRole("button", { name: /submit request/i })).toBeVisible();
   });

@@ -28,8 +28,8 @@ const body = `# Moon Steel Fabricators
 - [Projects](${PRODUCTION_SITE_URL}/projects): Fabrication installations across Pakistan
 - [Clients](${PRODUCTION_SITE_URL}/clients): Hotels, QSRs, hospitals, and industrial clients
 - [About](${PRODUCTION_SITE_URL}/about): Family fabrication business in Karachi since 1947
+- [Contact](${PRODUCTION_SITE_URL}/contact): Request a fabrication quote
 - [Food Fusion collaboration](${PRODUCTION_SITE_URL}/collaboration/food-fusion): Concept-to-product stainless fabrication
-- [Quote](${PRODUCTION_SITE_URL}/#contact): Request a fabrication quote
 
 ## Facts
 

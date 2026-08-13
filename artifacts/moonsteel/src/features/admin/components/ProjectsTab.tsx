@@ -1,11 +1,12 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { slugify } from "@/lib/slugify";
+import { FileDropzone, filterFilesByAccept } from "@/components/ui/FileDropzone";
 import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
 import { AdminImageActionButton } from "@/features/admin/components/AdminImageActions";
 import {
@@ -81,12 +82,12 @@ export function ProjectsTab() {
     });
   };
 
-  const onPickFiles = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []).filter((file) => file.type.startsWith("image/"));
-    if (files.length === 0) return;
+  const addImageFiles = (files: File[]) => {
+    const images = filterFilesByAccept(files, "image/*");
+    if (images.length === 0) return;
     setGallery((current) => [
       ...current,
-      ...files.map((file) => ({
+      ...images.map((file) => ({
         id: newId(),
         kind: "file" as const,
         file,
@@ -454,13 +455,13 @@ export function ProjectsTab() {
           ) : (
             <p className="text-sm text-muted-foreground">Add at least one photo.</p>
           )}
-          <input
-            key={`project-files-${fileInputKey}`}
-            type="file"
+          <FileDropzone
             accept="image/*"
             multiple
-            onChange={onPickFiles}
-            className="layer-1 w-full rounded-md px-3 py-2 text-sm"
+            inputKey={`project-files-${fileInputKey}`}
+            label="Drop photos here or click to browse"
+            hint="Multiple images — first photo is the cover"
+            onFiles={addImageFiles}
           />
           <div className="flex gap-2">
             <Input

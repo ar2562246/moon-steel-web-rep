@@ -1,7 +1,8 @@
 "use client";
 
-import { ChangeEvent, DragEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
+import { FileDropzone } from "@/components/ui/FileDropzone";
 import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
 import {
   AdminDetailSkeleton,
@@ -27,7 +28,6 @@ export function CustomerLogosTab() {
   const [selectedLogo, setSelectedLogo] = useState<CustomerLogo | null>(null);
   const [isUploadingView, setIsUploadingView] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   const [sliderSpeed, setSliderSpeed] = useState(52);
   const [isSavingSpeed, setIsSavingSpeed] = useState(false);
   const [speedError, setSpeedError] = useState<string | null>(null);
@@ -57,28 +57,16 @@ export function CustomerLogosTab() {
       });
   }, []);
 
-  const onPickFile = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (files.length === 0) return;
-    setSelectedFiles(files.filter((file) => file.type.startsWith("image/")));
-  };
-
-  const onDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const onDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const onDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files ?? []);
-    if (files.length === 0) return;
-    setSelectedFiles(files.filter((file) => file.type.startsWith("image/")));
+  const addLogoFiles = (files: File[]) => {
+    setSelectedFiles((current) => {
+      const next = [...current];
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+        if (next.some((existing) => existing.name === file.name && existing.size === file.size)) continue;
+        next.push(file);
+      }
+      return next;
+    });
   };
 
   const startUpload = () => {
@@ -222,24 +210,12 @@ export function CustomerLogosTab() {
             void onUpload();
           }}
         >
-          <div
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            className={`layer-1 rounded-md border-2 border-dashed p-5 text-center text-sm transition-colors ${
-              isDragging
-                ? "border-primary bg-primary/5 text-primary"
-                : "border-border text-muted-foreground"
-            }`}
-          >
-            Drag and drop image files here
-          </div>
-          <input
-            type="file"
+          <FileDropzone
             accept="image/*"
             multiple
-            onChange={onPickFile}
-            className="layer-1 w-full rounded-md px-3 py-2 text-sm"
+            label="Drop logos here or click to browse"
+            hint="Multiple image files"
+            onFiles={addLogoFiles}
           />
           {previewUrls.length > 0 ? (
             <div className="layer-2 grid grid-cols-2 gap-3 rounded-lg p-4 sm:grid-cols-3">

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ChangeEvent,
   FormEvent,
   useEffect,
   useLayoutEffect,
@@ -11,13 +10,14 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ExternalLink, GripVertical, ImageDown, Plus, Star, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, GripVertical, ImageDown, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { FileDropzone, filterFilesByAccept, hasFileDrag } from "@/components/ui/FileDropzone";
 import { slugify } from "@/lib/slugify";
 import { getCatalogProductCover, getCatalogProductImages, getCatalogProductPath } from "@/features/catalog/paths";
 import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
@@ -160,12 +160,12 @@ export function CatalogProductsTab() {
     });
   };
 
-  const onPickFiles = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []).filter((file) => file.type.startsWith("image/"));
-    if (files.length === 0) return;
+  const addImageFiles = (files: File[]) => {
+    const images = filterFilesByAccept(files, "image/*");
+    if (images.length === 0) return;
     setGallery((current) => [
       ...current,
-      ...files.map((file) => ({
+      ...images.map((file) => ({
         id: newId(),
         kind: "file" as const,
         file,
@@ -635,7 +635,19 @@ export function CatalogProductsTab() {
                       {optimizingId === "all" ? "Converting..." : "Make all web 4:3"}
                     </Button>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <div
+                    className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+                    onDragOver={(event) => {
+                      if (!hasFileDrag(event)) return;
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "copy";
+                    }}
+                    onDrop={(event) => {
+                      if (!hasFileDrag(event)) return;
+                      event.preventDefault();
+                      addImageFiles(Array.from(event.dataTransfer.files ?? []));
+                    }}
+                  >
                     {gallery.map((entry, index) => {
                       const src = entry.kind === "url" ? entry.url : entry.preview;
                       const isBusy = optimizingId !== null;
@@ -648,6 +660,10 @@ export function CatalogProductsTab() {
                           }}
                           onDrop={(event) => {
                             event.preventDefault();
+                            if (hasFileDrag(event)) {
+                              addImageFiles(Array.from(event.dataTransfer.files ?? []));
+                              return;
+                            }
                             const fromId = event.dataTransfer.getData("text/plain") || dragId;
                             if (fromId) moveGallery(fromId, entry.id);
                             setDragId(null);
@@ -777,18 +793,15 @@ export function CatalogProductsTab() {
                         </div>
                       );
                     })}
-                    <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-[color,background-color,border-color,transform,box-shadow] duration-150 hover:border-primary hover:bg-primary/5 hover:text-primary hover:shadow-sm active:scale-[0.97] active:bg-primary/10 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30">
-                      <input
-                        key={`catalog-files-${fileInputKey}`}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={onPickFiles}
-                        className="sr-only"
-                      />
-                      <Plus className="h-8 w-8" strokeWidth={2} />
-                      <span className="text-xs font-medium">Add photos</span>
-                    </label>
+                    <FileDropzone
+                      accept="image/*"
+                      multiple
+                      inputKey={`catalog-files-${fileInputKey}`}
+                      className="aspect-[4/3] px-3 py-3"
+                      label="Drop photos or click"
+                      hint="Multiple images"
+                      onFiles={addImageFiles}
+                    />
                   </div>
                   <div className="flex min-w-0 gap-2">
                     <Input

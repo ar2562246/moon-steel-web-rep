@@ -101,7 +101,7 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                 Calculate Your Required Size
               </a>
               <Link
-                href="/#contact"
+                href="/contact"
                 className="inline-flex min-h-11 items-center rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
               >
                 Request a Quote
@@ -383,7 +383,7 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
               requirements, and project specifications — including inlet and outlet size, cover
               arrangement, and overall dimensions.
             </p>
-            <InlineCta href="/#contact" label="Request a custom size" />
+            <InlineCta href="/contact" label="Request a custom size" />
           </div>
         </section>
 
@@ -405,7 +405,7 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
               ))}
             </Accordion>
           </div>
-          <InlineCta href="/#contact" label="Speak with a fabrication specialist" />
+          <InlineCta href="/contact" label="Speak with a fabrication specialist" />
         </section>
 
         <section className="mb-16">
@@ -437,7 +437,7 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
               <ArrowRight className="h-4 w-4" />
             </a>
             <Link
-              href="/#contact"
+              href="/contact"
               className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
             >
               Request a Quote

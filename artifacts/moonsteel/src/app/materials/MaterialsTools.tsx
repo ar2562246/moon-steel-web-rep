@@ -55,7 +55,7 @@ function ResultCard({
         </dl>
       ) : null}
       <Link
-        href="/#contact"
+        href="/contact"
         className="mt-5 inline-flex min-h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
       >
         Get quote

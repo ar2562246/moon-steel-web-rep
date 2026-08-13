@@ -189,7 +189,7 @@ export function InquiriesTab() {
               </a>
             </Field>
             {selectedInquiry.file_name ? (
-              <Field label="Attachment noted" value={selectedInquiry.file_name} />
+              <Field label="Attachments noted" value={selectedInquiry.file_name} />
             ) : null}
             <label className="grid gap-1.5 text-sm">
               <span className="text-muted-foreground">Status</span>

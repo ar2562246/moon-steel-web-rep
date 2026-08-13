@@ -80,7 +80,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
               </dl>
 
               <Link
-                href="/#contact"
+                href="/contact"
                 className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 Request a similar installation

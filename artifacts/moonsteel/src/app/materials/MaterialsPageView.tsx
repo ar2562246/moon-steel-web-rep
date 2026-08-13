@@ -119,7 +119,7 @@ export function MaterialsPageView() {
                 Compare Grades
               </a>
               <Link
-                href="/#contact"
+                href="/contact"
                 className="inline-flex min-h-11 items-center rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
               >
                 Request Quote
@@ -213,7 +213,7 @@ export function MaterialsPageView() {
               </article>
             ))}
           </SectionReveal>
-          <InlineCta href="/#contact" label="Request material recommendation" />
+          <InlineCta href="/contact" label="Request material recommendation" />
         </section>
 
         {/* Improved comparison matrix */}
@@ -285,7 +285,7 @@ export function MaterialsPageView() {
               </article>
             ))}
           </SectionReveal>
-          <InlineCta href="/#contact" label="Get a custom fabrication quote" />
+          <InlineCta href="/contact" label="Get a custom fabrication quote" />
         </section>
 
         {/* Finishes */}
@@ -381,7 +381,7 @@ export function MaterialsPageView() {
               not commercial kitchen grade.
             </p>
           </div>
-          <InlineCta href="/#contact" label="Ask about mill certificates for your order" />
+          <InlineCta href="/contact" label="Ask about mill certificates for your order" />
         </section>
 
         {/* Corrosion matrix */}
@@ -488,7 +488,7 @@ export function MaterialsPageView() {
               ))}
             </Accordion>
           </div>
-          <InlineCta href="/#contact" label="Speak with a stainless steel specialist" />
+          <InlineCta href="/contact" label="Speak with a stainless steel specialist" />
         </section>
 
         {/* Final CTA */}
@@ -502,7 +502,7 @@ export function MaterialsPageView() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/#contact"
+              href="/contact"
               className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
               Request a Quote

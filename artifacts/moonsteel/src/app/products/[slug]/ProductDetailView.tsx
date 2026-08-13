@@ -31,7 +31,7 @@ function CategoryPills({ product }: { product: CatalogProduct }) {
 function QuoteButton({ className }: { className?: string }) {
   return (
     <Link
-      href="/#contact"
+      href="/contact"
       className={
         className ??
         "inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"

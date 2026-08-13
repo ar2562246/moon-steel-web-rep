@@ -1,3 +1,5 @@
+"use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,8 +23,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Phone, Mail, Clock, FileUp, Send } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { useState, useRef } from "react";
+import { cn } from "@/lib/utils";
+import { FileDropzone } from "@/components/ui/FileDropzone";
+import { ContactVCardQr } from "@/components/ContactVCardQr";
+import {
+  CONTACT_DRAWING_ACCEPT,
+  CONTACT_DRAWING_HINT,
+  EMAIL,
+  PHONE_DISPLAY,
+  PHONE_TEL,
+  STREET_ADDRESS,
+  WHATSAPP_DISPLAY,
+  WHATSAPP_HREF,
+} from "@/lib/contact/details";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Name is required"),
@@ -33,9 +48,9 @@ const formSchema = z.object({
   message: z.string().min(10, "Please provide some project details"),
 });
 
-export function ContactForm() {
+export function ContactForm({ standalone = false }: { standalone?: boolean }) {
   const { toast } = useToast();
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileNames, setFileNames] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const honeypotRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +74,7 @@ export function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          fileName: fileName ?? undefined,
+          fileName: fileNames.length > 0 ? fileNames.join(", ") : undefined,
           website: honeypotRef.current?.value ?? "",
         }),
       });
@@ -88,7 +103,7 @@ export function ContactForm() {
       });
 
       form.reset();
-      setFileName(null);
+      setFileNames([]);
     } catch {
       toast({
         variant: "destructive",
@@ -100,14 +115,14 @@ export function ContactForm() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFileName(e.target.files[0].name);
-    }
-  };
-
   return (
-    <section id="contact" className="py-24 bg-gradient-to-b from-muted/45 via-background to-muted/35 border-t border-border/70">
+    <section
+      id="contact"
+      className={cn(
+        "border-t border-border/70 bg-gradient-to-b from-muted/45 via-background to-muted/35 py-24",
+        standalone && "pt-28 md:pt-32",
+      )}
+    >
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid lg:grid-cols-5 gap-12 lg:gap-8 max-w-6xl mx-auto">
           
@@ -126,8 +141,7 @@ export function ContactForm() {
                 <div>
                   <h4 className="font-medium text-foreground mb-1">Factory Location</h4>
                   <p className="text-muted-foreground text-sm leading-relaxed">
-                    Plot 142, Sector 24<br />
-                    Korangi Industrial Area<br />
+                    {STREET_ADDRESS}<br />
                     Karachi-Pakistan
                   </p>
                 </div>
@@ -137,7 +151,7 @@ export function ContactForm() {
                 <Phone className="w-6 h-6 text-primary shrink-0" />
                 <div>
                   <h4 className="font-medium text-foreground mb-1">Direct Line</h4>
-                  <a href="tel:+922135121145" className="text-muted-foreground text-sm hover:text-primary transition-colors">+92-21-35121145-46</a>
+                  <a href={`tel:${PHONE_TEL}`} className="text-muted-foreground text-sm hover:text-primary transition-colors">{PHONE_DISPLAY}</a>
                 </div>
               </div>
 
@@ -145,7 +159,33 @@ export function ContactForm() {
                 <Mail className="w-6 h-6 text-primary shrink-0" />
                 <div>
                   <h4 className="font-medium text-foreground mb-1">Email</h4>
-                  <a href="mailto:info@moonsteelfab.com" className="text-muted-foreground text-sm hover:text-primary transition-colors">info@moonsteelfab.com</a>
+                  <a href={`mailto:${EMAIL}`} className="text-muted-foreground text-sm hover:text-primary transition-colors">{EMAIL}</a>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="mt-0.5 h-6 w-6 shrink-0"
+                  fill="none"
+                >
+                  <circle cx="12" cy="12" r="11" fill="#25D366" />
+                  <path
+                    fill="#FFFFFF"
+                    d="M17.34 14.15c-.28-.14-1.63-.8-1.88-.89-.25-.09-.43-.14-.61.14-.18.28-.7.89-.86 1.08-.16.18-.31.21-.58.07-.28-.14-1.17-.43-2.23-1.36-.82-.73-1.38-1.62-1.54-1.9-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.46.14-.16.18-.28.28-.46.09-.18.05-.35-.02-.5-.07-.14-.61-1.47-.84-2.02-.22-.52-.45-.45-.61-.45h-.52c-.18 0-.46.07-.7.35-.24.28-.91.89-.91 2.16s.93 2.5 1.06 2.67c.14.18 1.81 2.75 4.38 3.85.61.26 1.09.42 1.46.54.61.19 1.17.16 1.61.1.49-.07 1.63-.67 1.86-1.32.23-.65.23-1.21.16-1.32-.07-.12-.25-.19-.52-.33Z"
+                  />
+                </svg>
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">WhatsApp</h4>
+                  <a
+                    href={WHATSAPP_HREF}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground text-sm hover:text-primary transition-colors"
+                  >
+                    {WHATSAPP_DISPLAY}
+                  </a>
                 </div>
               </div>
 
@@ -158,14 +198,16 @@ export function ContactForm() {
               </div>
             </div>
 
+            <ContactVCardQr />
+
             <div className="pt-8 border-t border-border mt-8">
               <a 
-                href="https://wa.me/923312562246"
+                href={WHATSAPP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 w-full min-h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full border border-primary/80 font-medium transition-colors"
               >
-                Chat on WhatsApp
+                Chat on WhatsApp · {WHATSAPP_DISPLAY}
               </a>
             </div>
           </div>
@@ -288,24 +330,37 @@ export function ContactForm() {
 
                 <div className="space-y-2">
                   <Label>Attach Drawings (Optional)</Label>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center justify-center gap-2 px-4 py-2 border border-dashed border-border rounded-lg hover:border-primary/50 cursor-pointer hover:bg-muted/50 transition-colors w-full md:w-auto">
-                      <FileUp className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Upload File</span>
-                      <input 
-                        type="file" 
-                        accept=".pdf,.dxf,.dwg,.jpg,.jpeg,.png"
-                        className="hidden"
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                    {fileName && (
-                      <span className="text-sm text-muted-foreground truncate max-w-[200px]">
-                        {fileName}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Accepts .pdf, .dxf, .dwg, .jpg, .png</p>
+                  <FileDropzone
+                    accept={CONTACT_DRAWING_ACCEPT}
+                    multiple
+                    label="Drop drawings or CAD files here, or click to browse"
+                    hint={CONTACT_DRAWING_HINT}
+                    onFiles={(files) => {
+                      setFileNames((current) => {
+                        const next = [...current];
+                        for (const file of files) {
+                          if (!next.includes(file.name)) next.push(file.name);
+                        }
+                        return next;
+                      });
+                    }}
+                  />
+                  {fileNames.length > 0 ? (
+                    <ul className="space-y-1">
+                      {fileNames.map((name) => (
+                        <li key={name} className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                          <span className="truncate">{name}</span>
+                          <button
+                            type="button"
+                            className="shrink-0 text-xs text-primary hover:underline"
+                            onClick={() => setFileNames((current) => current.filter((item) => item !== name))}
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </div>
 
                 <Button

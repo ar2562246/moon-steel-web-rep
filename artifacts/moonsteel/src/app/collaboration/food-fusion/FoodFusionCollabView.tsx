@@ -150,7 +150,7 @@ export function FoodFusionCollabView() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/#contact"
+              href="/contact"
               className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
               Talk to us about a build

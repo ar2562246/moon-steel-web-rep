@@ -7,7 +7,7 @@ export const contactInquirySchema = z.object({
   email: z.string().trim().email().max(254),
   projectType: z.string().trim().min(1).max(80),
   message: z.string().trim().min(10).max(5000),
-  fileName: z.string().trim().max(255).optional(),
+  fileName: z.string().trim().max(1000).optional(),
   website: z.string().optional(),
 });
 
@@ -31,7 +31,7 @@ export function toContactInquiryRecord(input: ContactInquiryInput): ContactInqui
     email: input.email,
     project_type: input.projectType,
     message: input.fileName
-      ? `${input.message}\n\n[Attachment noted: ${input.fileName}]`
+      ? `${input.message}\n\n[Attachments noted: ${input.fileName}]`
       : input.message,
     file_name: input.fileName ?? null,
   };

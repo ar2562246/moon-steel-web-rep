@@ -99,17 +99,17 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
             <div className="relative z-10 w-full max-w-xl">
               <div className="mb-6 flex items-center gap-4">
                 <div className="h-px w-12 bg-primary" />
-                <span className="apple-eyebrow text-primary">Engineering-Grade Stainless Steel Fabrication</span>
+                <span className="apple-eyebrow text-primary">Stainless steel fabrication · Made in Pakistan</span>
               </div>
 
               <h1 className="mb-6 text-5xl font-display font-semibold leading-[1.1] tracking-tight text-foreground md:text-7xl">
-                Built for Commercial Kitchens. <br className="hidden md:block" />
-                Engineered to <span className="text-primary">Last.</span>
+                Commercial kitchen equipment, <br className="hidden md:block" />
+                fabricated to <span className="text-primary">spec.</span>
               </h1>
 
               <p className="apple-section-copy mb-10 max-w-xl">
-                AISI 304 and AISI 316 fabrication for hotels, restaurants, QSRs, hospitals, and industrial
-                facilities — from drawings to fabrication and installation.
+                Moon Steel Fabricators builds AISI 304 and AISI 316 equipment for hotels, restaurants, QSRs,
+                hospitals, and industrial facilities — from drawings through fabrication and installation.
               </p>
 
               <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 py-1.5">
