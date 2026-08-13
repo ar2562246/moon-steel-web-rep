@@ -1,18 +1,19 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AdminDetailSkeleton,
+  AdminMasterDetail,
+  AdminSidebarCard,
+  AdminSidebarEmpty,
+  AdminSidebarSkeleton,
+  adminSidebarMutedClass,
+  adminSidebarTitleClass,
+} from "@/features/admin/components/AdminMasterDetail";
 import { useProductCategories } from "@/features/admin/hooks/useProductCategories";
+import type { ProductCategory } from "@/features/admin/types";
 
 const initialForm = {
   title: "",
@@ -25,8 +26,8 @@ const initialForm = {
 export function ProductCategoriesTab() {
   const { categories, isLoading, isSaving, error, create, update, remove } = useProductCategories();
   const [form, setForm] = useState(initialForm);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<ProductCategory | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const canSubmit = useMemo(
     () =>
@@ -37,37 +38,21 @@ export function ProductCategoriesTab() {
     [form]
   );
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!canSubmit) return;
-
-    if (editingId) {
-      await update({
-        id: editingId,
-        title: form.title.trim(),
-        specs: form.specs.trim(),
-        description: form.description.trim(),
-        uses: form.uses.trim(),
-        sort_order: Number(form.sort_order) || 100,
-      });
-    } else {
-      await create({
-        title: form.title.trim(),
-        specs: form.specs.trim(),
-        description: form.description.trim(),
-        uses: form.uses.trim(),
-        sort_order: Number(form.sort_order) || 100,
-      });
-    }
-    setEditingId(null);
+  const closeEditor = () => {
+    setEditingCategory(null);
     setForm(initialForm);
-    setIsDialogOpen(false);
+    setIsEditorOpen(false);
   };
 
-  const startEdit = (id: string) => {
-    const row = categories.find((x) => x.id === id);
-    if (!row) return;
-    setEditingId(id);
+  const startCreate = () => {
+    setEditingCategory(null);
+    setForm(initialForm);
+    setIsEditorOpen(true);
+  };
+
+  const startEdit = (row: ProductCategory, force = false) => {
+    if (!force && editingCategory?.id === row.id && isEditorOpen) return;
+    setEditingCategory(row);
     setForm({
       title: row.title,
       specs: row.specs,
@@ -75,135 +60,118 @@ export function ProductCategoriesTab() {
       uses: row.uses,
       sort_order: row.sort_order,
     });
-    setIsDialogOpen(true);
+    setIsEditorOpen(true);
   };
 
-  const resetForm = () => {
-    setEditingId(null);
-    setForm(initialForm);
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+
+    const payload = {
+      title: form.title.trim(),
+      specs: form.specs.trim(),
+      description: form.description.trim(),
+      uses: form.uses.trim(),
+      sort_order: Number(form.sort_order) || 100,
+    };
+
+    const saved = editingCategory
+      ? await update({ id: editingCategory.id, ...payload })
+      : await create(payload);
+    if (!saved) return;
+    startEdit(saved, true);
   };
 
-  const startCreate = () => {
-    resetForm();
-    setIsDialogOpen(true);
+  const onDelete = async (category: ProductCategory) => {
+    const ok = await remove(category.id);
+    if (!ok) return;
+    if (editingCategory?.id === category.id) closeEditor();
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="layer-1">
-        <CardHeader>
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle>Current Product Categories</CardTitle>
-            <Button type="button" onClick={startCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Category
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? <p className="text-sm text-muted-foreground">Loading categories...</p> : null}
-          {!isLoading && categories.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No categories yet.</p>
-          ) : null}
-          {!isLoading && categories.length > 0 ? (
-            <div className="space-y-3">
-              {categories.map((category) => (
-                <div
-                  key={category.id}
-                  className="layer-2 flex flex-col gap-3 rounded-lg p-4 md:flex-row md:items-start md:justify-between"
-                >
-                  <div className="space-y-1">
-                    <p className="text-base font-semibold text-foreground">{category.title}</p>
-                    <p className="text-xs font-mono text-muted-foreground">{category.specs}</p>
-                    <p className="text-sm text-muted-foreground">{category.description}</p>
-                    <p className="text-xs text-foreground/80">{category.uses}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" type="button" onClick={() => startEdit(category.id)}>
-                      <Pencil className="mr-2 h-3.5 w-3.5" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      type="button"
-                      onClick={() => void remove(category.id)}
-                    >
-                      <Trash2 className="mr-2 h-3.5 w-3.5" />
-                      Delete
-                    </Button>
-                  </div>
+    <AdminMasterDetail
+      title="Product Lines"
+      description="Manage product line details shown on the landing page."
+      addLabel="Add Category"
+      onAdd={startCreate}
+      onBack={closeEditor}
+      formId="admin-product-line-form"
+      canSubmit={canSubmit}
+      isSaving={isSaving}
+      submitLabel={editingCategory ? "Save Changes" : "Add Category"}
+      error={error}
+      sidebar={
+        isLoading ? (
+          <AdminSidebarSkeleton />
+        ) : categories.length === 0 ? (
+          <AdminSidebarEmpty>No categories yet.</AdminSidebarEmpty>
+        ) : (
+          categories.map((category) => {
+            const selected = isEditorOpen && editingCategory?.id === category.id;
+            return (
+              <AdminSidebarCard key={category.id} selected={selected} onClick={() => startEdit(category)}>
+                <div className="space-y-1.5 p-3">
+                  <p className={adminSidebarTitleClass(selected)}>{category.title}</p>
+                  {category.specs ? (
+                    <p className={adminSidebarMutedClass(selected)}>{category.specs}</p>
+                  ) : null}
                 </div>
-              ))}
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) resetForm();
-        }}
-      >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Product Category" : "Add Product Category"}</DialogTitle>
-            <DialogDescription>
-              Manage product category details shown on the landing page.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-            <input
-              className="layer-1 rounded-md px-3 py-2 text-sm"
-              placeholder="Category title"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            />
-            <input
-              className="layer-1 rounded-md px-3 py-2 text-sm"
-              placeholder="Specs"
-              value={form.specs}
-              onChange={(e) => setForm((f) => ({ ...f, specs: e.target.value }))}
-            />
-            <textarea
-              className="layer-1 rounded-md px-3 py-2 text-sm md:col-span-2"
-              placeholder="Description"
-              rows={3}
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            />
-            <input
-              className="layer-1 rounded-md px-3 py-2 text-sm md:col-span-2"
-              placeholder="Uses (comma-separated)"
-              value={form.uses}
-              onChange={(e) => setForm((f) => ({ ...f, uses: e.target.value }))}
-            />
-            <input
-              type="number"
-              className="layer-1 rounded-md px-3 py-2 text-sm"
-              placeholder="Sort order"
-              value={form.sort_order}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, sort_order: Number(e.target.value) || 0 }))
-              }
-            />
-
-            <DialogFooter className="md:col-span-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!canSubmit || isSaving}>
-                {isSaving ? "Saving..." : editingId ? "Save Changes" : "Add Category"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+              </AdminSidebarCard>
+            );
+          })
+        )
+      }
+      detailTitle={!isEditorOpen ? "Line detail" : editingCategory ? "Edit Product Line" : "Add Product Line"}
+      detailDescription={
+        !isEditorOpen
+          ? "Choose a product line from the sidebar, or add a new one."
+          : "Title, specs, description, and uses shown on the homepage."
+      }
+      detailActions={
+        isEditorOpen && editingCategory ? (
+          <Button variant="outline" size="sm" type="button" onClick={() => void onDelete(editingCategory)}>
+            <Trash2 className="mr-2 h-3.5 w-3.5" />
+            Delete
+          </Button>
+        ) : null
+      }
+      isEditorOpen={isEditorOpen}
+      skeleton={<AdminDetailSkeleton withImage={false} />}
+    >
+      <form id="admin-product-line-form" onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
+        <input
+          className="layer-1 rounded-md px-3 py-2 text-sm"
+          placeholder="Category title"
+          value={form.title}
+          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+        />
+        <input
+          className="layer-1 rounded-md px-3 py-2 text-sm"
+          placeholder="Specs"
+          value={form.specs}
+          onChange={(e) => setForm((f) => ({ ...f, specs: e.target.value }))}
+        />
+        <textarea
+          className="layer-1 rounded-md px-3 py-2 text-sm md:col-span-2"
+          placeholder="Description"
+          rows={3}
+          value={form.description}
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+        />
+        <input
+          className="layer-1 rounded-md px-3 py-2 text-sm md:col-span-2"
+          placeholder="Uses (comma-separated)"
+          value={form.uses}
+          onChange={(e) => setForm((f) => ({ ...f, uses: e.target.value }))}
+        />
+        <input
+          type="number"
+          className="layer-1 rounded-md px-3 py-2 text-sm"
+          placeholder="Sort order"
+          value={form.sort_order}
+          onChange={(e) => setForm((f) => ({ ...f, sort_order: Number(e.target.value) || 0 }))}
+        />
+      </form>
+    </AdminMasterDetail>
   );
 }

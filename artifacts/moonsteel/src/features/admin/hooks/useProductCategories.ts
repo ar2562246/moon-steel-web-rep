@@ -52,8 +52,10 @@ export function useProductCategories() {
       setCategories((prev) =>
         [...prev, created].sort((a, b) => a.sort_order - b.sort_order)
       );
+      return created;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create category.");
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -66,9 +68,11 @@ export function useProductCategories() {
       setCategories((current) => current.filter((item) => item.id !== id));
       try {
         await deleteProductCategory(id);
+        return true;
       } catch (e) {
         setCategories(prev);
         setError(e instanceof Error ? e.message : "Failed to delete category.");
+        return false;
       }
     },
     [categories]
@@ -84,8 +88,10 @@ export function useProductCategories() {
           .map((item) => (item.id === updated.id ? updated : item))
           .sort((a, b) => a.sort_order - b.sort_order)
       );
+      return updated;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update category.");
+      return null;
     } finally {
       setIsSaving(false);
     }

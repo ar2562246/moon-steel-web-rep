@@ -1,23 +1,45 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { ExternalLink, Pencil, Plus, Star, Trash2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import Link from "next/link";
+import { ChevronDown, ChevronUp, ExternalLink, GripVertical, ImageDown, Plus, Star, Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { slugify } from "@/lib/slugify";
 import { getCatalogProductCover, getCatalogProductImages, getCatalogProductPath } from "@/features/catalog/paths";
+import { AdminImagePreview } from "@/features/admin/components/AdminImagePreview";
+import { AdminImageEditDialog } from "@/features/admin/components/AdminImageEditDialog";
+import {
+  AdminMasterDetail,
+  AdminSidebarCard,
+  AdminSidebarEmpty,
+  AdminSidebarSkeleton,
+  AdminSidebarThumb,
+  adminSidebarBodyClass,
+  adminSidebarMetaClass,
+  adminSidebarMutedClass,
+  adminSidebarTitleClass,
+} from "@/features/admin/components/AdminMasterDetail";
 import { useCatalogCategories } from "@/features/admin/hooks/useCatalogCategories";
 import { useCatalogProducts } from "@/features/admin/hooks/useCatalogProducts";
+import {
+  optimizeImageToWeb43,
+  WEB_43_MAX_HEIGHT,
+  WEB_43_MAX_WIDTH,
+} from "@/features/admin/lib/optimizeImageToWeb43";
+import { useToast } from "@/hooks/use-toast";
 import type { CatalogProduct } from "@/features/catalog/types";
 
 const initialForm = {
@@ -36,24 +58,92 @@ function newId() {
   return crypto.randomUUID();
 }
 
+function Field({
+  label,
+  htmlFor,
+  hint,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  hint?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={htmlFor}>{label}</Label>
+      {children}
+      {hint ? <p className="text-xs leading-relaxed text-muted-foreground">{hint}</p> : null}
+    </div>
+  );
+}
+
+function AutoGrowTextarea({
+  id,
+  value,
+  onChange,
+  placeholder,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const resize = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const max = Math.round(window.innerHeight * 0.55);
+    el.style.height = `${Math.min(el.scrollHeight, max)}px`;
+  };
+
+  useLayoutEffect(() => {
+    resize();
+  }, [value]);
+
+  return (
+    <Textarea
+      id={id}
+      ref={ref}
+      value={value}
+      placeholder={placeholder}
+      rows={6}
+      onChange={(event) => {
+        onChange(event.target.value);
+        requestAnimationFrame(resize);
+      }}
+      className="min-h-[12rem] resize-none overflow-y-auto whitespace-pre-wrap text-base leading-relaxed md:text-sm"
+    />
+  );
+}
+
 export function CatalogProductsTab() {
+  const { toast } = useToast();
   const { products, isLoading, isSaving, error, create, update, remove } = useCatalogProducts();
   const { categories, isLoading: categoriesLoading } = useCatalogCategories();
   const [form, setForm] = useState(initialForm);
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [gallery, setGallery] = useState<GalleryEntry[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [optimizingId, setOptimizingId] = useState<string | "all" | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [editingImageId, setEditingImageId] = useState<string | null>(null);
+  const galleryRef = useRef(gallery);
+  galleryRef.current = gallery;
 
   useEffect(() => {
-    const fileEntries = gallery.filter((entry): entry is Extract<GalleryEntry, { kind: "file" }> => entry.kind === "file");
     return () => {
-      fileEntries.forEach((entry) => URL.revokeObjectURL(entry.preview));
+      galleryRef.current.forEach((entry) => {
+        if (entry.kind === "file") URL.revokeObjectURL(entry.preview);
+      });
     };
-  }, [gallery]);
+  }, []);
 
   const canSubmit = useMemo(
     () =>
@@ -63,6 +153,12 @@ export function CatalogProductsTab() {
       selectedCategoryIds.length > 0,
     [form, gallery.length, selectedCategoryIds.length]
   );
+
+  const revokeGalleryFiles = () => {
+    galleryRef.current.forEach((entry) => {
+      if (entry.kind === "file") URL.revokeObjectURL(entry.preview);
+    });
+  };
 
   const onPickFiles = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).filter((file) => file.type.startsWith("image/"));
@@ -94,6 +190,136 @@ export function CatalogProductsTab() {
     });
   };
 
+  const applyOptimizedFile = (id: string, file: File) => {
+    setGallery((current) =>
+      current.map((entry) => {
+        if (entry.id !== id) return entry;
+        if (entry.kind === "file") URL.revokeObjectURL(entry.preview);
+        return { id, kind: "file" as const, file, preview: URL.createObjectURL(file) };
+      })
+    );
+  };
+
+  const editingImage = useMemo(
+    () => gallery.find((entry) => entry.id === editingImageId) ?? null,
+    [editingImageId, gallery]
+  );
+  const editingImageSrc = editingImage
+    ? editingImage.kind === "url"
+      ? editingImage.url
+      : editingImage.preview
+    : null;
+  const editingImageName =
+    editingImage?.kind === "file" ? editingImage.file.name : "product-image.jpg";
+
+  const moveGallery = (fromId: string, toId: string) => {
+    if (fromId === toId) return;
+    setGallery((current) => {
+      const from = current.findIndex((item) => item.id === fromId);
+      const to = current.findIndex((item) => item.id === toId);
+      if (from < 0 || to < 0) return current;
+      const next = [...current];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  };
+
+  const moveGalleryBy = (id: string, offset: number) => {
+    setGallery((current) => {
+      const from = current.findIndex((item) => item.id === id);
+      const to = from + offset;
+      if (from < 0 || to < 0 || to >= current.length) return current;
+      const next = [...current];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  };
+
+  const optimizeEntry = async (entry: GalleryEntry, quiet = false) => {
+    const source = entry.kind === "url" ? entry.url : entry.file;
+    const name = entry.kind === "file" ? entry.file.name : "product-image.jpg";
+    const result = await optimizeImageToWeb43(source, name);
+
+    if (result.status === "already-standard") {
+      if (!quiet) {
+        toast({
+          title: "Already web-ready",
+          description: `${result.width} × ${result.height} is already within ${WEB_43_MAX_WIDTH} × ${WEB_43_MAX_HEIGHT} at 4:3.`,
+        });
+      }
+      return result;
+    }
+
+    applyOptimizedFile(entry.id, result.file);
+    if (!quiet) {
+      toast({
+        title: "Resized to web 4:3",
+        description: `${result.previousWidth} × ${result.previousHeight} → ${result.width} × ${result.height}. Save the product to apply it on the site.`,
+      });
+    }
+    return result;
+  };
+
+  const onOptimizeImage = async (entry: GalleryEntry) => {
+    setOptimizingId(entry.id);
+    try {
+      await optimizeEntry(entry);
+    } catch (e) {
+      toast({
+        title: "Could not resize image",
+        description: e instanceof Error ? e.message : "Try downloading and re-uploading the file.",
+        variant: "destructive",
+      });
+    } finally {
+      setOptimizingId(null);
+    }
+  };
+
+  const onOptimizeAll = async () => {
+    if (gallery.length === 0) return;
+    setOptimizingId("all");
+    let changed = 0;
+    let skipped = 0;
+    try {
+      const next: GalleryEntry[] = [];
+      for (const entry of gallery) {
+        const source = entry.kind === "url" ? entry.url : entry.file;
+        const name = entry.kind === "file" ? entry.file.name : "product-image.jpg";
+        const result = await optimizeImageToWeb43(source, name);
+        if (result.status === "already-standard") {
+          skipped += 1;
+          next.push(entry);
+          continue;
+        }
+        if (entry.kind === "file") URL.revokeObjectURL(entry.preview);
+        changed += 1;
+        next.push({
+          id: entry.id,
+          kind: "file",
+          file: result.file,
+          preview: URL.createObjectURL(result.file),
+        });
+      }
+      setGallery(next);
+      toast({
+        title: changed ? "Photos ready for web" : "Already web-ready",
+        description: changed
+          ? `${changed} resized to ${WEB_43_MAX_WIDTH} × ${WEB_43_MAX_HEIGHT} 4:3${skipped ? `, ${skipped} already standard` : ""}. Order is unchanged. Save the product to apply.`
+          : `All photos are already within ${WEB_43_MAX_WIDTH} × ${WEB_43_MAX_HEIGHT} at 4:3.`,
+      });
+    } catch (e) {
+      toast({
+        title: "Could not resize images",
+        description: e instanceof Error ? e.message : "Try again with a local file.",
+        variant: "destructive",
+      });
+    } finally {
+      setOptimizingId(null);
+    }
+  };
+
   const setCover = (id: string) => {
     setGallery((current) => {
       const index = current.findIndex((item) => item.id === id);
@@ -113,7 +339,8 @@ export function CatalogProductsTab() {
     );
   };
 
-  const resetForm = () => {
+  const closeEditor = () => {
+    revokeGalleryFiles();
     setForm(initialForm);
     setEditingProduct(null);
     setSelectedCategoryIds([]);
@@ -121,14 +348,26 @@ export function CatalogProductsTab() {
     setImageUrlInput("");
     setSlugTouched(false);
     setFileInputKey((key) => key + 1);
+    setOptimizingId(null);
+    setIsEditorOpen(false);
   };
 
   const startCreate = () => {
-    resetForm();
-    setIsDialogOpen(true);
+    revokeGalleryFiles();
+    setForm(initialForm);
+    setEditingProduct(null);
+    setSelectedCategoryIds([]);
+    setGallery([]);
+    setImageUrlInput("");
+    setSlugTouched(false);
+    setFileInputKey((key) => key + 1);
+    setOptimizingId(null);
+    setIsEditorOpen(true);
   };
 
-  const startEdit = (product: CatalogProduct) => {
+  const startEdit = (product: CatalogProduct, force = false) => {
+    if (!force && editingProduct?.id === product.id && isEditorOpen) return;
+    revokeGalleryFiles();
     setEditingProduct(product);
     setForm({
       name: product.name,
@@ -148,19 +387,13 @@ export function CatalogProductsTab() {
     setImageUrlInput("");
     setSlugTouched(true);
     setFileInputKey((key) => key + 1);
-    setIsDialogOpen(true);
+    setOptimizingId(null);
+    setIsEditorOpen(true);
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-
-    const image_urls: string[] = [];
-    const files: File[] = [];
-    for (const entry of gallery) {
-      if (entry.kind === "url") image_urls.push(entry.url);
-      else files.push(entry.file);
-    }
 
     const payload = {
       name: form.name.trim(),
@@ -168,272 +401,410 @@ export function CatalogProductsTab() {
       details: form.details.trim(),
       sort_order: Number(form.sort_order) || 100,
       published: form.published,
-      image_urls,
       category_ids: selectedCategoryIds,
     };
+    const images = gallery.map((entry) =>
+      entry.kind === "url" ? { kind: "url" as const, url: entry.url } : { kind: "file" as const, file: entry.file }
+    );
 
-    const ok = editingProduct
+    const saved = editingProduct
       ? await update(
           {
             ...payload,
             id: editingProduct.id,
             previous_image_urls: getCatalogProductImages(editingProduct),
           },
-          files
+          images
         )
-      : await create(payload, files);
+      : await create(payload, images);
 
+    if (!saved) return;
+    startEdit(saved, true);
+  };
+
+  const onDelete = async (product: CatalogProduct) => {
+    const ok = await remove(product);
     if (!ok) return;
-    resetForm();
-    setIsDialogOpen(false);
+    if (editingProduct?.id === product.id) closeEditor();
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="layer-1">
-        <CardHeader>
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle>Catalog Products</CardTitle>
-            <Button type="button" onClick={startCreate} disabled={categoriesLoading || categories.length === 0}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Individual products with SEO URLs like{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">/products/stainless-steel-table</code>.
-            Create categories first, then assign one or more per product.
-          </p>
-
-          {categories.length === 0 && !categoriesLoading ? (
-            <p className="mb-4 text-sm text-amber-600">Add at least one category before creating products.</p>
-          ) : null}
-
-          {isLoading ? <p className="text-sm text-muted-foreground">Loading products...</p> : null}
-          {!isLoading && products.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No catalog products yet.</p>
-          ) : null}
-
-          {!isLoading && products.length > 0 ? (
-            <div className="space-y-3">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="layer-2 flex flex-col gap-4 rounded-lg p-4 md:flex-row md:items-start"
-                >
-                  <div className="h-20 w-28 shrink-0 overflow-hidden rounded-md">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={getCatalogProductCover(product)}
-                      alt={product.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="text-base font-semibold text-foreground">{product.name}</p>
-                    <div className="flex flex-wrap gap-1.5">
+    <AdminMasterDetail
+      title="Catalog Products"
+      description={
+        <>
+          Select a product card to edit it on the right. SEO URLs look like{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">/products/stainless-steel-table</code>.
+        </>
+      }
+      addLabel="Add Product"
+      onAdd={startCreate}
+      addDisabled={categoriesLoading || categories.length === 0}
+      onBack={closeEditor}
+      formId="admin-catalog-product-form"
+      canSubmit={canSubmit}
+      isSaving={isSaving}
+      submitLabel={editingProduct ? "Save Changes" : "Add Product"}
+      notice={
+        categories.length === 0 && !categoriesLoading ? (
+          <p className="text-sm text-amber-600">Add at least one category before creating products.</p>
+        ) : null
+      }
+      error={error}
+      sidebar={
+        isLoading ? (
+          <AdminSidebarSkeleton withImage />
+        ) : products.length === 0 ? (
+          <AdminSidebarEmpty>No catalog products yet.</AdminSidebarEmpty>
+        ) : (
+          products.map((product) => {
+            const selected = isEditorOpen && editingProduct?.id === product.id;
+            return (
+              <AdminSidebarCard
+                key={product.id}
+                selected={selected}
+                compact
+                onClick={() => startEdit(product)}
+              >
+                <AdminSidebarThumb src={getCatalogProductCover(product)} alt={product.name} />
+                <div className={adminSidebarBodyClass()}>
+                  <p className={adminSidebarTitleClass(selected)}>{product.name}</p>
+                  {product.categories.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
                       {product.categories.map((category) => (
-                        <span
-                          key={category.id}
-                          className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
-                        >
+                        <span key={category.id} className={adminSidebarMetaClass(selected)}>
                           {category.name}
                         </span>
                       ))}
                     </div>
-                    <p className="text-xs font-mono text-muted-foreground">{product.path}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" type="button" asChild>
-                      <Link href={getCatalogProductPath(product.slug)} target="_blank">
-                        <ExternalLink className="mr-2 h-3.5 w-3.5" />
-                        View
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="sm" type="button" onClick={() => startEdit(product)}>
-                      <Pencil className="mr-2 h-3.5 w-3.5" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" type="button" onClick={() => void remove(product)}>
-                      <Trash2 className="mr-2 h-3.5 w-3.5" />
-                      Delete
-                    </Button>
-                  </div>
+                  ) : null}
+                  <p className={`${adminSidebarMutedClass(selected)} break-all`}>/products/{product.slug}</p>
+                  {!product.published ? (
+                    <p className={adminSidebarMutedClass(selected)}>Draft</p>
+                  ) : null}
                 </div>
-              ))}
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
+              </AdminSidebarCard>
+            );
+          })
+        )
+      }
+      detailTitle={!isEditorOpen ? "Product detail" : editingProduct ? "Edit Product" : "Add Product"}
+      detailDescription={
+        !isEditorOpen
+          ? "Choose a product from the sidebar, or add a new one."
+          : "Name, slug, details, categories, and images. Path is /products/{slug}."
+      }
+      detailActions={
+        isEditorOpen && editingProduct ? (
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" type="button" asChild>
+              <Link href={getCatalogProductPath(editingProduct.slug)} target="_blank">
+                <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                View
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" type="button" onClick={() => void onDelete(editingProduct)}>
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </div>
+        ) : null
+      }
+      isEditorOpen={isEditorOpen}
+    >
+              <form id="admin-catalog-product-form" onSubmit={onSubmit} className="space-y-8">
+                <section className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+                    <Field label="Name" htmlFor="product-name">
+                      <Input
+                        id="product-name"
+                        placeholder="Hand Wash Sink"
+                        value={form.name}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          setForm((current) => ({
+                            ...current,
+                            name,
+                            slug: slugTouched ? current.slug : slugify(name),
+                          }));
+                        }}
+                      />
+                    </Field>
+                    <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2.5">
+                      <Switch
+                        id="product-published"
+                        checked={form.published}
+                        onCheckedChange={(published) => setForm((current) => ({ ...current, published }))}
+                      />
+                      <div>
+                        <Label htmlFor="product-published" className="cursor-pointer">
+                          {form.published ? "Published" : "Draft"}
+                        </Label>
+                        <p className="text-[11px] text-muted-foreground">
+                          {form.published ? "Visible in the catalog" : "Hidden from the site"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) resetForm();
-        }}
-      >
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
-            <DialogDescription>
-              Name, slug, details, categories, and images. Path is computed as /products/{"{slug}"}.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-            <Input
-              placeholder="Product name"
-              value={form.name}
-              onChange={(e) => {
-                const name = e.target.value;
-                setForm((current) => ({
-                  ...current,
-                  name,
-                  slug: slugTouched ? current.slug : slugify(name),
-                }));
-              }}
-              className="md:col-span-2"
-            />
-            <Input
-              placeholder="URL slug"
-              value={form.slug}
-              onChange={(e) => {
-                setSlugTouched(true);
-                setForm((current) => ({ ...current, slug: e.target.value }));
-              }}
-            />
-            <Input
-              readOnly
-              value={form.slug ? getCatalogProductPath(slugify(form.slug)) : "/products/..."}
-              className="font-mono text-xs text-muted-foreground"
-            />
-            <textarea
-              className="layer-1 rounded-md px-3 py-2 text-sm md:col-span-2"
-              placeholder="Product details"
-              rows={4}
-              value={form.details}
-              onChange={(e) => setForm((current) => ({ ...current, details: e.target.value }))}
-            />
-            <Input
-              type="number"
-              placeholder="Sort order"
-              value={form.sort_order}
-              onChange={(e) =>
-                setForm((current) => ({ ...current, sort_order: Number(e.target.value) || 0 }))
-              }
-            />
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={form.published}
-                onChange={(e) => setForm((current) => ({ ...current, published: e.target.checked }))}
-              />
-              Published on site
-            </label>
-
-            <div className="space-y-2 md:col-span-2">
-              <p className="text-sm font-medium text-foreground">Categories</p>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <label
-                    key={category.id}
-                    className="flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm"
+                  <Field
+                    label="Page URL"
+                    htmlFor="product-slug"
+                    hint="Used on the product page and in search results."
                   >
-                    <input
-                      type="checkbox"
-                      checked={selectedCategoryIds.includes(category.id)}
-                      onChange={() => toggleCategory(category.id)}
-                    />
-                    {category.name}
-                  </label>
-                ))}
-              </div>
-            </div>
+                    <div className="flex overflow-hidden rounded-lg border border-input focus-within:ring-1 focus-within:ring-ring">
+                      <span className="flex shrink-0 items-center bg-muted px-3 font-mono text-xs text-muted-foreground">
+                        /products/
+                      </span>
+                      <Input
+                        id="product-slug"
+                        placeholder="hand-wash-sink"
+                        value={form.slug}
+                        onChange={(e) => {
+                          setSlugTouched(true);
+                          setForm((current) => ({ ...current, slug: e.target.value }));
+                        }}
+                        className="border-0 shadow-none focus-visible:ring-0"
+                      />
+                    </div>
+                  </Field>
 
-            <div className="space-y-3 md:col-span-2">
-              <p className="text-sm font-medium text-foreground">Product photos</p>
-              {gallery.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {gallery.map((entry, index) => {
-                    const src = entry.kind === "url" ? entry.url : entry.preview;
-                    return (
-                      <div key={entry.id} className="layer-2 relative overflow-hidden rounded-lg bg-muted">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="" className="aspect-[4/3] w-full object-contain" />
-                        {index === 0 ? (
-                          <span className="absolute left-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
-                            Cover
-                          </span>
-                        ) : null}
-                        <div className="absolute right-2 top-2 flex gap-1">
-                          {index > 0 ? (
-                            <button
-                              type="button"
-                              className="rounded bg-background/90 p-1"
-                              onClick={() => setCover(entry.id)}
-                              aria-label="Set as cover"
-                            >
-                              <Star className="h-3.5 w-3.5" />
-                            </button>
-                          ) : null}
+                  <Field
+                    label="Sort order"
+                    htmlFor="product-sort"
+                    hint="Lower numbers appear first in the catalog."
+                  >
+                    <Input
+                      id="product-sort"
+                      type="number"
+                      value={form.sort_order}
+                      onChange={(e) =>
+                        setForm((current) => ({ ...current, sort_order: Number(e.target.value) || 0 }))
+                      }
+                      className="max-w-[10rem]"
+                    />
+                  </Field>
+
+                  <Field label="Categories">
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((category) => {
+                        const checked = selectedCategoryIds.includes(category.id);
+                        return (
+                          <label
+                            key={category.id}
+                            className={`flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                              checked
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-foreground hover:border-primary/40"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="sr-only"
+                              checked={checked}
+                              onChange={() => toggleCategory(category.id)}
+                            />
+                            {category.name}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </Field>
+                </section>
+
+                <section className="space-y-3">
+                  <Field
+                    label="Product details"
+                    htmlFor="product-details"
+                    hint="This is the description on the product page. Line breaks are kept."
+                  >
+                    <AutoGrowTextarea
+                      id="product-details"
+                      value={form.details}
+                      placeholder="Material, size, construction, and what this product is for."
+                      onChange={(details) => setForm((current) => ({ ...current, details }))}
+                    />
+                  </Field>
+                  {form.details.trim() ? (
+                    <div className="layer-2 rounded-xl p-4">
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        On the product page
+                      </p>
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                        {form.details}
+                      </p>
+                    </div>
+                  ) : null}
+                </section>
+
+                <section className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Product photos</p>
+                      <p className="text-xs text-muted-foreground">
+                        Oversized photos can be reduced to {WEB_43_MAX_WIDTH} × {WEB_43_MAX_HEIGHT} (4:3)
+                        without changing order. Drag or use arrows to reorder. First image is the cover.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={gallery.length === 0 || optimizingId !== null}
+                      onClick={() => void onOptimizeAll()}
+                    >
+                      <ImageDown className="mr-2 h-3.5 w-3.5" />
+                      {optimizingId === "all" ? "Converting..." : "Make all web 4:3"}
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {gallery.map((entry, index) => {
+                      const src = entry.kind === "url" ? entry.url : entry.preview;
+                      return (
+                        <div
+                          key={entry.id}
+                          draggable={optimizingId === null}
+                          onDragStart={() => setDragId(entry.id)}
+                          onDragOver={(event) => event.preventDefault()}
+                          onDrop={() => {
+                            if (dragId) moveGallery(dragId, entry.id);
+                            setDragId(null);
+                          }}
+                          onDragEnd={() => setDragId(null)}
+                          className="layer-2 relative overflow-hidden rounded-lg bg-muted"
+                        >
                           <button
                             type="button"
-                            className="rounded bg-background/90 p-1"
-                            onClick={() => removeGalleryEntry(entry.id)}
-                            aria-label="Remove image"
+                            className="block w-full cursor-pointer text-left"
+                            onClick={() => setEditingImageId(entry.id)}
+                            aria-label={`Edit photo ${index + 1}`}
                           >
-                            <X className="h-3.5 w-3.5" />
+                            <AdminImagePreview
+                              src={src}
+                              file={entry.kind === "file" ? entry.file : null}
+                              className="aspect-[4/3] w-full"
+                              imgClassName="object-contain pointer-events-none"
+                            />
                           </button>
+                          {optimizingId === entry.id || optimizingId === "all" ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-xs font-medium text-white">
+                              Converting…
+                            </div>
+                          ) : null}
+                          {index === 0 ? (
+                            <span className="absolute left-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
+                              Cover
+                            </span>
+                          ) : null}
+                          <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                            <button
+                              type="button"
+                              className="min-h-9 min-w-9 cursor-grab rounded bg-background/90 p-2 active:cursor-grabbing lg:min-h-0 lg:min-w-0 lg:p-1"
+                              aria-label="Drag to reorder"
+                              title="Drag to reorder"
+                            >
+                              <GripVertical className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 disabled:opacity-40 lg:min-h-0 lg:min-w-0 lg:p-1"
+                              disabled={index === 0 || optimizingId !== null}
+                              onClick={() => moveGalleryBy(entry.id, -1)}
+                              aria-label="Move image earlier"
+                            >
+                              <ChevronUp className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 disabled:opacity-40 lg:min-h-0 lg:min-w-0 lg:p-1"
+                              disabled={index === gallery.length - 1 || optimizingId !== null}
+                              onClick={() => moveGalleryBy(entry.id, 1)}
+                              aria-label="Move image later"
+                            >
+                              <ChevronDown className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <div className="absolute right-2 top-2 flex gap-1">
+                            <button
+                              type="button"
+                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 lg:min-h-0 lg:min-w-0 lg:p-1"
+                              disabled={optimizingId !== null}
+                              onClick={() => void onOptimizeImage(entry)}
+                              aria-label="Convert to web 4:3"
+                              title="Convert to web 4:3"
+                            >
+                              <ImageDown className="h-3.5 w-3.5" />
+                            </button>
+                            {index > 0 ? (
+                              <button
+                                type="button"
+                                className="min-h-9 min-w-9 rounded bg-background/90 p-2 lg:min-h-0 lg:min-w-0 lg:p-1"
+                                onClick={() => setCover(entry.id)}
+                                aria-label="Set as cover"
+                              >
+                                <Star className="h-3.5 w-3.5" />
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 lg:min-h-0 lg:min-w-0 lg:p-1"
+                              onClick={() => removeGalleryEntry(entry.id)}
+                              aria-label="Remove image"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Add at least one photo.</p>
-              )}
-              <input
-                key={`catalog-files-${fileInputKey}`}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={onPickFiles}
-                className="layer-1 w-full rounded-md px-3 py-2 text-sm"
-              />
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Or image URL"
-                  value={imageUrlInput}
-                  onChange={(e) => setImageUrlInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addImageUrl();
-                    }
-                  }}
-                />
-                <Button type="button" variant="outline" onClick={addImageUrl}>
-                  Add URL
-                </Button>
-              </div>
-            </div>
-
-            <DialogFooter className="md:col-span-2">
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!canSubmit || isSaving}>
-                {isSaving ? "Saving..." : editingProduct ? "Save Changes" : "Add Product"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+                      );
+                    })}
+                    <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-[color,background-color,border-color,transform,box-shadow] duration-150 hover:border-primary hover:bg-primary/5 hover:text-primary hover:shadow-sm active:scale-[0.97] active:bg-primary/10 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30">
+                      <input
+                        key={`catalog-files-${fileInputKey}`}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={onPickFiles}
+                        className="sr-only"
+                      />
+                      <Plus className="h-8 w-8" strokeWidth={2} />
+                      <span className="text-xs font-medium">Add photos</span>
+                    </label>
+                  </div>
+                  <div className="flex min-w-0 gap-2">
+                    <Input
+                      placeholder="Or image URL"
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addImageUrl();
+                        }
+                      }}
+                    />
+                    <Button type="button" variant="outline" onClick={addImageUrl}>
+                      Add URL
+                    </Button>
+                  </div>
+                </section>
+              </form>
+      <AdminImageEditDialog
+        open={Boolean(editingImageId && editingImageSrc)}
+        imageSrc={editingImageSrc}
+        fileName={editingImageName}
+        onOpenChange={(open) => {
+          if (!open) setEditingImageId(null);
+        }}
+        onSave={(file) => {
+          if (!editingImageId) return;
+          applyOptimizedFile(editingImageId, file);
+          toast({
+            title: "Photo updated",
+            description: "Save the product to keep this edit on the site.",
+          });
+          setEditingImageId(null);
+        }}
+      />
+    </AdminMasterDetail>
   );
 }

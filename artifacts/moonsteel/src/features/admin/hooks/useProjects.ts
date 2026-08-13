@@ -59,10 +59,10 @@ export function useProjects() {
       setProjects((prev) =>
         [...prev, created].sort((a, b) => a.sort_order - b.sort_order)
       );
-      return true;
+      return created;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create project.");
-      return false;
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -78,10 +78,10 @@ export function useProjects() {
           .map((item) => (item.id === updated.id ? updated : item))
           .sort((a, b) => a.sort_order - b.sort_order)
       );
-      return true;
+      return updated;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update project.");
-      return false;
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -94,9 +94,11 @@ export function useProjects() {
       setProjects((current) => current.filter((item) => item.id !== project.id));
       try {
         await deleteProject(project);
+        return true;
       } catch (e) {
         setProjects(prev);
         setError(e instanceof Error ? e.message : "Failed to delete project.");
+        return false;
       }
     },
     [projects]

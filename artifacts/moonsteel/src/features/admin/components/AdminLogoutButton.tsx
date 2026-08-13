@@ -27,12 +27,14 @@ export function AdminLogoutButton() {
     <Button
       type="button"
       variant="outline"
+      size="icon"
       disabled={isSigningOut}
       onClick={() => void onLogout()}
-      className="shrink-0"
+      className="h-9 w-9 shrink-0"
+      aria-label={isSigningOut ? "Signing out" : "Log out"}
+      title={isSigningOut ? "Signing out..." : "Log out"}
     >
-      <LogOut className="mr-2 h-4 w-4" />
-      {isSigningOut ? "Signing out..." : "Log out"}
+      <LogOut className="h-4 w-4" />
     </Button>
   );
 }

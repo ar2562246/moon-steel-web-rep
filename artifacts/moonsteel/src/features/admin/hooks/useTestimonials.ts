@@ -53,8 +53,10 @@ export function useTestimonials() {
       setTestimonials((prev) =>
         [...prev, created].sort((a, b) => a.sort_order - b.sort_order),
       );
+      return created;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create testimonial.");
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -67,9 +69,11 @@ export function useTestimonials() {
       setTestimonials((current) => current.filter((item) => item.id !== id));
       try {
         await deleteTestimonial(id);
+        return true;
       } catch (e) {
         setTestimonials(prev);
         setError(e instanceof Error ? e.message : "Failed to delete testimonial.");
+        return false;
       }
     },
     [testimonials],
@@ -85,8 +89,10 @@ export function useTestimonials() {
           .map((item) => (item.id === updated.id ? updated : item))
           .sort((a, b) => a.sort_order - b.sort_order),
       );
+      return updated;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update testimonial.");
+      return null;
     } finally {
       setIsSaving(false);
     }

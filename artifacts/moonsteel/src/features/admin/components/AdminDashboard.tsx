@@ -1,10 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ExternalLink } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { AdminTabKey } from "@/features/admin/types";
+import { AdminLogoutButton } from "@/features/admin/components/AdminLogoutButton";
 import { CustomerLogosTab } from "@/features/admin/components/CustomerLogosTab";
 import { HeroImagesTab } from "@/features/admin/components/HeroImagesTab";
 import { ProductCategoriesTab } from "@/features/admin/components/ProductCategoriesTab";
@@ -17,18 +21,19 @@ import { BlogsTab } from "@/features/admin/components/BlogsTab";
 type TabConfig = {
   key: AdminTabKey;
   label: string;
+  shortLabel: string;
   placeholder?: boolean;
 };
 
 const tabConfig: TabConfig[] = [
-  { key: "customer-logos", label: "Customer Logos" },
-  { key: "hero-images", label: "Hero Images" },
-  { key: "products", label: "Product Lines" },
-  { key: "categories", label: "Categories" },
-  { key: "catalog-products", label: "Catalog Products" },
-  { key: "projects", label: "Projects" },
-  { key: "testimonials", label: "Testimonials" },
-  { key: "blogs", label: "Blog" },
+  { key: "customer-logos", label: "Customer Logos", shortLabel: "Logos" },
+  { key: "hero-images", label: "Hero Images", shortLabel: "Hero" },
+  { key: "products", label: "Product Lines", shortLabel: "Lines" },
+  { key: "categories", label: "Categories", shortLabel: "Categories" },
+  { key: "catalog-products", label: "Catalog Products", shortLabel: "Products" },
+  { key: "projects", label: "Projects", shortLabel: "Projects" },
+  { key: "testimonials", label: "Testimonials", shortLabel: "Quotes" },
+  { key: "blogs", label: "Blog", shortLabel: "Blog" },
 ];
 const defaultTab: AdminTabKey = "customer-logos";
 const tabKeys = new Set<AdminTabKey>(tabConfig.map((t) => t.key));
@@ -44,6 +49,19 @@ function PlaceholderTab({ title }: { title: string }) {
       </CardContent>
     </Card>
   );
+}
+
+function AdminTabBody({ tab }: { tab: AdminTabKey }) {
+  if (tab === "customer-logos") return <CustomerLogosTab />;
+  if (tab === "hero-images") return <HeroImagesTab />;
+  if (tab === "products") return <ProductCategoriesTab />;
+  if (tab === "categories") return <CatalogCategoriesTab />;
+  if (tab === "catalog-products") return <CatalogProductsTab />;
+  if (tab === "projects") return <ProjectsTab />;
+  if (tab === "testimonials") return <TestimonialsTab />;
+  if (tab === "blogs") return <BlogsTab />;
+  const fallback = tabConfig.find((item) => item.key === tab);
+  return <PlaceholderTab title={fallback?.label ?? "Admin"} />;
 }
 
 export function AdminDashboard() {
@@ -64,39 +82,47 @@ export function AdminDashboard() {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="mb-4 h-auto w-full justify-start gap-2 overflow-x-auto rounded-lg p-1">
-        {tabConfig.map((tab) => (
-          <TabsTrigger key={tab.key} value={tab.key} className="shrink-0">
-            {tab.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+  useEffect(() => {
+    const active = document.querySelector<HTMLElement>('[role="tab"][data-state="active"]');
+    const list = active?.closest('[role="tablist"]');
+    if (!active || !list) return;
+    const left = active.offsetLeft - list.clientWidth / 2 + active.offsetWidth / 2;
+    list.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [activeTab]);
 
-      {tabConfig.map((tab) => (
-        <TabsContent key={tab.key} value={tab.key}>
-          {tab.key === "customer-logos" ? (
-            <CustomerLogosTab />
-          ) : tab.key === "hero-images" ? (
-            <HeroImagesTab />
-          ) : tab.key === "products" ? (
-            <ProductCategoriesTab />
-          ) : tab.key === "categories" ? (
-            <CatalogCategoriesTab />
-          ) : tab.key === "catalog-products" ? (
-            <CatalogProductsTab />
-          ) : tab.key === "projects" ? (
-            <ProjectsTab />
-          ) : tab.key === "testimonials" ? (
-            <TestimonialsTab />
-          ) : tab.key === "blogs" ? (
-            <BlogsTab />
-          ) : (
-            <PlaceholderTab title={tab.label} />
-          )}
+  return (
+    <Tabs value={activeTab} onValueChange={onTabChange} className="flex h-full min-h-0 flex-col overflow-hidden">
+      <header className="shrink-0 border-b border-border bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className="mx-auto flex h-12 max-w-none items-center gap-2 px-2 md:px-3">
+          <img src="/ms3-logo.svg" alt="Admin" className="h-7 w-7 shrink-0 object-contain" />
+          <TabsList className="flex h-9 min-w-0 flex-1 justify-start gap-1 overflow-x-auto overscroll-x-contain rounded-lg p-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {tabConfig.map((tab) => (
+              <TabsTrigger
+                key={tab.key}
+                value={tab.key}
+                className="min-h-7 shrink-0 px-2.5 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none sm:px-3 sm:text-sm"
+              >
+                <span className="lg:hidden">{tab.shortLabel}</span>
+                <span className="hidden lg:inline">{tab.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Button variant="outline" size="icon" type="button" className="h-9 w-9" asChild>
+              <Link href="/" target="_blank" rel="noreferrer" aria-label="View site" title="View site">
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </Button>
+            <AdminLogoutButton />
+          </div>
+        </div>
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-hidden [&_input]:text-base [&_textarea]:text-base md:[&_input]:text-sm md:[&_textarea]:text-sm">
+        <TabsContent value={activeTab} className="mt-0 h-full min-h-0 overflow-hidden [&>*]:h-full [&>*]:min-h-0">
+          <AdminTabBody tab={activeTab} />
         </TabsContent>
-      ))}
+      </div>
     </Tabs>
   );
 }

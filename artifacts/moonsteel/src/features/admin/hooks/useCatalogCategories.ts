@@ -47,10 +47,10 @@ export function useCatalogCategories() {
     try {
       const created = await createCatalogCategory(input);
       setCategories((prev) => [...prev, created].sort((a, b) => a.sort_order - b.sort_order));
-      return true;
+      return created;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create category.");
-      return false;
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -64,10 +64,10 @@ export function useCatalogCategories() {
       setCategories((prev) =>
         prev.map((item) => (item.id === updated.id ? updated : item)).sort((a, b) => a.sort_order - b.sort_order)
       );
-      return true;
+      return updated;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update category.");
-      return false;
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -79,9 +79,11 @@ export function useCatalogCategories() {
     setCategories((current) => current.filter((item) => item.id !== id));
     try {
       await deleteCatalogCategory(id);
+      return true;
     } catch (e) {
       setCategories(prev);
       setError(e instanceof Error ? e.message : "Failed to delete category.");
+      return false;
     }
   }, [categories]);
 

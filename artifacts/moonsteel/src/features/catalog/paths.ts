@@ -8,6 +8,20 @@ export function getCatalogCategoryFilterPath(categorySlug: string) {
   return `/products?category=${categorySlug}`;
 }
 
+export function unescapeImportedNewlines(value: string) {
+  if (!value) return value;
+  if (!value.includes("\\") && !value.includes("\r")) return value;
+  return value
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export function attachProductPath(product: Omit<CatalogProduct, "path">): CatalogProduct {
   return {
     ...product,
@@ -35,6 +49,7 @@ export function normalizeCatalogProduct<T extends Omit<CatalogProduct, "path">>(
   const image_urls = getCatalogProductImages(product);
   return attachProductPath({
     ...product,
+    details: unescapeImportedNewlines(product.details ?? ""),
     image_urls,
     image_url: image_urls[0] ?? product.image_url,
   });

@@ -46,9 +46,10 @@ export function useBlogs() {
       setPosts((prev) =>
         [...prev, created].sort((a, b) => a.sort_order - b.sort_order),
       );
+      return created;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create blog post.");
-      throw e;
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -64,9 +65,10 @@ export function useBlogs() {
           .map((item) => (item.id === updated.id ? updated : item))
           .sort((a, b) => a.sort_order - b.sort_order),
       );
+      return updated;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update blog post.");
-      throw e;
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -79,9 +81,11 @@ export function useBlogs() {
       setPosts((current) => current.filter((item) => item.id !== post.id));
       try {
         await deleteBlog(post);
+        return true;
       } catch (e) {
         setPosts(prev);
         setError(e instanceof Error ? e.message : "Failed to delete blog post.");
+        return false;
       }
     },
     [posts],

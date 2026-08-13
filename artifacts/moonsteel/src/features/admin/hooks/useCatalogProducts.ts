@@ -7,6 +7,7 @@ import {
   deleteCatalogProduct,
   fetchCatalogProducts,
   updateCatalogProduct,
+  type CatalogImageSlot,
 } from "@/features/admin/services/catalogProducts";
 
 type ProductInput = {
@@ -15,7 +16,6 @@ type ProductInput = {
   details: string;
   sort_order: number;
   published: boolean;
-  image_urls: string[];
   category_ids: string[];
 };
 
@@ -46,33 +46,33 @@ export function useCatalogProducts() {
     void refresh();
   }, [refresh]);
 
-  const create = useCallback(async (input: ProductInput, files: File[] = []) => {
+  const create = useCallback(async (input: ProductInput, images: CatalogImageSlot[] = []) => {
     setError(null);
     setIsSaving(true);
     try {
-      const created = await createCatalogProduct(input, files);
+      const created = await createCatalogProduct(input, images);
       setProducts((prev) => [...prev, created].sort((a, b) => a.sort_order - b.sort_order));
-      return true;
+      return created;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create product.");
-      return false;
+      return null;
     } finally {
       setIsSaving(false);
     }
   }, []);
 
-  const update = useCallback(async (input: UpdateInput, files: File[] = []) => {
+  const update = useCallback(async (input: UpdateInput, images: CatalogImageSlot[] = []) => {
     setError(null);
     setIsSaving(true);
     try {
-      const updated = await updateCatalogProduct(input, files);
+      const updated = await updateCatalogProduct(input, images);
       setProducts((prev) =>
         prev.map((item) => (item.id === updated.id ? updated : item)).sort((a, b) => a.sort_order - b.sort_order)
       );
-      return true;
+      return updated;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to update product.");
-      return false;
+      return null;
     } finally {
       setIsSaving(false);
     }
@@ -85,9 +85,11 @@ export function useCatalogProducts() {
       setProducts((current) => current.filter((item) => item.id !== product.id));
       try {
         await deleteCatalogProduct(product);
+        return true;
       } catch (e) {
         setProducts(prev);
         setError(e instanceof Error ? e.message : "Failed to delete product.");
+        return false;
       }
     },
     [products]

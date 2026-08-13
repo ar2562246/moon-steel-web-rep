@@ -44,6 +44,7 @@ export function Header() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
     const handleScroll = () => setScrolled(window.scrollY > 50);
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -142,6 +143,8 @@ export function Header() {
           ? "text-foreground hover:text-primary"
           : "text-muted-foreground hover:text-foreground"
     );
+
+  if (pathname.startsWith("/admin")) return null;
 
   return (
     <header

@@ -72,9 +72,11 @@ export function useCustomerLogos() {
     setLogos((current) => current.filter((x) => x.id !== logo.id));
     try {
       await deleteCustomerLogo(logo);
+      return true;
     } catch (e) {
       setLogos(prev);
       setError(e instanceof Error ? e.message : "Delete failed.");
+      return false;
     }
   }, [logos]);
 

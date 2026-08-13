@@ -3,6 +3,7 @@ import { slugify } from "@/lib/slugify";
 import {
   getCatalogProductImages,
   normalizeCatalogProduct,
+  unescapeImportedNewlines,
 } from "@/features/catalog/paths";
 import { listAllCatalogProducts, listPublishedCatalogProducts } from "@/features/catalog/queries";
 import type { CatalogProduct } from "@/features/catalog/types";
@@ -84,23 +85,39 @@ type ProductPayload = {
   details: string;
   sort_order: number;
   published: boolean;
-  image_urls: string[];
   category_ids: string[];
 };
 
-function buildImageUrls(existingUrls: string[], files: File[]) {
-  const trimmed = existingUrls.map((url) => url.trim()).filter(Boolean);
-  if (trimmed.length === 0 && files.length === 0) {
+export type CatalogImageSlot = { kind: "url"; url: string } | { kind: "file"; file: File };
+
+async function resolveOrderedImageUrls(slots: CatalogImageSlot[]) {
+  const urls: string[] = [];
+  const uploaded: string[] = [];
+
+  for (const slot of slots) {
+    if (slot.kind === "url") {
+      const url = slot.url.trim();
+      if (url) urls.push(url);
+      continue;
+    }
+
+    const next = await uploadCatalogProductImages([slot.file]);
+    uploaded.push(...next);
+    urls.push(...next);
+  }
+
+  if (urls.length === 0) {
     throw new Error("At least one product image is required.");
   }
-  return { trimmed, files };
+
+  return { urls, uploaded };
 }
 
 function productInsertPayload(payload: ProductPayload, imageUrls: string[]) {
   return {
     name: payload.name.trim(),
     slug: normalizeSlug(payload.slug, payload.name),
-    details: payload.details.trim(),
+    details: unescapeImportedNewlines(payload.details).trim(),
     sort_order: payload.sort_order,
     published: payload.published,
     image_urls: imageUrls,
@@ -118,15 +135,13 @@ export async function fetchPublishedCatalogProducts(categorySlug?: string) {
   return listPublishedCatalogProducts(supabase, categorySlug);
 }
 
-export async function createCatalogProduct(payload: ProductPayload, files: File[] = []) {
+export async function createCatalogProduct(payload: ProductPayload, images: CatalogImageSlot[] = []) {
   const supabase = createSupabaseBrowserClient();
-  const { trimmed } = buildImageUrls(payload.image_urls, files);
-  const uploaded = files.length > 0 ? await uploadCatalogProductImages(files) : [];
-  const imageUrls = [...trimmed, ...uploaded];
+  const { urls, uploaded } = await resolveOrderedImageUrls(images);
 
   const { data, error } = await supabase
     .from("catalog_products")
-    .insert(productInsertPayload(payload, imageUrls))
+    .insert(productInsertPayload(payload, urls))
     .select("id")
     .single();
 
@@ -148,19 +163,17 @@ type UpdatePayload = ProductPayload & {
   previous_image_urls: string[];
 };
 
-export async function updateCatalogProduct(payload: UpdatePayload, files: File[] = []) {
+export async function updateCatalogProduct(payload: UpdatePayload, images: CatalogImageSlot[] = []) {
   const supabase = createSupabaseBrowserClient();
-  const { trimmed } = buildImageUrls(payload.image_urls, files);
-  const uploaded = files.length > 0 ? await uploadCatalogProductImages(files) : [];
-  const imageUrls = [...trimmed, ...uploaded];
+  const { urls, uploaded } = await resolveOrderedImageUrls(images);
 
   const removedStorageUrls = payload.previous_image_urls.filter(
-    (url) => isStorageUrl(url) && !imageUrls.includes(url)
+    (url) => isStorageUrl(url) && !urls.includes(url)
   );
 
   const { error } = await supabase
     .from("catalog_products")
-    .update(productInsertPayload(payload, imageUrls))
+    .update(productInsertPayload(payload, urls))
     .eq("id", payload.id);
 
   if (error) {

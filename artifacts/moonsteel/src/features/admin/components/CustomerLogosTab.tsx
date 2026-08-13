@@ -1,19 +1,35 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useEffect, useMemo, useState } from "react";
-import { Trash2, Upload } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { AdminImagePreview } from "@/features/admin/components/AdminImagePreview";
+import {
+  AdminDetailSkeleton,
+  AdminMasterDetail,
+  AdminSidebarCard,
+  AdminSidebarEmpty,
+  AdminSidebarSkeleton,
+  AdminSidebarThumb,
+  adminSidebarBodyClass,
+  adminSidebarMutedClass,
+  adminSidebarTitleClass,
+} from "@/features/admin/components/AdminMasterDetail";
 import { useCustomerLogos } from "@/features/admin/hooks/useCustomerLogos";
 import { fetchLogoSliderSpeed, saveLogoSliderSpeed } from "@/features/admin/services/customerLogos";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { CustomerLogo } from "@/features/admin/types";
 
 export function CustomerLogosTab() {
   const { logos, isLoading, isUploading, error, uploadMany, remove } = useCustomerLogos();
+  const [selectedLogo, setSelectedLogo] = useState<CustomerLogo | null>(null);
+  const [isUploadingView, setIsUploadingView] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [sliderSpeed, setSliderSpeed] = useState(52);
   const [isSavingSpeed, setIsSavingSpeed] = useState(false);
   const [speedError, setSpeedError] = useState<string | null>(null);
+
+  const isEditorOpen = isUploadingView || Boolean(selectedLogo);
 
   const previewUrls = useMemo(
     () =>
@@ -21,7 +37,7 @@ export function CustomerLogosTab() {
         name: file.name,
         url: URL.createObjectURL(file),
       })),
-    [selectedFiles],
+    [selectedFiles]
   );
 
   useEffect(() => {
@@ -41,8 +57,7 @@ export function CustomerLogosTab() {
   const onPickFile = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;
-    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
-    setSelectedFiles(imageFiles);
+    setSelectedFiles(files.filter((file) => file.type.startsWith("image/")));
   };
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -60,14 +75,38 @@ export function CustomerLogosTab() {
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files ?? []);
     if (files.length === 0) return;
-    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
-    setSelectedFiles(imageFiles);
+    setSelectedFiles(files.filter((file) => file.type.startsWith("image/")));
+  };
+
+  const startUpload = () => {
+    setSelectedLogo(null);
+    setSelectedFiles([]);
+    setIsUploadingView(true);
+  };
+
+  const startEdit = (logo: CustomerLogo) => {
+    setIsUploadingView(false);
+    setSelectedFiles([]);
+    setSelectedLogo(logo);
+  };
+
+  const closeEditor = () => {
+    setSelectedLogo(null);
+    setIsUploadingView(false);
+    setSelectedFiles([]);
   };
 
   const onUpload = async () => {
     if (selectedFiles.length === 0) return;
     await uploadMany(selectedFiles);
     setSelectedFiles([]);
+    setIsUploadingView(false);
+  };
+
+  const onDelete = async (logo: CustomerLogo) => {
+    const ok = await remove(logo);
+    if (!ok) return;
+    if (selectedLogo?.id === logo.id) closeEditor();
   };
 
   const onSaveSpeed = async () => {
@@ -84,34 +123,102 @@ export function CustomerLogosTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="layer-1">
-        <CardHeader>
-          <CardTitle>Upload Customer Logos</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="layer-2 rounded-lg p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-medium text-foreground">Logo Slider Speed</p>
-              <span className="text-xs text-muted-foreground">{sliderSpeed}s per loop</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                min={12}
-                max={120}
-                step={1}
-                value={sliderSpeed}
-                onChange={(e) => setSliderSpeed(Number(e.target.value))}
-                className="w-full"
-              />
-              <Button type="button" size="sm" onClick={onSaveSpeed} disabled={isSavingSpeed}>
-                {isSavingSpeed ? "Saving..." : "Save"}
-              </Button>
-            </div>
-            {speedError ? <p className="mt-2 text-xs text-destructive">{speedError}</p> : null}
+    <AdminMasterDetail
+      title="Customer Logos"
+      description="Logos in the homepage slider. Select a logo to preview it, or add new files."
+      addLabel="Add Logos"
+      onAdd={startUpload}
+      onBack={closeEditor}
+      formId={isUploadingView ? "admin-logo-upload-form" : undefined}
+      canSubmit={selectedFiles.length > 0}
+      isSaving={isUploading}
+      submitLabel={
+        selectedFiles.length > 1 ? `Upload ${selectedFiles.length} Logos` : "Upload Logo"
+      }
+      error={error}
+      notice={
+        <div className="layer-2 rounded-lg p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">Logo Slider Speed</p>
+            <span className="text-xs text-muted-foreground">{sliderSpeed}s per loop</span>
           </div>
-
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={12}
+              max={120}
+              step={1}
+              value={sliderSpeed}
+              onChange={(e) => setSliderSpeed(Number(e.target.value))}
+              className="w-full"
+            />
+            <Button type="button" size="sm" onClick={() => void onSaveSpeed()} disabled={isSavingSpeed}>
+              {isSavingSpeed ? "Saving..." : "Save"}
+            </Button>
+          </div>
+          {speedError ? <p className="mt-2 text-xs text-destructive">{speedError}</p> : null}
+        </div>
+      }
+      sidebar={
+        isLoading ? (
+          <AdminSidebarSkeleton withImage />
+        ) : logos.length === 0 ? (
+          <AdminSidebarEmpty>No logos uploaded yet.</AdminSidebarEmpty>
+        ) : (
+          logos.map((logo) => {
+            const selected = !isUploadingView && selectedLogo?.id === logo.id;
+            return (
+              <AdminSidebarCard
+                key={logo.id}
+                selected={selected}
+                compact
+                onClick={() => startEdit(logo)}
+              >
+                <AdminSidebarThumb
+                  src={logo.image_url}
+                  alt="Customer logo"
+                  contain
+                  className="min-h-[4.5rem] w-28 self-stretch bg-background"
+                />
+                <div className={adminSidebarBodyClass()}>
+                  <p className={adminSidebarTitleClass(selected)}>Customer logo</p>
+                  <p className={adminSidebarMutedClass(selected)}>
+                    {new Date(logo.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </AdminSidebarCard>
+            );
+          })
+        )
+      }
+      detailTitle={isUploadingView ? "Add logos" : selectedLogo ? "Logo detail" : "Logo detail"}
+      detailDescription={
+        !isEditorOpen
+          ? "Choose a logo from the sidebar, or add new files."
+          : isUploadingView
+            ? "Drop image files or pick them from your computer."
+            : "Preview and delete this logo."
+      }
+      detailActions={
+        selectedLogo && !isUploadingView ? (
+          <Button variant="outline" size="sm" type="button" onClick={() => void onDelete(selectedLogo)}>
+            <Trash2 className="mr-2 h-3.5 w-3.5" />
+            Delete
+          </Button>
+        ) : null
+      }
+      isEditorOpen={isEditorOpen}
+      skeleton={<AdminDetailSkeleton withImage />}
+    >
+      {isUploadingView ? (
+        <form
+          id="admin-logo-upload-form"
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void onUpload();
+          }}
+        >
           <div
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}
@@ -124,7 +231,6 @@ export function CustomerLogosTab() {
           >
             Drag and drop image files here
           </div>
-
           <input
             type="file"
             accept="image/*"
@@ -132,78 +238,31 @@ export function CustomerLogosTab() {
             onChange={onPickFile}
             className="layer-1 w-full rounded-md px-3 py-2 text-sm"
           />
-
           {previewUrls.length > 0 ? (
-            <div className="layer-2 grid grid-cols-2 gap-3 rounded-lg p-4 sm:grid-cols-3 lg:grid-cols-4">
-              {previewUrls.map((item) => (
-                <div key={`${item.name}-${item.url}`} className="layer-1 rounded-md p-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.url}
-                    alt={`Preview ${item.name}`}
-                    className="mx-auto h-16 w-full object-contain"
-                  />
-                </div>
+            <div className="layer-2 grid grid-cols-2 gap-3 rounded-lg p-4 sm:grid-cols-3">
+              {previewUrls.map((item, index) => (
+                <AdminImagePreview
+                  key={`${item.name}-${item.url}`}
+                  src={item.url}
+                  alt={`Preview ${item.name}`}
+                  file={selectedFiles[index]}
+                  className="layer-1 rounded-md"
+                  imgClassName="mx-auto h-20 w-full object-contain p-2"
+                />
               ))}
             </div>
           ) : null}
-
-          <Button
-            type="button"
-            disabled={selectedFiles.length === 0 || isUploading}
-            onClick={onUpload}
-            className="inline-flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            {isUploading
-              ? "Uploading..."
-              : selectedFiles.length > 1
-                ? `Upload ${selectedFiles.length} Logos`
-                : "Upload Logo"}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className="layer-1">
-        <CardHeader>
-          <CardTitle>Uploaded Logos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? <p className="text-sm text-muted-foreground">Loading logos...</p> : null}
-          {!isLoading && logos.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No logos uploaded yet.</p>
-          ) : null}
-
-          {!isLoading && logos.length > 0 ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {logos.map((logo) => (
-                <div key={logo.id} className="layer-2 rounded-lg p-3">
-                  <div className="layer-1 flex h-24 items-center justify-center rounded-md p-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={logo.image_url}
-                      alt="Customer logo"
-                      className="max-h-20 max-w-full object-contain"
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                    onClick={() => void remove(logo)}
-                    className="mt-3 w-full"
-                  >
-                    <Trash2 className="mr-2 h-3.5 w-3.5" />
-                    Delete
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
-        </CardContent>
-      </Card>
-    </div>
+        </form>
+      ) : selectedLogo ? (
+        <div className="space-y-4">
+          <AdminImagePreview
+            src={selectedLogo.image_url}
+            alt="Customer logo"
+            className="layer-2 w-full rounded-lg"
+            imgClassName="mx-auto max-h-72 w-full object-contain p-6"
+          />
+        </div>
+      ) : null}
+    </AdminMasterDetail>
   );
 }
