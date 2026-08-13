@@ -31,6 +31,7 @@ async function blobToPng(blob: Blob): Promise<Blob> {
   try {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => resolve(img);
       img.onerror = () => reject(new Error("Could not decode this image."));
       img.src = objectUrl;
@@ -72,12 +73,48 @@ export async function downloadImageSrc(src: string, fileName?: string) {
   URL.revokeObjectURL(objectUrl);
 }
 
-export async function copyImageSrc(src: string) {
-  if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
-    throw new Error("Copy image is not supported in this browser.");
+export type CopyImageResult = {
+  mode: "image" | "url";
+};
+
+/**
+ * Copy an image to the clipboard.
+ * Uses ClipboardItem + Promise so `write()` starts during the click gesture
+ * (fetch/convert can finish after without losing permission).
+ * Falls back to copying the image URL when image clipboard is blocked.
+ */
+export async function copyImageSrc(src: string): Promise<CopyImageResult> {
+  const canWriteImage = Boolean(navigator.clipboard?.write) && typeof ClipboardItem !== "undefined";
+
+  if (canWriteImage) {
+    try {
+      const pngPromise = (async () => {
+        const blob = await fetchImageBlob(src);
+        return blobToPng(blob);
+      })();
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": pngPromise,
+        }),
+      ]);
+      return { mode: "image" };
+    } catch {
+      // Fall through to URL copy.
+    }
   }
 
-  const blob = await fetchImageBlob(src);
-  const png = await blobToPng(blob);
-  await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
+  if (navigator.clipboard?.writeText) {
+    const absolute =
+      src.startsWith("blob:") || src.startsWith("data:")
+        ? src
+        : new URL(src, window.location.origin).toString();
+
+    if (!absolute.startsWith("blob:")) {
+      await navigator.clipboard.writeText(absolute);
+      return { mode: "url" };
+    }
+  }
+
+  throw new Error("Could not copy this image. Use Download instead.");
 }

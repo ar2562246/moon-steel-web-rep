@@ -210,8 +210,14 @@ export function AdminImageEditDialog({
     const src = workingSrc ?? imageSrc;
     if (!src) return;
     try {
-      await copyImageSrc(src);
-      toast({ title: "Image copied", description: "Paste it anywhere that accepts images." });
+      const result = await copyImageSrc(src);
+      toast({
+        title: result.mode === "image" ? "Image copied" : "Image link copied",
+        description:
+          result.mode === "image"
+            ? "Paste it anywhere that accepts images."
+            : "The image URL is on your clipboard.",
+      });
     } catch (e) {
       toast({
         title: "Copy failed",
