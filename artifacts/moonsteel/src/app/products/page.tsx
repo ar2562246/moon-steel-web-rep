@@ -9,8 +9,7 @@ import {
 } from "@/features/catalog/defaultCatalog";
 import { listPublishedCatalogCategories, listPublishedCatalogProducts } from "@/features/catalog/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+import { absoluteUrl } from "@/lib/site";
 
 type PageProps = {
   searchParams: Promise<{ category?: string }>;
@@ -56,7 +55,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
     },
     openGraph: {
       type: "website",
-      url: category ? `${siteUrl}/products?category=${category}` : `${siteUrl}/products`,
+      url: category ? absoluteUrl(`/products?category=${category}`) : absoluteUrl("/products"),
       title,
       description,
     },

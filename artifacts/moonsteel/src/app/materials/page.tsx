@@ -3,8 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { MaterialsPageView } from "@/app/materials/MaterialsPageView";
 import { faqs } from "@/app/materials/materials-data";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Stainless Steel Grades for Commercial Kitchens",
@@ -25,7 +24,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: `${siteUrl}/materials`,
+    url: absoluteUrl("/materials"),
     title: "Stainless Steel Grades for Commercial Kitchens | Moon Steel",
     description:
       "Choose AISI 304 or 316 with interactive tools, comparison cards, thickness guide, and mill-certified fabrication guidance.",

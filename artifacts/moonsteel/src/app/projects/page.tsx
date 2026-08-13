@@ -5,8 +5,7 @@ import { ProjectsIndexView } from "@/app/projects/ProjectsIndexView";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjects } from "@/features/projects/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+import { absoluteUrl } from "@/lib/site";
 
 async function resolveProjects() {
   if (hasSupabaseServerEnv()) {
@@ -31,7 +30,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: `${siteUrl}/projects`,
+    url: absoluteUrl("/projects"),
     title: "Projects | Moon Steel",
     description:
       "Commercial stainless steel fabrication portfolio — proven installations across Pakistan.",

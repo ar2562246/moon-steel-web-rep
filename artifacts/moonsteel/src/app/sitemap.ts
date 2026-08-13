@@ -6,63 +6,62 @@ import { getCatalogProductPath } from "@/features/catalog/paths";
 import { listPublishedCatalogProductSlugs } from "@/features/catalog/queries";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjectSlugs } from "@/features/projects/queries";
+import { absoluteUrl } from "@/lib/site";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: `${siteUrl}/`,
+      url: absoluteUrl("/"),
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: `${siteUrl}/products`,
+      url: absoluteUrl("/products"),
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
-      url: `${siteUrl}/materials`,
+      url: absoluteUrl("/materials"),
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
-      url: `${siteUrl}/grease-traps`,
+      url: absoluteUrl("/grease-traps"),
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,
     },
     {
-      url: `${siteUrl}/projects`,
+      url: absoluteUrl("/projects"),
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.85,
     },
     {
-      url: `${siteUrl}/clients`,
+      url: absoluteUrl("/clients"),
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${siteUrl}/blog`,
+      url: absoluteUrl("/blog"),
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.75,
     },
     {
-      url: `${siteUrl}/about`,
+      url: absoluteUrl("/about"),
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.7,
     },
     {
-      url: `${siteUrl}/collaboration/food-fusion`,
+      url: absoluteUrl("/collaboration/food-fusion"),
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
@@ -70,14 +69,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   let projectRoutes: MetadataRoute.Sitemap = defaultProjects.map((project) => ({
-    url: `${siteUrl}/projects/${project.slug}`,
+    url: absoluteUrl(`/projects/${project.slug}`),
     lastModified: now,
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
   let catalogProductRoutes: MetadataRoute.Sitemap = defaultCatalogProducts.map((product) => ({
-    url: `${siteUrl}${getCatalogProductPath(product.slug)}`,
+    url: absoluteUrl(getCatalogProductPath(product.slug)),
     lastModified: now,
     changeFrequency: "monthly",
     priority: 0.8,
@@ -96,7 +95,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       if (projectRows.length > 0) {
         projectRoutes = projectRows.map((row) => ({
-          url: `${siteUrl}/projects/${row.slug}`,
+          url: absoluteUrl(`/projects/${row.slug}`),
           lastModified: new Date(row.updated_at),
           changeFrequency: "monthly",
           priority: 0.7,
@@ -105,7 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       if (productRows.length > 0) {
         catalogProductRoutes = productRows.map((row) => ({
-          url: `${siteUrl}${getCatalogProductPath(row.slug)}`,
+          url: absoluteUrl(getCatalogProductPath(row.slug)),
           lastModified: new Date(row.updated_at),
           changeFrequency: "monthly",
           priority: 0.8,
@@ -113,7 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
 
       blogRoutes = blogRows.map((row) => ({
-        url: `${siteUrl}${getBlogPath(row.slug)}`,
+        url: absoluteUrl(getBlogPath(row.slug)),
         lastModified: new Date(row.updated_at),
         changeFrequency: "monthly",
         priority: 0.65,

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { CmsImage } from "@/components/ui/CmsImage";
 import { getCatalogCategoryHref } from "@/features/catalog/paths";
 import type { CatalogCategoryCard } from "@/features/catalog/types";
@@ -22,7 +23,7 @@ export function Products({ categories }: ProductsProps) {
 
         {categories.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 md:gap-6">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <Link
                 key={category.id}
                 href={getCatalogCategoryHref(category.slug)}
@@ -35,7 +36,6 @@ export function Products({ categories }: ProductsProps) {
                       alt={category.name}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      priority={index < 4}
                       className="object-contain p-3 transition-transform duration-500 md:group-hover:scale-[1.03]"
                     />
                   ) : null}
@@ -51,14 +51,13 @@ export function Products({ categories }: ProductsProps) {
           </div>
         ) : null}
 
-        <div className="mt-10">
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-          >
-            View all products
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+        <div className="mt-10 flex justify-end">
+          <Button asChild>
+            <Link href="/products">
+              View all products
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

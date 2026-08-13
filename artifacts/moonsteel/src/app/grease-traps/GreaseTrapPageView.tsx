@@ -217,14 +217,13 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                 className="layer-1 flex flex-col overflow-hidden rounded-2xl scroll-mt-28"
               >
                 <Link href={getCatalogProductPath(product.slug)} className="block">
-                  <ProductCardImage
+                    <ProductCardImage
                     product={
                       catalogImages[product.slug] ?? {
                         name: product.name,
                         image_url: "",
                       }
                     }
-                    priority
                   />
                 </Link>
                 <div className="flex flex-1 flex-col p-6">

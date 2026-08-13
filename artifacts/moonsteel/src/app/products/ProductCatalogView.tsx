@@ -159,7 +159,7 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
                     href={getCatalogProductPath(product.slug)}
                     className="group layer-1 overflow-hidden rounded-xl transition-colors hover:border-primary/40"
                   >
-                    <ProductCardImage product={product} priority={index < 6} />
+                    <ProductCardImage product={product} priority={index < 2} />
                     <div className="space-y-3 p-6">
                       <div className="flex flex-wrap gap-1.5">
                         {product.categories.map((category) => (

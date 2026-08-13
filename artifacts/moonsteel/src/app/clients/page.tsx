@@ -10,8 +10,7 @@ import {
   listPublishedClients,
 } from "@/features/clients/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+import { absoluteUrl } from "@/lib/site";
 
 async function resolveClientsPageData() {
   if (hasSupabaseServerEnv()) {
@@ -46,7 +45,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: `${siteUrl}/clients`,
+    url: absoluteUrl("/clients"),
     title: "Clients | Moon Steel",
     description:
       "Trusted by Pizza Hut, Aga Khan Hospital, Serena Hotels, and dozens more across Pakistan.",

@@ -209,6 +209,8 @@ export function ClientsPageView({ clients, references, logos = [] }: ClientsPage
             <img
               src={activeRef.image_url}
               alt={`${activeRef.client_name} reference letter`}
+              loading="lazy"
+              decoding="async"
               className="mx-auto max-h-[75vh] w-auto max-w-full object-contain"
             />
           </div>

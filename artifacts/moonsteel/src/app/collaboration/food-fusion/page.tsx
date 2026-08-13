@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoodFusionCollabView } from "@/app/collaboration/food-fusion/FoodFusionCollabView";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Moon Steel × Food Fusion",
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: `${siteUrl}/collaboration/food-fusion`,
+    url: absoluteUrl("/collaboration/food-fusion"),
     title: "Moon Steel × Food Fusion | Moon Steel",
     description:
       "Food Fusion designs it. We fabricate it in Karachi — laser-cut stainless steel kitchen tools for Pakistan's largest food brand.",

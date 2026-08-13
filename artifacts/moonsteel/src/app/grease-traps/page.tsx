@@ -5,8 +5,7 @@ import { GreaseTrapPageView } from "@/app/grease-traps/GreaseTrapPageView";
 import { faqs, greaseTrapProducts, pickGreaseTrapCatalogImages } from "@/app/grease-traps/grease-traps-data";
 import { getCatalogProductBySlug } from "@/features/catalog/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Commercial Stainless Steel Grease Traps",
@@ -31,7 +30,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: `${siteUrl}/grease-traps`,
+    url: absoluteUrl("/grease-traps"),
     title: "Commercial Stainless Steel Grease Traps | Moon Steel",
     description:
       "Fabricated AISI 304 grease traps with gross tank volumes for Small, Medium, and Large commercial kitchens — plus a sizing calculator.",

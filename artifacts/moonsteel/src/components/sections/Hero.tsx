@@ -171,7 +171,7 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
                           src={stripe.src}
                           alt={stripe.label ?? `Hero image ${i + 1}`}
                           fill
-                          sizes="(max-width: 1024px) 100vw, 40vw"
+                          sizes="(min-width: 1024px) 40vw, 1px"
                           priority={i === 0}
                           className={`object-cover object-center transition-transform duration-[1.4s] ease-out ${
                             active ? "scale-110" : "scale-100"
@@ -223,7 +223,7 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
                           src={stripe.src}
                           alt={stripe.label ?? "Hero image"}
                           fill
-                          sizes="80vw"
+                          sizes="(max-width: 1023px) 82vw, 1px"
                           priority={index === 0}
                           className="object-cover object-center"
                         />

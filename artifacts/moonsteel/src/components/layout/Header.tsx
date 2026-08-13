@@ -11,11 +11,9 @@ const logoUrl = "/ms3-logo.svg";
 
 const navLinks = [
   { name: "Home", href: "/", sectionId: "home" },
+  { name: "Clients", href: "/clients", sectionId: "clients" },
   { name: "Products", href: "/products", sectionId: "products" },
   { name: "Materials", href: "/materials", sectionId: "materials" },
-  { name: "Projects", href: "/projects", sectionId: "projects" },
-  { name: "Clients", href: "/clients", sectionId: "clients" },
-  { name: "Process", href: "#process", sectionId: "process" },
   { name: "About", href: "/about", sectionId: "about" },
   { name: "Blog", href: "/blog", sectionId: "blog" },
 ] as const;
@@ -26,9 +24,6 @@ function isNavLinkActive(sectionId: string, pathname: string, activeSection: str
   if (sectionId === "home") return pathname === "/" && activeSection === null;
   if (sectionId === "products") return pathname.startsWith("/products");
   if (sectionId === "materials") return pathname.startsWith("/materials");
-  if (sectionId === "projects") {
-    return pathname.startsWith("/projects") || (pathname === "/" && activeSection === "projects");
-  }
   if (sectionId === "clients") return pathname.startsWith("/clients");
   if (sectionId === "blog") return pathname.startsWith("/blog");
   if (sectionId === "about") return pathname.startsWith("/about");
@@ -158,7 +153,7 @@ export function Header() {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-            <img src={logoUrl} alt="Moon Steel Fabricators" className="h-9 w-9 object-contain" />
+            <img src={logoUrl} alt="Moon Steel Fabricators" width={36} height={36} decoding="async" className="h-9 w-9 object-contain" />
             <div className="leading-none text-center">
               <span className="moonsteel-wordmark block font-display text-xl font-semibold tracking-tight text-foreground">
                 MOON-STEEL

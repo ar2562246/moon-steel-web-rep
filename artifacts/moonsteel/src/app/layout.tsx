@@ -4,8 +4,9 @@ import { Header } from "@/components/layout/Header";
 import { VercelInsights } from "@/components/VercelInsights";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+const siteUrl = getSiteUrl();
 const ogImage = "/ms3-logo.svg";
 
 export const metadata: Metadata = {
@@ -67,7 +68,7 @@ export default function RootLayout({
               "@type": "LocalBusiness",
               name: "Moon Steel",
               url: siteUrl,
-              logo: `${siteUrl}/ms3-logo.svg`,
+              logo: absoluteUrl("/ms3-logo.svg"),
               description:
                 "Commercial stainless steel fabrication for kitchens, healthcare, and industrial food-service operations.",
               address: {

@@ -7,8 +7,9 @@ import { getPublishedBlogBySlug, listPublishedBlogSlugs } from "@/features/blog/
 import { getBlogCoverImageUrl } from "@/features/blog/types";
 import { getPublishedCatalogProductsByIds } from "@/features/catalog/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+const siteUrl = getSiteUrl();
 
 type PageProps = {
   params: Promise<{ slug: string }>;

@@ -12,6 +12,10 @@ export function Footer() {
               <img
                 src={logoUrl}
                 alt="Moon Steel Fabricators"
+                width={40}
+                height={40}
+                loading="lazy"
+                decoding="async"
                 className="w-10 h-10 object-contain"
               />
               <div className="leading-none text-center">
@@ -139,7 +143,6 @@ export function Footer() {
               <li><a href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Products & Specs</a></li>
               <li><a href="/materials" className="text-sm text-muted-foreground hover:text-primary transition-colors">Materials Guide</a></li>
               <li><a href="/grease-traps" className="text-sm text-muted-foreground hover:text-primary transition-colors">Grease Traps</a></li>
-              <li><a href="/projects" className="text-sm text-muted-foreground hover:text-primary transition-colors">Project Portfolio</a></li>
               <li><a href="/clients" className="text-sm text-muted-foreground hover:text-primary transition-colors">Clients</a></li>
               <li><a href="/#process" className="text-sm text-muted-foreground hover:text-primary transition-colors">Process</a></li>
               <li><a href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</a></li>

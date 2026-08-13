@@ -5,8 +5,7 @@ import { BlogIndexView } from "@/app/blog/BlogIndexView";
 import { listPublishedBlogs } from "@/features/blog/queries";
 import type { BlogPost } from "@/features/blog/types";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+import { absoluteUrl } from "@/lib/site";
 
 async function resolveBlogPosts(): Promise<BlogPost[]> {
   if (!hasSupabaseServerEnv()) return [];
@@ -27,7 +26,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: `${siteUrl}/blog`,
+    url: absoluteUrl("/blog"),
     title: "Blog | Moon Steel",
     description:
       "Notes on stainless fabrication, SS 304, and commercial kitchen projects from Karachi.",

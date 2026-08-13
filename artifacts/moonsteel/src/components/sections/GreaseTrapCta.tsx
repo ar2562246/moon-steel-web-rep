@@ -49,7 +49,7 @@ export function GreaseTrapCta({ catalogImages = {} }: GreaseTrapCtaProps) {
                 href={getCatalogProductPath(product.slug)}
                 className="layer-1 group flex flex-col overflow-hidden rounded-2xl transition-colors hover:border-primary/40"
               >
-                <ProductCardImage product={catalogImage} priority />
+                <ProductCardImage product={catalogImage} />
                 <div className="flex flex-1 flex-col p-6">
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -76,7 +76,7 @@ export function GreaseTrapCta({ catalogImages = {} }: GreaseTrapCtaProps) {
           })}
         </SectionReveal>
 
-        <div className="mt-10 flex flex-wrap gap-3">
+        <div className="mt-10 flex flex-wrap justify-end gap-3">
           <Link
             href="/grease-traps"
             className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"

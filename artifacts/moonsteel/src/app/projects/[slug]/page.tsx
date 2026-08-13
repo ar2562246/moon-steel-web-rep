@@ -5,8 +5,9 @@ import { getDefaultProjectBySlug } from "@/features/projects/defaultProjects";
 import { getProjectImages, normalizeProject, toAbsoluteImageUrl } from "@/features/projects/images";
 import { getProjectBySlug, listPublishedProjectSlugs } from "@/features/projects/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { getSiteUrl } from "@/lib/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+const siteUrl = getSiteUrl();
 
 type PageProps = {
   params: Promise<{ slug: string }>;

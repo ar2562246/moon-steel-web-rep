@@ -6,6 +6,6 @@ type CmsImageProps = Omit<ImageProps, "alt"> & {
   className?: string;
 };
 
-export function CmsImage({ alt, className, ...props }: CmsImageProps) {
-  return <Image alt={alt} className={cn(className)} {...props} />;
+export function CmsImage({ alt, className, decoding = "async", ...props }: CmsImageProps) {
+  return <Image alt={alt} decoding={decoding} className={cn(className)} {...props} />;
 }

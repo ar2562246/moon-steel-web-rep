@@ -18,6 +18,10 @@ export function FoodFusionCollab() {
                 <img
                   src="/ms3-logo.svg"
                   alt="Moon Steel Fabricators"
+                  width={48}
+                  height={48}
+                  loading="lazy"
+                  decoding="async"
                   className="h-12 w-12 object-contain"
                 />
                 <span className="text-2xl font-light text-muted-foreground" aria-hidden>
@@ -30,6 +34,8 @@ export function FoodFusionCollab() {
                   alt="Food Fusion"
                   width={126}
                   height={126}
+                  loading="lazy"
+                  decoding="async"
                   className="h-12 w-12 object-contain"
                 />
               </div>

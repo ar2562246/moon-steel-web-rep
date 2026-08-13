@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { AboutPageView } from "@/app/about/AboutPageView";
+import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: `${siteUrl}/about`,
+    url: absoluteUrl("/about"),
     title: "About Us | Moon Steel",
     description:
       "Three generations of stainless steel fabrication in Karachi — from Ghulam Haider in 1947 to Muhammad Suleman and his sons today.",
@@ -42,19 +43,19 @@ const organizationSchema = {
       "@type": "Person",
       name: "Muhammad Suleman",
       jobTitle: "Chief Executive Officer",
-      image: `${siteUrl}/images/team/muhammad-suleman.jpg`,
+      image: absoluteUrl("/images/team/muhammad-suleman.jpg"),
     },
     {
       "@type": "Person",
       name: "Ovais Suleman",
       jobTitle: "Sales and Project Management",
-      image: `${siteUrl}/images/team/ovais-suleman.jpg`,
+      image: absoluteUrl("/images/team/ovais-suleman.jpg"),
     },
     {
       "@type": "Person",
       name: "Abdul Rahman",
       jobTitle: "Business Development",
-      image: `${siteUrl}/images/team/abdul-rahman.jpg`,
+      image: absoluteUrl("/images/team/abdul-rahman.jpg"),
     },
   ],
 };

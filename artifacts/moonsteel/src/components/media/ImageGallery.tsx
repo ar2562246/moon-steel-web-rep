@@ -61,7 +61,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
   if (images.length === 1) {
     return (
       <div className="overflow-hidden bg-muted max-md:-mx-4 md:rounded-2xl">
-        <img src={images[0]} alt={title} className="aspect-[4/3] w-full object-contain" />
+        <img src={images[0]} alt={title} loading="eager" decoding="async" className="aspect-[4/3] w-full object-contain" />
       </div>
     );
   }
@@ -150,7 +150,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
             aria-label={`View photo ${index + 1}`}
             aria-current={activeIndex === index ? true : undefined}
           >
-            <img src={image} alt="" className="h-full w-full object-cover" />
+            <img src={image} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
           </button>
         ))}
       </div>

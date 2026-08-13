@@ -28,7 +28,7 @@ export function ProblemSolution() {
                 "Reduces gauge thickness to save costs (causes warping)",
                 "Spot or MIG welding that breaks under stress",
                 "Mill finish with sharp, hazardous edges",
-                "Fails international HACCP hygiene standards"
+                "Fails commercial kitchen hygiene requirements"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-1.5 h-1.5 rounded-full bg-destructive mt-2 shrink-0" />
@@ -49,7 +49,7 @@ export function ProblemSolution() {
                 "Accurate, heavy-duty gauge thickness specified for load",
                 "Precision Laser Welding, ground flat and polished",
                 "Food-grade #4 satin finish with radiused, deburred edges",
-                "Fully HACCP-compliant for strict health inspections"
+                "Built to meet commercial kitchen hygiene requirements"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />

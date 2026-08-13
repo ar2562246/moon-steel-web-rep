@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import { CmsImage } from "@/components/ui/CmsImage";
 import type { CustomerLogo } from "@/features/admin/types";
@@ -13,35 +13,6 @@ type TrustBandProps = {
 export function TrustBand({ initialLogos = [], initialSliderSpeed = 52 }: TrustBandProps) {
   const [logos] = useState<CustomerLogo[]>(initialLogos);
   const [sliderSpeed] = useState(initialSliderSpeed);
-  const [imagesLoaded, setImagesLoaded] = useState(initialLogos.length === 0);
-
-  useEffect(() => {
-    if (logos.length === 0) {
-      setImagesLoaded(false);
-      return;
-    }
-
-    let cancelled = false;
-    const urls = [...new Set(logos.map((l) => l.image_url).filter(Boolean))];
-
-    Promise.all(
-      urls.map(
-        (url) =>
-          new Promise<void>((resolve) => {
-            const img = new Image();
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
-            img.src = url;
-          }),
-      ),
-    ).then(() => {
-      if (!cancelled) setImagesLoaded(true);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [logos]);
 
   const hasLogos = logos.length > 0;
   const marqueeLogos = useMemo(() => {
@@ -88,7 +59,7 @@ export function TrustBand({ initialLogos = [], initialSliderSpeed = 52 }: TrustB
           <p className="apple-eyebrow">Trusted by Industry Leaders</p>
         </div>
 
-        {hasLogos && imagesLoaded ? (
+        {hasLogos ? (
           <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
             <div
               className="clients-carousel-track"
@@ -104,27 +75,22 @@ export function TrustBand({ initialLogos = [], initialSliderSpeed = 52 }: TrustB
                   href={logo.image_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="clients-carousel-item flex items-center justify-center"
+                  className="clients-carousel-item"
                   aria-label="View customer logo"
                 >
                   <CmsImage
                     src={logo.image_url}
                     alt="Customer logo"
-                    width={160}
-                    height={44}
-                    sizes="160px"
-                    loading="eager"
-                    className="max-h-10 w-auto max-w-full object-contain sm:max-h-[44px]"
+                    width={176}
+                    height={52}
+                    sizes="176px"
+                    loading="lazy"
+                    className="max-h-12 w-auto max-w-full object-contain sm:max-h-[52px]"
                   />
                 </a>
               ))}
             </div>
           </div>
-        ) : hasLogos ? (
-          <div
-            className="h-[60px] sm:h-20 w-full rounded-xl border border-border/50 bg-muted/30"
-            aria-hidden
-          />
         ) : null}
       </div>
     </section>

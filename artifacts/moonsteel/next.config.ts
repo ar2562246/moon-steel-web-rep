@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: getImageRemotePatterns(),
+    formats: ["image/avif", "image/webp"],
   },
   turbopack: {
     root: path.join(__dirname, "../.."),
