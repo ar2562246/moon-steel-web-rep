@@ -8,7 +8,7 @@ import {
   filterDefaultCatalogProducts,
 } from "@/features/catalog/defaultCatalog";
 import { listPublishedCatalogCategories, listPublishedCatalogProducts } from "@/features/catalog/queries";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
@@ -19,7 +19,7 @@ type PageProps = {
 async function resolveCatalog(categorySlug?: string) {
   if (hasSupabaseServerEnv()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabasePublicClient();
       const [products, categories] = await Promise.all([
         listPublishedCatalogProducts(supabase, categorySlug),
         listPublishedCatalogCategories(supabase),

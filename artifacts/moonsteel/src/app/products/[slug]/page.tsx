@@ -11,7 +11,7 @@ import {
   toAbsoluteCatalogImageUrl,
 } from "@/features/catalog/paths";
 import { getCatalogProductBySlug, listPublishedCatalogProductSlugs } from "@/features/catalog/queries";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd, ORGANIZATION_ID } from "@/lib/json-ld";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getSiteUrl } from "@/lib/site";
@@ -25,7 +25,7 @@ type PageProps = {
 async function resolveProduct(slug: string) {
   if (hasSupabaseServerEnv()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabasePublicClient();
       const product = await getCatalogProductBySlug(supabase, slug);
       if (product) return product;
     } catch {
@@ -45,7 +45,7 @@ export async function generateStaticParams() {
   }
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const rows = await listPublishedCatalogProductSlugs(supabase);
     if (rows.length > 0) return rows.map((row) => ({ slug: row.slug }));
   } catch {

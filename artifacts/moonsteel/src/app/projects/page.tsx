@@ -5,14 +5,14 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ProjectsIndexView } from "@/app/projects/ProjectsIndexView";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjects } from "@/features/projects/queries";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
 async function resolveProjects() {
   if (hasSupabaseServerEnv()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabasePublicClient();
       const projects = await listPublishedProjects(supabase);
       if (projects.length > 0) return projects;
     } catch {

@@ -10,14 +10,14 @@ import {
   listPublishedClientReferences,
   listPublishedClients,
 } from "@/features/clients/queries";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
 async function resolveClientsPageData() {
   if (hasSupabaseServerEnv()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabasePublicClient();
       const [clients, references, logos] = await Promise.all([
         listPublishedClients(supabase),
         listPublishedClientReferences(supabase),

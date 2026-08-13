@@ -7,7 +7,7 @@ import { BlogPostView } from "@/app/blog/BlogPostView";
 import { getPublishedBlogBySlug, listPublishedBlogSlugs } from "@/features/blog/queries";
 import { getBlogCoverImageUrl } from "@/features/blog/types";
 import { getPublishedCatalogProductsByIds } from "@/features/catalog/queries";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd, ORGANIZATION_ID, toAbsoluteMediaUrl } from "@/lib/json-ld";
 import { absoluteUrl, getSiteUrl } from "@/lib/site";
 
@@ -20,7 +20,7 @@ type PageProps = {
 export async function generateStaticParams() {
   if (!hasSupabaseServerEnv()) return [];
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const rows = await listPublishedBlogSlugs(supabase);
     return rows.map((row) => ({ slug: row.slug }));
   } catch {
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const post = await getPublishedBlogBySlug(supabase, slug);
     if (!post) return { title: "Article not found" };
 
@@ -68,7 +68,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   let post = null;
   let linkedProducts: Awaited<ReturnType<typeof getPublishedCatalogProductsByIds>> = [];
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     post = await getPublishedBlogBySlug(supabase, slug);
     if (post?.product_ids.length) {
       linkedProducts = await getPublishedCatalogProductsByIds(supabase, post.product_ids);

@@ -20,7 +20,7 @@ import { defaultTestimonials } from "@/features/testimonials/defaultTestimonials
 import { listPublishedTestimonials } from "@/features/testimonials/queries";
 import type { Testimonial } from "@/features/testimonials/types";
 import type { Project } from "@/features/projects/types";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 
 const DEFAULT_LOGO_SLIDER_SPEED = 52;
 
@@ -78,7 +78,7 @@ async function fetchLogoSliderSpeed(supabase: SupabaseClient) {
 export async function resolveHomePageData(): Promise<HomePageData> {
   if (hasSupabaseServerEnv()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabasePublicClient();
       const [
         heroImages,
         customerLogos,

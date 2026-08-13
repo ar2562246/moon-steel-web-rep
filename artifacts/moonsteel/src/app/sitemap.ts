@@ -7,7 +7,7 @@ import { listPublishedCatalogProductSlugs } from "@/features/catalog/queries";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjectSlugs } from "@/features/projects/queries";
 import { absoluteUrl } from "@/lib/site";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -86,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (hasSupabaseServerEnv()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabasePublicClient();
       const [projectRows, productRows, blogRows] = await Promise.all([
         listPublishedProjectSlugs(supabase),
         listPublishedCatalogProductSlugs(supabase),

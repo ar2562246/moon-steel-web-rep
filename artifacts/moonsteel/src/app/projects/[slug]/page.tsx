@@ -4,7 +4,7 @@ import { ProjectDetailView } from "@/app/projects/[slug]/ProjectDetailView";
 import { getDefaultProjectBySlug } from "@/features/projects/defaultProjects";
 import { getProjectImages, normalizeProject, toAbsoluteImageUrl } from "@/features/projects/images";
 import { getProjectBySlug, listPublishedProjectSlugs } from "@/features/projects/queries";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd, ORGANIZATION_ID } from "@/lib/json-ld";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getSiteUrl } from "@/lib/site";
@@ -18,7 +18,7 @@ type PageProps = {
 async function resolveProject(slug: string) {
   if (hasSupabaseServerEnv()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabasePublicClient();
       const project = await getProjectBySlug(supabase, slug);
       if (project) return project;
     } catch {
@@ -37,7 +37,7 @@ export async function generateStaticParams() {
   }
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const rows = await listPublishedProjectSlugs(supabase);
     if (rows.length > 0) {
       return rows.map((row) => ({ slug: row.slug }));

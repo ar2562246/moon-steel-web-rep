@@ -5,7 +5,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { GreaseTrapPageView } from "@/app/grease-traps/GreaseTrapPageView";
 import { faqs, greaseTrapProducts, pickGreaseTrapCatalogImages } from "@/app/grease-traps/grease-traps-data";
 import { getCatalogProductBySlug } from "@/features/catalog/queries";
-import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
 
@@ -56,7 +56,7 @@ async function resolveCatalogImages() {
   if (!hasSupabaseServerEnv()) return {};
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const rows = await Promise.all(
       greaseTrapProducts.map((item) => getCatalogProductBySlug(supabase, item.slug)),
     );
