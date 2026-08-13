@@ -1,6 +1,7 @@
 import path from "path";
 import type { NextConfig } from "next";
 import { getImageRemotePatterns } from "./src/lib/images";
+import { legacyWordpressRedirects } from "./src/lib/legacy-redirects";
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -32,6 +33,7 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      ...legacyWordpressRedirects,
     ];
   },
   async headers() {

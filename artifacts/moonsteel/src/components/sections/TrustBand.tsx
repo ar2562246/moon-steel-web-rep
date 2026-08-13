@@ -6,6 +6,13 @@ import { CmsImage } from "@/components/ui/CmsImage";
 import type { CustomerLogo } from "@/features/admin/types";
 import { logoAltFromUrl } from "@/lib/logo-alt";
 
+const stats = [
+  { value: "50+", label: "Years fabricating steel" },
+  { value: "850+", label: "Projects Delivered" },
+  { value: "304 / 316", label: "Guaranteed" },
+  { value: "Karachi", label: "Korangi Industrial Area" },
+] as const;
+
 type TrustBandProps = {
   initialLogos?: CustomerLogo[];
   initialSliderSpeed?: number;
@@ -37,23 +44,17 @@ export function TrustBand({ initialLogos = [], initialSliderSpeed = 52 }: TrustB
   return (
     <section className="py-16 bg-background border-b border-border">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16 border-b border-border/50 pb-16">
-          <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
-            <p className="text-5xl md:text-6xl font-display font-semibold text-foreground leading-none">50+</p>
-            <p className="text-sm font-medium text-muted-foreground mt-3">Years fabricating steel</p>
-          </div>
-          <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
-            <p className="text-5xl md:text-6xl font-display font-semibold text-foreground leading-none">850+</p>
-            <p className="text-sm font-medium text-muted-foreground mt-3">Projects Delivered</p>
-          </div>
-          <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
-            <p className="text-4xl md:text-5xl font-display font-semibold text-foreground leading-none">304 / 316</p>
-            <p className="text-sm font-medium text-muted-foreground mt-3">Specified per project</p>
-          </div>
-          <div className="flex flex-col items-center justify-start min-h-[88px] text-center">
-            <p className="text-4xl md:text-5xl font-display font-semibold text-primary leading-none">Karachi</p>
-            <p className="text-sm font-medium text-muted-foreground mt-3">Korangi Industrial Area</p>
-          </div>
+        <div className="mb-16 grid grid-cols-2 gap-x-4 gap-y-10 border-b border-border/50 pb-16 md:grid-cols-4 md:gap-8">
+          {stats.map((stat) => (
+            <div key={stat.value} className="flex flex-col items-center text-center">
+              <p className="whitespace-nowrap font-display text-[clamp(1.85rem,5vw,3.75rem)] font-semibold leading-none tracking-tight text-foreground">
+                {stat.value}
+              </p>
+              <p className="mt-3 max-w-[11rem] text-sm font-medium leading-snug text-muted-foreground md:max-w-none">
+                {stat.label}
+              </p>
+            </div>
+          ))}
         </div>
 
         <div className="text-center mb-10">
