@@ -1,4 +1,5 @@
 export type AdminTabKey =
+  | "inquiries"
   | "customer-logos"
   | "hero-images"
   | "products"
@@ -7,6 +8,21 @@ export type AdminTabKey =
   | "projects"
   | "testimonials"
   | "blogs";
+
+export type ContactInquiryStatus = "new" | "read" | "archived";
+
+export type ContactInquiry = {
+  id: string;
+  full_name: string;
+  company: string;
+  phone: string;
+  email: string;
+  project_type: string;
+  message: string;
+  file_name: string | null;
+  status: ContactInquiryStatus;
+  created_at: string;
+};
 
 export type CustomerLogo = {
   id: string;

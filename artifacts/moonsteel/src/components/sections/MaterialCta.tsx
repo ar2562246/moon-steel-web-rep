@@ -8,7 +8,7 @@ export function MaterialCta() {
   return (
     <section className="layer-1 border-y border-border py-16">
       <div className="container mx-auto px-4 md:px-6">
-        <SectionReveal className="mx-auto flex max-w-3xl flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
+        <SectionReveal className="mx-auto flex max-w-3xl flex-col items-start gap-6">
           <div className="max-w-xl">
             <h2 className="text-2xl font-display font-semibold text-foreground md:text-3xl">
               Why SS 304 matters

@@ -15,6 +15,16 @@ create table if not exists public.blogs (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.blog_products (
+  blog_id uuid not null references public.blogs (id) on delete cascade,
+  product_id uuid not null references public.catalog_products (id) on delete cascade,
+  sort_order int not null default 100,
+  primary key (blog_id, product_id)
+);
+
+create index if not exists blog_products_product_id_idx on public.blog_products (product_id);
+create index if not exists blog_products_blog_sort_idx on public.blog_products (blog_id, sort_order);
+
 create index if not exists blogs_published_idx
   on public.blogs (published, published_at desc nulls last, sort_order, created_at desc);
 
@@ -87,6 +97,36 @@ create policy "Admins delete blogs"
   on public.blogs for delete
   to authenticated
   using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid() and profiles.role = 'admin'
+    )
+  );
+
+alter table public.blog_products enable row level security;
+
+drop policy if exists "Public read blog product links" on public.blog_products;
+create policy "Public read blog product links"
+  on public.blog_products for select
+  to anon, authenticated
+  using (
+    exists (
+      select 1 from public.blogs b
+      where b.id = blog_id and b.published = true
+    )
+  );
+
+drop policy if exists "Admins manage blog product links" on public.blog_products;
+create policy "Admins manage blog product links"
+  on public.blog_products for all
+  to authenticated
+  using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid() and profiles.role = 'admin'
+    )
+  )
+  with check (
     exists (
       select 1 from public.profiles
       where profiles.id = auth.uid() and profiles.role = 'admin'

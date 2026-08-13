@@ -1,5 +1,5 @@
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { BLOG_SELECT, type BlogPost } from "@/features/blog/types";
+import { BLOG_SELECT, normalizeBlogPost, type BlogPost, type BlogPostRow } from "@/features/blog/types";
 
 const BUCKET = "blog-covers";
 
@@ -14,6 +14,30 @@ function getStoragePathFromUrl(url: string): string | null {
   return url.slice(idx + marker.length);
 }
 
+async function syncBlogProducts(blogId: string, productIds: string[]) {
+  const supabase = createSupabaseBrowserClient();
+  const { error: deleteError } = await supabase.from("blog_products").delete().eq("blog_id", blogId);
+  if (deleteError) throw deleteError;
+
+  if (productIds.length === 0) return;
+
+  const { error: insertError } = await supabase.from("blog_products").insert(
+    productIds.map((product_id, index) => ({
+      blog_id: blogId,
+      product_id,
+      sort_order: (index + 1) * 10,
+    }))
+  );
+  if (insertError) throw insertError;
+}
+
+async function fetchBlogById(id: string) {
+  const supabase = createSupabaseBrowserClient();
+  const { data, error } = await supabase.from("blogs").select(BLOG_SELECT).eq("id", id).single();
+  if (error) throw error;
+  return normalizeBlogPost(data as BlogPostRow);
+}
+
 export async function fetchBlogs() {
   const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase
@@ -23,7 +47,7 @@ export async function fetchBlogs() {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data ?? []) as BlogPost[];
+  return ((data ?? []) as BlogPostRow[]).map(normalizeBlogPost);
 }
 
 async function uploadCover(file: File): Promise<string> {
@@ -53,6 +77,7 @@ export type BlogWritePayload = {
   excerpt: string;
   body: string;
   cover_image_url: string;
+  product_ids: string[];
   published: boolean;
   published_at: string | null;
   sort_order: number;
@@ -96,7 +121,19 @@ export async function createBlog(payload: BlogWritePayload) {
     throw error;
   }
 
-  return data as BlogPost;
+  const post = normalizeBlogPost(data as BlogPostRow);
+
+  try {
+    await syncBlogProducts(post.id, payload.product_ids);
+  } catch (syncError) {
+    await supabase.from("blogs").delete().eq("id", post.id);
+    if (payload.coverFile && coverUrl) {
+      await removeCoverIfStored(coverUrl);
+    }
+    throw syncError;
+  }
+
+  return fetchBlogById(post.id);
 }
 
 export async function updateBlog(payload: BlogWritePayload & { id: string; previous_cover_url: string }) {
@@ -138,6 +175,8 @@ export async function updateBlog(payload: BlogWritePayload & { id: string; previ
     throw error;
   }
 
+  await syncBlogProducts(payload.id, payload.product_ids);
+
   if (
     payload.coverFile &&
     payload.previous_cover_url &&
@@ -146,7 +185,7 @@ export async function updateBlog(payload: BlogWritePayload & { id: string; previ
     await removeCoverIfStored(payload.previous_cover_url);
   }
 
-  return data as BlogPost;
+  return fetchBlogById(payload.id);
 }
 
 export async function deleteBlog(post: BlogPost) {

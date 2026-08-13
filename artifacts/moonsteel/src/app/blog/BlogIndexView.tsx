@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { CmsImage } from "@/components/ui/CmsImage";
-import { formatBlogDate, getBlogPath } from "@/features/blog/types";
+import { formatBlogDate, getBlogCoverImageUrl, getBlogPath } from "@/features/blog/types";
 import type { BlogPost } from "@/features/blog/types";
 
 type BlogIndexViewProps = {
@@ -35,16 +35,17 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => {
               const dateLabel = formatBlogDate(post.published_at ?? post.created_at);
+              const coverSrc = getBlogCoverImageUrl(post);
               return (
                 <li key={post.id}>
                   <Link
                     href={getBlogPath(post.slug)}
                     className="group layer-1 block overflow-hidden rounded-xl transition-colors hover:border-primary/40"
                   >
-                    {post.cover_image_url ? (
+                    {coverSrc ? (
                       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                         <CmsImage
-                          src={post.cover_image_url}
+                          src={coverSrc}
                           alt=""
                           fill
                           sizes="(max-width: 768px) 100vw, 33vw"

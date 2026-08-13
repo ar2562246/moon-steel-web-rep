@@ -1,6 +1,12 @@
 export const WEB_43_MAX_WIDTH = 1200;
 export const WEB_43_MAX_HEIGHT = 900;
 export const WEB_43_RATIO = 4 / 3;
+
+/** Hero strip is widescreen; keep files light for fast homepage loads. */
+export const WEB_HERO_MAX_WIDTH = 1600;
+export const WEB_HERO_MAX_HEIGHT = 900;
+export const WEB_HERO_RATIO = 16 / 9;
+
 const RATIO_TOLERANCE = 0.02;
 
 export type OptimizeImageResult =
@@ -18,31 +24,51 @@ export type OptimizeImageResult =
       previousHeight: number;
     };
 
-function isFourByThree(width: number, height: number) {
-  return Math.abs(width / height - WEB_43_RATIO) <= RATIO_TOLERANCE;
+type OptimizeOptions = {
+  ratio: number;
+  maxWidth: number;
+  maxHeight: number;
+  fileSuffix: string;
+  defaultName: string;
+};
+
+function matchesRatio(width: number, height: number, ratio: number) {
+  return Math.abs(width / height - ratio) <= RATIO_TOLERANCE;
 }
 
 export function isWebStandard43(width: number, height: number) {
-  return isFourByThree(width, height) && width <= WEB_43_MAX_WIDTH && height <= WEB_43_MAX_HEIGHT;
+  return (
+    matchesRatio(width, height, WEB_43_RATIO) &&
+    width <= WEB_43_MAX_WIDTH &&
+    height <= WEB_43_MAX_HEIGHT
+  );
 }
 
-function cropToFourByThree(width: number, height: number) {
+export function isWebStandardHero(width: number, height: number) {
+  return (
+    matchesRatio(width, height, WEB_HERO_RATIO) &&
+    width <= WEB_HERO_MAX_WIDTH &&
+    height <= WEB_HERO_MAX_HEIGHT
+  );
+}
+
+function cropToRatio(width: number, height: number, ratio: number) {
   const current = width / height;
-  if (Math.abs(current - WEB_43_RATIO) <= RATIO_TOLERANCE) {
+  if (Math.abs(current - ratio) <= RATIO_TOLERANCE) {
     return { sx: 0, sy: 0, sw: width, sh: height };
   }
 
-  if (current > WEB_43_RATIO) {
-    const sw = Math.round(height * WEB_43_RATIO);
+  if (current > ratio) {
+    const sw = Math.round(height * ratio);
     return { sx: Math.round((width - sw) / 2), sy: 0, sw, sh: height };
   }
 
-  const sh = Math.round(width / WEB_43_RATIO);
+  const sh = Math.round(width / ratio);
   return { sx: 0, sy: Math.round((height - sh) / 2), sw: width, sh };
 }
 
-function fitWithinMax(width: number, height: number) {
-  const scale = Math.min(1, WEB_43_MAX_WIDTH / width, WEB_43_MAX_HEIGHT / height);
+function fitWithinMax(width: number, height: number, maxWidth: number, maxHeight: number) {
+  const scale = Math.min(1, maxWidth / width, maxHeight / height);
   return {
     width: Math.max(1, Math.round(width * scale)),
     height: Math.max(1, Math.round(height * scale)),
@@ -90,21 +116,22 @@ function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) 
   });
 }
 
-function fileNameForOutput(name: string) {
-  const base = name.replace(/\.[^.]+$/, "") || "product-image";
-  return `${base}-web43.jpg`;
+function fileNameForOutput(name: string, suffix: string, fallback: string) {
+  const base = name.replace(/\.[^.]+$/, "") || fallback;
+  return `${base}-${suffix}.jpg`;
 }
 
-export async function optimizeImageToWeb43(
+async function optimizeImageForWeb(
   source: Blob | string,
-  originalName = "product-image.jpg"
+  originalName: string,
+  options: OptimizeOptions
 ): Promise<OptimizeImageResult> {
   const blob = await blobFromSource(source);
   const image = await loadImage(blob);
   const previousWidth = image.naturalWidth;
   const previousHeight = image.naturalHeight;
-  const crop = cropToFourByThree(previousWidth, previousHeight);
-  const fitted = fitWithinMax(crop.sw, crop.sh);
+  const crop = cropToRatio(previousWidth, previousHeight, options.ratio);
+  const fitted = fitWithinMax(crop.sw, crop.sh, options.maxWidth, options.maxHeight);
 
   if (
     crop.sx === 0 &&
@@ -127,9 +154,12 @@ export async function optimizeImageToWeb43(
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(image, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, fitted.width, fitted.height);
 
-  const type = "image/jpeg";
-  const output = await canvasToBlob(canvas, type, 0.92);
-  const file = new File([output], fileNameForOutput(originalName), { type });
+  const output = await canvasToBlob(canvas, "image/jpeg", 0.85);
+  const file = new File(
+    [output],
+    fileNameForOutput(originalName, options.fileSuffix, options.defaultName),
+    { type: "image/jpeg" }
+  );
 
   return {
     status: "optimized",
@@ -139,4 +169,30 @@ export async function optimizeImageToWeb43(
     previousWidth,
     previousHeight,
   };
+}
+
+export async function optimizeImageToWeb43(
+  source: Blob | string,
+  originalName = "product-image.jpg"
+): Promise<OptimizeImageResult> {
+  return optimizeImageForWeb(source, originalName, {
+    ratio: WEB_43_RATIO,
+    maxWidth: WEB_43_MAX_WIDTH,
+    maxHeight: WEB_43_MAX_HEIGHT,
+    fileSuffix: "web43",
+    defaultName: "product-image",
+  });
+}
+
+export async function optimizeImageToWebHero(
+  source: Blob | string,
+  originalName = "hero-image.jpg"
+): Promise<OptimizeImageResult> {
+  return optimizeImageForWeb(source, originalName, {
+    ratio: WEB_HERO_RATIO,
+    maxWidth: WEB_HERO_MAX_WIDTH,
+    maxHeight: WEB_HERO_MAX_HEIGHT,
+    fileSuffix: "web-hero",
+    defaultName: "hero-image",
+  });
 }

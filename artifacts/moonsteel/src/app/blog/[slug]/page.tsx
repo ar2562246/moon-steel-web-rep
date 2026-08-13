@@ -4,6 +4,8 @@ import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { BlogPostView } from "@/app/blog/BlogPostView";
 import { getPublishedBlogBySlug, listPublishedBlogSlugs } from "@/features/blog/queries";
+import { getBlogCoverImageUrl } from "@/features/blog/types";
+import { getPublishedCatalogProductsByIds } from "@/features/catalog/queries";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://moonsteelfab.com";
@@ -35,6 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (!post) return { title: "Article not found" };
 
     const description = post.excerpt || post.body.slice(0, 160);
+    const coverSrc = getBlogCoverImageUrl(post);
     return {
       title: post.title,
       description,
@@ -46,9 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         url: `${siteUrl}/blog/${post.slug}`,
         title: `${post.title} | Moon Steel`,
         description,
-        ...(post.cover_image_url
-          ? { images: [{ url: post.cover_image_url, alt: post.title }] }
-          : {}),
+        ...(coverSrc ? { images: [{ url: coverSrc, alt: post.title }] } : {}),
       },
     };
   } catch {
@@ -62,9 +63,13 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!hasSupabaseServerEnv()) notFound();
 
   let post = null;
+  let linkedProducts: Awaited<ReturnType<typeof getPublishedCatalogProductsByIds>> = [];
   try {
     const supabase = await createSupabaseServerClient();
     post = await getPublishedBlogBySlug(supabase, slug);
+    if (post?.product_ids.length) {
+      linkedProducts = await getPublishedCatalogProductsByIds(supabase, post.product_ids);
+    }
   } catch {
     notFound();
   }
@@ -73,7 +78,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <>
-      <BlogPostView post={post} />
+      <BlogPostView post={post} linkedProducts={linkedProducts} />
       <Footer />
       <WhatsAppButton />
     </>

@@ -133,6 +133,22 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
               </p>
             </div>
 
+            {activeCategory === "grease-traps" ? (
+              <div className="mb-6 rounded-xl border border-primary/25 bg-primary/5 p-4">
+                <p className="text-sm font-medium text-foreground">Need help choosing a size?</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Select a GPM rating to see the recommended Moon Steel size, inlet, and outlet.
+                </p>
+                <Link
+                  href="/grease-traps#calculator"
+                  className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                >
+                  Open grease trap calculator
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+            ) : null}
+
             {products.length === 0 ? (
               <p className="text-muted-foreground">No products found in this category.</p>
             ) : (

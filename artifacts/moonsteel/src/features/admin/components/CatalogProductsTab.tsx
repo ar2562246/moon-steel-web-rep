@@ -613,16 +613,6 @@ export function CatalogProductsTab() {
                       onChange={(details) => setForm((current) => ({ ...current, details }))}
                     />
                   </Field>
-                  {form.details.trim() ? (
-                    <div className="layer-2 rounded-xl p-4">
-                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        On the product page
-                      </p>
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                        {form.details}
-                      </p>
-                    </div>
-                  ) : null}
                 </section>
 
                 <section className="space-y-3">

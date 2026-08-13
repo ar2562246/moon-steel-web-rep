@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { BLOG_SELECT, type BlogPost } from "@/features/blog/types";
+import { BLOG_SELECT, normalizeBlogPost, type BlogPost, type BlogPostRow } from "@/features/blog/types";
 
 export async function listPublishedBlogs(supabase: SupabaseClient): Promise<BlogPost[]> {
   const { data, error } = await supabase
@@ -11,7 +11,7 @@ export async function listPublishedBlogs(supabase: SupabaseClient): Promise<Blog
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data ?? []) as BlogPost[];
+  return ((data ?? []) as BlogPostRow[]).map(normalizeBlogPost);
 }
 
 export async function getPublishedBlogBySlug(
@@ -26,7 +26,7 @@ export async function getPublishedBlogBySlug(
     .maybeSingle();
 
   if (error) throw error;
-  return (data as BlogPost | null) ?? null;
+  return data ? normalizeBlogPost(data as BlogPostRow) : null;
 }
 
 export async function listPublishedBlogSlugs(

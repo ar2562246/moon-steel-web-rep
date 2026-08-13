@@ -76,8 +76,13 @@
   },
   {
     "slug": "grease-trap-grease-interceptor",
-    "name": "Grease Trap / Grease Interceptor",
-    "details": "Compact grease interceptor that separates fats, oils, and grease from kitchen wastewater before they enter the drainage system.\n\nSpecifications\n• Size: 22″ × 15″ × 12″\n• Material: 1.50mm SS 304\n• Inlet: 38mm\n• Outlet: 50mm\n• Internals: 1× bucket, 1× baffle\n• Grease holding capacity: 9.5 kg\n\nSuitable for foodservice and commercial kitchen wastewater lines. Custom capacities available on request."
+    "name": "Grease Trap Small 17 GPM",
+    "details": "Small grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 22″ × 15″ × 12″\n• Flow: 17 GPM\n• Gross tank volume: ~17.1 gal / 65 L\n• Material: 1.50mm AISI 304\n• Inlet: 1″\n• Outlet: 2″\n• Internals: 1× bucket, 1× baffle\n• Grease holding capacity: 9.5 kg\n\nSuitable for cafés and light-duty sinks. Custom sizes available on request."
+  },
+  {
+    "slug": "grease-trap-large",
+    "name": "Grease Trap Large 120 GPM",
+    "details": "Large grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 48″ × 24″ × 24″\n• Flow: 120 GPM\n• Gross tank volume: ~119.7 gal / 453 L\n• Material: 1.50mm AISI 304\n• Inlet: 4″\n• Outlet: 4″\n\nSuitable for hotels, catering, and high-volume kitchens. Custom sizes available on request."
   },
   {
     "slug": "hand-wash-sink",
@@ -141,8 +146,8 @@
   },
   {
     "slug": "stainless-steel-grease-trap-33-gpm",
-    "name": "Stainless Steel Grease Trap 33 GPM",
-    "details": "Medium-capacity grease interceptor that separates grease and oil from kitchen wastewater to protect drains and support environmental compliance.\n\nSpecifications\n• Material: 1.50mm SS 304\n• Size: 24″ (L) × 18″ (W) × 18″ (H)\n• Connections: 3″ inlet and outlet\n• Flow rate: 33.66 GPM\n• Internals: Removable baffles and grease collection system for easy cleaning\n\nSuited to medium commercial kitchens and foodservice facilities. Custom capacities available on request."
+    "name": "Grease Trap Medium 34 GPM",
+    "details": "Medium grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 24″ × 18″ × 18″\n• Flow: 34 GPM\n• Gross tank volume: ~33.7 gal / 128 L\n• Material: 1.50mm AISI 304\n• Inlet: 3″\n• Outlet: 3″\n• Internals: Removable baffles\n\nSuitable for restaurants and moderate commercial kitchens. Custom sizes available on request."
   },
   {
     "slug": "stainless-steel-stock-pot-stove",

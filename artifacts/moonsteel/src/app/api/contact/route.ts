@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { contactInquirySchema, toContactInquiryRecord } from "@/lib/contact/schema";
-import { sendContactNotificationEmail } from "@/lib/contact/send-email";
+import {
+  sendContactConfirmationEmail,
+  sendContactNotificationEmail,
+} from "@/lib/contact/send-email";
+import { getDefaultFromAddress } from "@/lib/email/mailer";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -33,30 +37,44 @@ export async function POST(request: Request) {
   let stored = false;
   if (admin) {
     const { error } = await admin.from("contact_inquiries").insert(inquiry);
-    stored = !error;
+    if (error) {
+      console.error("contact_inquiries insert failed:", error.message);
+    } else {
+      stored = true;
+    }
   }
 
-  const notifyTo = process.env.CONTACT_NOTIFICATION_EMAIL;
-  const notifyFrom = process.env.RESEND_FROM_EMAIL ?? "Moon Steel <onboarding@resend.dev>";
-  let emailed = false;
+  const notifyTo = process.env.CONTACT_NOTIFICATION_EMAIL ?? process.env.SMTP_USER;
+  const notifyFrom = getDefaultFromAddress();
+  let notified = false;
+  let confirmed = false;
 
   if (notifyTo) {
-    emailed = await sendContactNotificationEmail({
+    notified = await sendContactNotificationEmail({
       to: notifyTo,
       from: notifyFrom,
       inquiry,
     });
   }
 
-  if (!stored && !emailed) {
+  confirmed = await sendContactConfirmationEmail({
+    to: inquiry.email,
+    from: notifyFrom,
+    inquiry,
+  });
+
+  if (!stored && !notified) {
     return NextResponse.json(
       {
         error:
-          "Contact delivery is not configured. Set SUPABASE_SERVICE_ROLE_KEY and/or RESEND_API_KEY with CONTACT_NOTIFICATION_EMAIL.",
+          "Contact delivery is not configured. Set SUPABASE_SERVICE_ROLE_KEY and/or SMTP with CONTACT_NOTIFICATION_EMAIL.",
       },
       { status: 503 }
     );
   }
 
-  return NextResponse.json({ ok: true, stored, emailed }, { status: 201 });
+  return NextResponse.json(
+    { ok: true, stored, emailed: notified, confirmed },
+    { status: 201 }
+  );
 }

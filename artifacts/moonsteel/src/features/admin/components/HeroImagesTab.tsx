@@ -1,11 +1,12 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { Download, ImagePlus, Save, Trash2, Upload, X } from "lucide-react";
+import { Download, ImageDown, ImagePlus, Save, Trash2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
+import { AdminImageActionButton } from "@/features/admin/components/AdminImageActions";
 import {
   AdminMasterDetail,
   AdminSidebarCard,
@@ -17,6 +18,11 @@ import {
 } from "@/features/admin/components/AdminMasterDetail";
 import { useHeroImages } from "@/features/admin/hooks/useHeroImages";
 import { downloadImageSrc } from "@/features/admin/lib/adminImageActions";
+import {
+  optimizeImageToWebHero,
+  WEB_HERO_MAX_HEIGHT,
+  WEB_HERO_MAX_WIDTH,
+} from "@/features/admin/lib/optimizeImageToWeb43";
 import { useToast } from "@/hooks/use-toast";
 
 const slots = [1, 2, 3, 4] as const;
@@ -45,6 +51,7 @@ export function HeroImagesTab() {
     4: 0,
   });
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
 
   const previewUrls = useMemo(() => {
     const next: Record<number, string | null> = { 1: null, 2: null, 3: null, 4: null };
@@ -98,6 +105,43 @@ export function HeroImagesTab() {
   const onClearSelection = (slot: number) => {
     setSelected((prev) => ({ ...prev, [slot]: null }));
     setFileInputKeys((prev) => ({ ...prev, [slot]: prev[slot] + 1 }));
+  };
+
+  const onOptimizeForWeb = async (slot: number) => {
+    const pending = selected[slot];
+    const existingImage = bySlot.get(slot);
+    const source = pending ?? existingImage?.image_url;
+    if (!source) return;
+
+    setIsOptimizing(true);
+    try {
+      const name =
+        pending?.name ||
+        (typeof source === "string" ? `hero-image-slot-${slot}.jpg` : "hero-image.jpg");
+      const result = await optimizeImageToWebHero(source, name);
+
+      if (result.status === "already-standard") {
+        toast({
+          title: "Already web-ready",
+          description: `${result.width}×${result.height} is within ${WEB_HERO_MAX_WIDTH}×${WEB_HERO_MAX_HEIGHT} at 16:9.`,
+        });
+        return;
+      }
+
+      setSelected((prev) => ({ ...prev, [slot]: result.file }));
+      toast({
+        title: "Optimized for web",
+        description: `${result.previousWidth}×${result.previousHeight} → ${result.width}×${result.height}. Click ${existingImage ? "Replace" : "Upload"} to save.`,
+      });
+    } catch (e) {
+      toast({
+        title: "Optimize failed",
+        description: e instanceof Error ? e.message : "Could not optimize this hero image.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   const onDelete = async (slot: number) => {
@@ -255,11 +299,25 @@ export function HeroImagesTab() {
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <Label>Photo</Label>
-            {pendingFile ? (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                Unsaved edit — click {existing ? "Replace" : "Upload"}
-              </span>
-            ) : null}
+            <div className="flex items-center gap-2">
+              {displaySrc ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isOptimizing || isSaving}
+                  onClick={() => void onOptimizeForWeb(selectedSlot)}
+                >
+                  <ImageDown className="mr-2 h-3.5 w-3.5" />
+                  {isOptimizing ? "Optimizing…" : "Make web ready"}
+                </Button>
+              ) : null}
+              {pendingFile ? (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                  Unsaved edit — click {existing ? "Replace" : "Upload"}
+                </span>
+              ) : null}
+            </div>
           </div>
 
           {displaySrc ? (
@@ -270,6 +328,21 @@ export function HeroImagesTab() {
               fileName={pendingFile?.name || `hero-image-slot-${selectedSlot}.jpg`}
               className="aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted"
               imgClassName="object-cover"
+              disabled={isOptimizing || isSaving}
+              extraActions={
+                <AdminImageActionButton
+                  tone="optimize"
+                  disabled={isOptimizing || isSaving}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void onOptimizeForWeb(selectedSlot);
+                  }}
+                  aria-label="Make web ready"
+                  title={`Web ready · max ${WEB_HERO_MAX_WIDTH}×${WEB_HERO_MAX_HEIGHT} 16:9`}
+                >
+                  <ImageDown className="h-3.5 w-3.5" />
+                </AdminImageActionButton>
+              }
               onEdited={(file) => {
                 setSelected((prev) => ({ ...prev, [selectedSlot]: file }));
                 toast({
@@ -289,9 +362,18 @@ export function HeroImagesTab() {
               />
               <ImagePlus className="h-8 w-8" strokeWidth={1.75} />
               <span className="text-sm font-medium">Add hero photo</span>
-              <span className="text-xs">Widescreen image works best</span>
+              <span className="text-xs">
+                Widescreen 16:9 · up to {WEB_HERO_MAX_WIDTH}×{WEB_HERO_MAX_HEIGHT} for fast loads
+              </span>
             </label>
           )}
+          {displaySrc ? (
+            <p className="text-xs text-muted-foreground">
+              Use <span className="font-medium text-foreground">Make web ready</span> to crop to 16:9
+              and shrink to max {WEB_HERO_MAX_WIDTH}×{WEB_HERO_MAX_HEIGHT} JPEG for faster homepage
+              loads.
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-2">

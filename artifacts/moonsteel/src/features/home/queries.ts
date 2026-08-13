@@ -10,6 +10,10 @@ import {
   listPublishedCatalogProducts,
 } from "@/features/catalog/queries";
 import type { CatalogCategoryCard } from "@/features/catalog/types";
+import {
+  pickGreaseTrapCatalogImages,
+  type GreaseTrapCatalogImage,
+} from "@/app/grease-traps/grease-traps-data";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjects } from "@/features/projects/queries";
 import { defaultTestimonials } from "@/features/testimonials/defaultTestimonials";
@@ -25,6 +29,7 @@ export type HomePageData = {
   customerLogos: CustomerLogo[];
   logoSliderSpeed: number;
   catalogCategories: CatalogCategoryCard[];
+  greaseTrapImages: Record<string, GreaseTrapCatalogImage>;
   projects: Project[];
   testimonials: Testimonial[];
 };
@@ -102,6 +107,7 @@ export async function resolveHomePageData(): Promise<HomePageData> {
         customerLogos,
         logoSliderSpeed,
         catalogCategories,
+        greaseTrapImages: pickGreaseTrapCatalogImages(products),
         projects: projects.length > 0 ? projects : defaultProjects,
         testimonials: testimonials.length > 0 ? testimonials : defaultTestimonials,
       };
@@ -115,6 +121,7 @@ export async function resolveHomePageData(): Promise<HomePageData> {
     customerLogos: [],
     logoSliderSpeed: DEFAULT_LOGO_SLIDER_SPEED,
     catalogCategories: defaultCategoryCards(),
+    greaseTrapImages: pickGreaseTrapCatalogImages(defaultCatalogProducts),
     projects: defaultProjects,
     testimonials: defaultTestimonials,
   };

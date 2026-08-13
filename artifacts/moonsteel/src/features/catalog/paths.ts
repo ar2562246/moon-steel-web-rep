@@ -8,6 +8,11 @@ export function getCatalogCategoryFilterPath(categorySlug: string) {
   return `/products?category=${categorySlug}`;
 }
 
+export function getCatalogCategoryHref(categorySlug: string) {
+  if (categorySlug === "grease-traps") return "/grease-traps";
+  return getCatalogCategoryFilterPath(categorySlug);
+}
+
 export function unescapeImportedNewlines(value: string) {
   if (!value) return value;
   if (!value.includes("\\") && !value.includes("\r")) return value;

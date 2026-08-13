@@ -17,6 +17,7 @@ import { CatalogProductsTab } from "@/features/admin/components/CatalogProductsT
 import { ProjectsTab } from "@/features/admin/components/ProjectsTab";
 import { TestimonialsTab } from "@/features/admin/components/TestimonialsTab";
 import { BlogsTab } from "@/features/admin/components/BlogsTab";
+import { InquiriesTab } from "@/features/admin/components/InquiriesTab";
 
 type TabConfig = {
   key: AdminTabKey;
@@ -26,6 +27,7 @@ type TabConfig = {
 };
 
 const tabConfig: TabConfig[] = [
+  { key: "inquiries", label: "Inquiries", shortLabel: "Leads" },
   { key: "customer-logos", label: "Customer Logos", shortLabel: "Logos" },
   { key: "hero-images", label: "Hero Images", shortLabel: "Hero" },
   { key: "products", label: "Product Lines", shortLabel: "Lines" },
@@ -52,6 +54,7 @@ function PlaceholderTab({ title }: { title: string }) {
 }
 
 function AdminTabBody({ tab }: { tab: AdminTabKey }) {
+  if (tab === "inquiries") return <InquiriesTab />;
   if (tab === "customer-logos") return <CustomerLogosTab />;
   if (tab === "hero-images") return <HeroImagesTab />;
   if (tab === "products") return <ProductCategoriesTab />;

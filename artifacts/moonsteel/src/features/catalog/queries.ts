@@ -141,6 +141,36 @@ export async function getCatalogProductBySlug(supabase: SupabaseClient, slug: st
   return data ? normalizeProductRow(data as CatalogProductRow) : null;
 }
 
+export async function getPublishedCatalogProductById(supabase: SupabaseClient, id: string) {
+  const { data, error } = await supabase
+    .from("catalog_products")
+    .select(CATALOG_PRODUCT_SELECT)
+    .eq("id", id)
+    .eq("published", true)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? normalizeProductRow(data as CatalogProductRow) : null;
+}
+
+export async function getPublishedCatalogProductsByIds(supabase: SupabaseClient, ids: string[]) {
+  if (ids.length === 0) return [] as CatalogProduct[];
+
+  const { data, error } = await supabase
+    .from("catalog_products")
+    .select(CATALOG_PRODUCT_SELECT)
+    .in("id", ids)
+    .eq("published", true);
+
+  if (error) throw error;
+
+  const byId = new Map(
+    ((data ?? []) as CatalogProductRow[]).map((row) => [row.id, normalizeProductRow(row)])
+  );
+
+  return ids.map((id) => byId.get(id)).filter((product): product is CatalogProduct => Boolean(product));
+}
+
 export async function listPublishedCatalogProductSlugs(supabase: SupabaseClient) {
   const { data, error } = await supabase
     .from("catalog_products")
