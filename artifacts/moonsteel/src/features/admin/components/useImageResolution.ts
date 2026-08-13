@@ -18,12 +18,44 @@ function gcd(a: number, b: number): number {
   return x || 1;
 }
 
+/** Common display ratios, checked within a small tolerance. */
+const COMMON_ASPECTS: { label: string; value: number }[] = [
+  { label: "1:1", value: 1 },
+  { label: "5:4", value: 5 / 4 },
+  { label: "4:3", value: 4 / 3 },
+  { label: "3:2", value: 3 / 2 },
+  { label: "16:10", value: 16 / 10 },
+  { label: "16:9", value: 16 / 9 },
+  { label: "2:1", value: 2 },
+  { label: "21:9", value: 21 / 9 },
+  { label: "4:5", value: 4 / 5 },
+  { label: "3:4", value: 3 / 4 },
+  { label: "2:3", value: 2 / 3 },
+  { label: "9:16", value: 9 / 16 },
+];
+
 export function formatAspectRatio(width: number, height: number) {
+  if (width <= 0 || height <= 0) return "—";
+
+  const ratio = width / height;
+
+  // Prefer a named common ratio when close enough (e.g. 1600×1194 → 4:3).
+  let best: { label: string; delta: number } | null = null;
+  for (const aspect of COMMON_ASPECTS) {
+    const delta = Math.abs(ratio - aspect.value) / aspect.value;
+    if (delta <= 0.03 && (!best || delta < best.delta)) {
+      best = { label: aspect.label, delta };
+    }
+  }
+  if (best) return best.label;
+
   const d = gcd(width, height);
   const w = width / d;
   const h = height / d;
-  if (w <= 32 && h <= 32) return `${w}:${h}`;
-  return `${(width / height).toFixed(2)}:1`;
+  if (w <= 40 && h <= 40) return `${w}:${h}`;
+
+  // Last resort: keep it readable without the old "1.34:1" style.
+  return `${ratio.toFixed(2)}`;
 }
 
 export function formatFileSize(bytes: number) {

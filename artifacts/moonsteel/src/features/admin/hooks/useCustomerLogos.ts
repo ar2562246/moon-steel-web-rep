@@ -37,8 +37,10 @@ export function useCustomerLogos() {
     try {
       const created = await uploadCustomerLogo(file);
       setLogos((prev) => [created, ...prev]);
+      return created;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
+      return null;
     } finally {
       setIsUploading(false);
     }

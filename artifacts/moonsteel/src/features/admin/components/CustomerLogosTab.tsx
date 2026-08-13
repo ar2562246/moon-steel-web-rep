@@ -2,7 +2,7 @@
 
 import { ChangeEvent, DragEvent, useEffect, useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
-import { AdminImagePreview } from "@/features/admin/components/AdminImagePreview";
+import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
 import {
   AdminDetailSkeleton,
   AdminMasterDetail,
@@ -17,10 +17,12 @@ import {
 import { useCustomerLogos } from "@/features/admin/hooks/useCustomerLogos";
 import { fetchLogoSliderSpeed, saveLogoSliderSpeed } from "@/features/admin/services/customerLogos";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import type { CustomerLogo } from "@/features/admin/types";
 
 export function CustomerLogosTab() {
-  const { logos, isLoading, isUploading, error, uploadMany, remove } = useCustomerLogos();
+  const { toast } = useToast();
+  const { logos, isLoading, isUploading, error, upload, uploadMany, remove } = useCustomerLogos();
   const [selectedLogo, setSelectedLogo] = useState<CustomerLogo | null>(null);
   const [isUploadingView, setIsUploadingView] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -241,13 +243,23 @@ export function CustomerLogosTab() {
           {previewUrls.length > 0 ? (
             <div className="layer-2 grid grid-cols-2 gap-3 rounded-lg p-4 sm:grid-cols-3">
               {previewUrls.map((item, index) => (
-                <AdminImagePreview
+                <AdminEditableImage
                   key={`${item.name}-${item.url}`}
                   src={item.url}
                   alt={`Preview ${item.name}`}
                   file={selectedFiles[index]}
-                  className="layer-1 rounded-md"
-                  imgClassName="mx-auto h-20 w-full object-contain p-2"
+                  fileName={item.name}
+                  className="layer-1 aspect-square rounded-md bg-background"
+                  imgClassName="object-contain p-2"
+                  onEdited={(file) => {
+                    setSelectedFiles((current) =>
+                      current.map((existing, i) => (i === index ? file : existing))
+                    );
+                    toast({
+                      title: "Logo edited",
+                      description: "Upload to save the edited logo.",
+                    });
+                  }}
                 />
               ))}
             </div>
@@ -255,11 +267,31 @@ export function CustomerLogosTab() {
         </form>
       ) : selectedLogo ? (
         <div className="space-y-4">
-          <AdminImagePreview
+          <AdminEditableImage
             src={selectedLogo.image_url}
             alt="Customer logo"
-            className="layer-2 w-full rounded-lg"
-            imgClassName="mx-auto max-h-72 w-full object-contain p-6"
+            fileName={`customer-logo-${selectedLogo.id}.png`}
+            className="layer-2 aspect-[4/3] w-full rounded-lg bg-background"
+            imgClassName="object-contain p-6"
+            onEdited={async (file) => {
+              const created = await upload(file);
+              if (!created) {
+                toast({
+                  title: "Update failed",
+                  description: "Could not upload the edited logo.",
+                  variant: "destructive",
+                });
+                return;
+              }
+              const ok = await remove(selectedLogo);
+              setSelectedLogo(created);
+              toast({
+                title: ok ? "Logo updated" : "Logo uploaded",
+                description: ok
+                  ? "Edited logo replaced the previous file."
+                  : "Edited logo uploaded; remove the old one if it still appears.",
+              });
+            }}
           />
         </div>
       ) : null}

@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ExternalLink, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AdminImagePreview } from "@/features/admin/components/AdminImagePreview";
+import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
 import {
   AdminDetailSkeleton,
   AdminMasterDetail,
@@ -18,6 +18,7 @@ import {
 import { useBlogs } from "@/features/admin/hooks/useBlogs";
 import { formatBlogDate, getBlogPath, type BlogPost } from "@/features/blog/types";
 import { slugify } from "@/lib/slugify";
+import { useToast } from "@/hooks/use-toast";
 
 const initialForm = {
   title: "",
@@ -31,6 +32,7 @@ const initialForm = {
 };
 
 export function BlogsTab() {
+  const { toast } = useToast();
   const { posts, isLoading, isSaving, error, create, update, remove } = useBlogs();
   const [form, setForm] = useState(initialForm);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -252,11 +254,20 @@ export function BlogsTab() {
           />
         </div>
         {coverPreview || form.cover_image_url ? (
-          <AdminImagePreview
+          <AdminEditableImage
             src={coverPreview || form.cover_image_url}
             file={coverFile}
-            className="max-h-48 w-full rounded-md"
-            imgClassName="aspect-[16/10] max-h-48 object-cover"
+            fileName={coverFile?.name || "blog-cover.jpg"}
+            alt="Blog cover"
+            className="aspect-[16/10] max-h-56 w-full rounded-md bg-muted"
+            imgClassName="object-cover"
+            onEdited={(file) => {
+              setCoverFile(file);
+              toast({
+                title: "Cover edited",
+                description: "Save the post to keep this cover image.",
+              });
+            }}
           />
         ) : null}
         <div className="grid gap-4 md:grid-cols-2">

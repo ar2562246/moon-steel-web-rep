@@ -46,23 +46,25 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   const images = getCatalogProductImages(product);
 
   return (
-    <main className="pt-24 pb-28 md:pt-28 md:pb-24">
+    <main className="pt-20 pb-28 md:pt-28 md:pb-24">
       <div className="container mx-auto px-4 md:px-6">
         <Link
           href="/products"
-          className="mb-5 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground md:mb-8"
+          className="mb-3 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground md:mb-8"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to catalog
         </Link>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-start lg:gap-10">
-          <div className="space-y-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-start lg:gap-10 md:gap-6">
+          <div className="space-y-5 md:space-y-6">
             <ImageGallery images={images} title={product.name} />
 
             <div className="space-y-3 lg:hidden">
               <CategoryPills product={product} />
-              <h1 className="text-2xl font-display font-semibold text-foreground">{product.name}</h1>
+              <h1 className="text-2xl font-display font-semibold leading-snug text-foreground">
+                {product.name}
+              </h1>
               <QuoteButton />
             </div>
 

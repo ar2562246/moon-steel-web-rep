@@ -11,16 +11,17 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, ExternalLink, GripVertical, ImageDown, Plus, Star, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, GripVertical, ImageDown, Plus, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import { slugify } from "@/lib/slugify";
 import { getCatalogProductCover, getCatalogProductImages, getCatalogProductPath } from "@/features/catalog/paths";
-import { AdminImagePreview } from "@/features/admin/components/AdminImagePreview";
-import { AdminImageEditDialog } from "@/features/admin/components/AdminImageEditDialog";
+import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
+import { AdminImageActionButton } from "@/features/admin/components/AdminImageActions";
 import {
   AdminMasterDetail,
   AdminSidebarCard,
@@ -133,7 +134,6 @@ export function CatalogProductsTab() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [optimizingId, setOptimizingId] = useState<string | "all" | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
-  const [editingImageId, setEditingImageId] = useState<string | null>(null);
   const galleryRef = useRef(gallery);
   galleryRef.current = gallery;
 
@@ -199,18 +199,6 @@ export function CatalogProductsTab() {
       })
     );
   };
-
-  const editingImage = useMemo(
-    () => gallery.find((entry) => entry.id === editingImageId) ?? null,
-    [editingImageId, gallery]
-  );
-  const editingImageSrc = editingImage
-    ? editingImage.kind === "url"
-      ? editingImage.url
-      : editingImage.preview
-    : null;
-  const editingImageName =
-    editingImage?.kind === "file" ? editingImage.file.name : "product-image.jpg";
 
   const moveGallery = (fromId: string, toId: string) => {
     if (fromId === toId) return;
@@ -660,100 +648,142 @@ export function CatalogProductsTab() {
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {gallery.map((entry, index) => {
                       const src = entry.kind === "url" ? entry.url : entry.preview;
+                      const isBusy = optimizingId !== null;
                       return (
                         <div
                           key={entry.id}
-                          draggable={optimizingId === null}
-                          onDragStart={() => setDragId(entry.id)}
-                          onDragOver={(event) => event.preventDefault()}
-                          onDrop={() => {
-                            if (dragId) moveGallery(dragId, entry.id);
+                          onDragOver={(event) => {
+                            event.preventDefault();
+                            event.dataTransfer.dropEffect = "move";
+                          }}
+                          onDrop={(event) => {
+                            event.preventDefault();
+                            const fromId = event.dataTransfer.getData("text/plain") || dragId;
+                            if (fromId) moveGallery(fromId, entry.id);
                             setDragId(null);
                           }}
-                          onDragEnd={() => setDragId(null)}
-                          className="layer-2 relative overflow-hidden rounded-lg bg-muted"
+                          className={cn(
+                            "layer-2 rounded-lg p-2",
+                            dragId === entry.id && "opacity-60 ring-2 ring-primary"
+                          )}
                         >
-                          <button
-                            type="button"
-                            className="block w-full cursor-pointer text-left"
-                            onClick={() => setEditingImageId(entry.id)}
-                            aria-label={`Edit photo ${index + 1}`}
-                          >
-                            <AdminImagePreview
-                              src={src}
-                              file={entry.kind === "file" ? entry.file : null}
-                              className="aspect-[4/3] w-full"
-                              imgClassName="object-contain pointer-events-none"
-                            />
-                          </button>
+                          <AdminEditableImage
+                            src={src}
+                            file={entry.kind === "file" ? entry.file : null}
+                            fileName={
+                              entry.kind === "file" ? entry.file.name : `product-photo-${index + 1}.jpg`
+                            }
+                            alt={`Product photo ${index + 1}`}
+                            disabled={isBusy}
+                            className="aspect-[4/3] w-full rounded-md"
+                            imgClassName="object-contain"
+                            badge={
+                              index === 0 ? (
+                                <span className="rounded-md bg-primary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
+                                  Cover
+                                </span>
+                              ) : null
+                            }
+                            extraActions={
+                              <>
+                                <AdminImageActionButton
+                                  tone="optimize"
+                                  disabled={isBusy}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    void onOptimizeImage(entry);
+                                  }}
+                                  aria-label="Convert to web 4:3"
+                                  title="Web 4:3"
+                                >
+                                  <ImageDown className="h-3.5 w-3.5" />
+                                </AdminImageActionButton>
+                                {index > 0 ? (
+                                  <AdminImageActionButton
+                                    tone="accent"
+                                    disabled={isBusy}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setCover(entry.id);
+                                    }}
+                                    aria-label="Set as cover"
+                                    title="Set cover"
+                                  >
+                                    <Star className="h-3.5 w-3.5" />
+                                  </AdminImageActionButton>
+                                ) : null}
+                                <AdminImageActionButton
+                                  tone="danger"
+                                  disabled={isBusy}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    removeGalleryEntry(entry.id);
+                                  }}
+                                  aria-label="Remove image"
+                                  title="Remove"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </AdminImageActionButton>
+                              </>
+                            }
+                            footerActions={
+                              <>
+                                <AdminImageActionButton
+                                  tone="grip"
+                                  draggable={!isBusy}
+                                  disabled={isBusy}
+                                  onDragStart={(event) => {
+                                    event.stopPropagation();
+                                    event.dataTransfer.setData("text/plain", entry.id);
+                                    event.dataTransfer.effectAllowed = "move";
+                                    setDragId(entry.id);
+                                  }}
+                                  onDragEnd={() => setDragId(null)}
+                                  className="cursor-grab active:cursor-grabbing"
+                                  aria-label="Drag to reorder"
+                                  title="Drag to reorder"
+                                >
+                                  <GripVertical className="h-3.5 w-3.5" />
+                                </AdminImageActionButton>
+                                <AdminImageActionButton
+                                  tone="move"
+                                  disabled={index === 0 || isBusy}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    moveGalleryBy(entry.id, -1);
+                                  }}
+                                  aria-label="Move earlier"
+                                  title="Move left"
+                                >
+                                  <ChevronLeft className="h-3.5 w-3.5" />
+                                </AdminImageActionButton>
+                                <AdminImageActionButton
+                                  tone="move"
+                                  disabled={index === gallery.length - 1 || isBusy}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    moveGalleryBy(entry.id, 1);
+                                  }}
+                                  aria-label="Move later"
+                                  title="Move right"
+                                >
+                                  <ChevronRight className="h-3.5 w-3.5" />
+                                </AdminImageActionButton>
+                              </>
+                            }
+                            onEdited={(file) => {
+                              applyOptimizedFile(entry.id, file);
+                              toast({
+                                title: "Photo updated",
+                                description: "Save the product to keep this edit on the site.",
+                              });
+                            }}
+                          />
                           {optimizingId === entry.id || optimizingId === "all" ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-xs font-medium text-white">
+                            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 text-xs font-medium text-white">
                               Converting…
                             </div>
                           ) : null}
-                          {index === 0 ? (
-                            <span className="absolute left-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
-                              Cover
-                            </span>
-                          ) : null}
-                          <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                            <button
-                              type="button"
-                              className="min-h-9 min-w-9 cursor-grab rounded bg-background/90 p-2 active:cursor-grabbing lg:min-h-0 lg:min-w-0 lg:p-1"
-                              aria-label="Drag to reorder"
-                              title="Drag to reorder"
-                            >
-                              <GripVertical className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 disabled:opacity-40 lg:min-h-0 lg:min-w-0 lg:p-1"
-                              disabled={index === 0 || optimizingId !== null}
-                              onClick={() => moveGalleryBy(entry.id, -1)}
-                              aria-label="Move image earlier"
-                            >
-                              <ChevronUp className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 disabled:opacity-40 lg:min-h-0 lg:min-w-0 lg:p-1"
-                              disabled={index === gallery.length - 1 || optimizingId !== null}
-                              onClick={() => moveGalleryBy(entry.id, 1)}
-                              aria-label="Move image later"
-                            >
-                              <ChevronDown className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                          <div className="absolute right-2 top-2 flex gap-1">
-                            <button
-                              type="button"
-                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 lg:min-h-0 lg:min-w-0 lg:p-1"
-                              disabled={optimizingId !== null}
-                              onClick={() => void onOptimizeImage(entry)}
-                              aria-label="Convert to web 4:3"
-                              title="Convert to web 4:3"
-                            >
-                              <ImageDown className="h-3.5 w-3.5" />
-                            </button>
-                            {index > 0 ? (
-                              <button
-                                type="button"
-                                className="min-h-9 min-w-9 rounded bg-background/90 p-2 lg:min-h-0 lg:min-w-0 lg:p-1"
-                                onClick={() => setCover(entry.id)}
-                                aria-label="Set as cover"
-                              >
-                                <Star className="h-3.5 w-3.5" />
-                              </button>
-                            ) : null}
-                            <button
-                              type="button"
-                              className="min-h-9 min-w-9 rounded bg-background/90 p-2 lg:min-h-0 lg:min-w-0 lg:p-1"
-                              onClick={() => removeGalleryEntry(entry.id)}
-                              aria-label="Remove image"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
                         </div>
                       );
                     })}
@@ -788,23 +818,6 @@ export function CatalogProductsTab() {
                   </div>
                 </section>
               </form>
-      <AdminImageEditDialog
-        open={Boolean(editingImageId && editingImageSrc)}
-        imageSrc={editingImageSrc}
-        fileName={editingImageName}
-        onOpenChange={(open) => {
-          if (!open) setEditingImageId(null);
-        }}
-        onSave={(file) => {
-          if (!editingImageId) return;
-          applyOptimizedFile(editingImageId, file);
-          toast({
-            title: "Photo updated",
-            description: "Save the product to keep this edit on the site.",
-          });
-          setEditingImageId(null);
-        }}
-      />
     </AdminMasterDetail>
   );
 }

@@ -67,7 +67,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5 md:space-y-3">
       <div className="relative max-md:-mx-4">
         <div
           ref={scrollerRef}
@@ -75,7 +75,10 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
           className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain touch-pan-x [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {images.map((image, index) => (
-            <div key={`${image}-${index}`} className="w-full shrink-0 snap-start snap-always">
+            <div
+              key={`${image}-${index}`}
+              className="w-full min-w-full shrink-0 snap-start snap-always basis-full"
+            >
               <div className="overflow-hidden bg-muted md:rounded-2xl">
                 <img
                   src={image}
@@ -89,11 +92,12 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
             </div>
           ))}
         </div>
+        {/* Arrows are desktop-only; mobile uses swipe + dots/thumbs */}
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className="absolute left-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background/90 shadow-sm backdrop-blur-sm md:h-11 md:w-11"
+          className="absolute left-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 rounded-full border-border bg-background/90 shadow-sm backdrop-blur-sm md:inline-flex"
           onClick={() => goTo(activeIndex - 1)}
           disabled={activeIndex === 0}
           aria-label="Previous photo"
@@ -104,7 +108,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
           type="button"
           variant="outline"
           size="icon"
-          className="absolute right-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background/90 shadow-sm backdrop-blur-sm md:h-11 md:w-11"
+          className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 rounded-full border-border bg-background/90 shadow-sm backdrop-blur-sm md:inline-flex"
           onClick={() => goTo(activeIndex + 1)}
           disabled={activeIndex === images.length - 1}
           aria-label="Next photo"
@@ -113,24 +117,25 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
         </Button>
       </div>
 
-      <div className="flex items-center justify-center gap-1.5 md:hidden">
+      <div className="flex items-center justify-center gap-1 md:hidden" role="tablist" aria-label="Photo position">
         {images.map((_, index) => (
           <button
             key={`dot-${index}`}
             type="button"
             onClick={() => goTo(index)}
-            className={cn(
-              "h-1.5 rounded-full transition-all",
-              activeIndex === index ? "w-5 bg-primary" : "w-1.5 bg-muted-foreground/35"
-            )}
+            className="flex h-11 w-11 items-center justify-center"
             aria-label={`Go to photo ${index + 1}`}
-          />
+            aria-current={activeIndex === index ? true : undefined}
+          >
+            <span
+              className={cn(
+                "h-1.5 rounded-full transition-all",
+                activeIndex === index ? "w-5 bg-primary" : "w-1.5 bg-muted-foreground/35"
+              )}
+            />
+          </button>
         ))}
       </div>
-
-      <p className="text-center text-xs text-muted-foreground md:hidden">
-        {activeIndex + 1} / {images.length}
-      </p>
 
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:px-0">
         {images.map((image, index) => (
@@ -139,11 +144,11 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
             type="button"
             onClick={() => goTo(index)}
             className={cn(
-              "h-16 w-[4.5rem] shrink-0 overflow-hidden rounded-lg border-2 transition-colors sm:w-24",
+              "h-14 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-colors sm:h-16 sm:w-24",
               activeIndex === index ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
             )}
             aria-label={`View photo ${index + 1}`}
-            aria-current={activeIndex === index}
+            aria-current={activeIndex === index ? true : undefined}
           >
             <img src={image} alt="" className="h-full w-full object-cover" />
           </button>

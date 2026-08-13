@@ -2,11 +2,12 @@
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Star, Trash2, X } from "lucide-react";
+import { ExternalLink, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { slugify } from "@/lib/slugify";
-import { AdminImagePreview } from "@/features/admin/components/AdminImagePreview";
+import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
+import { AdminImageActionButton } from "@/features/admin/components/AdminImageActions";
 import {
   AdminMasterDetail,
   AdminSidebarCard,
@@ -20,6 +21,7 @@ import {
 } from "@/features/admin/components/AdminMasterDetail";
 import { getProjectCoverImage, getProjectImages } from "@/features/projects/images";
 import { useProjects } from "@/features/admin/hooks/useProjects";
+import { useToast } from "@/hooks/use-toast";
 import type { Project } from "@/features/projects/types";
 
 const initialForm = {
@@ -44,6 +46,7 @@ function newId() {
 }
 
 export function ProjectsTab() {
+  const { toast } = useToast();
   const { projects, isLoading, isSaving, error, create, update, remove } = useProjects();
   const [form, setForm] = useState(initialForm);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -117,6 +120,16 @@ export function ProjectsTab() {
       next.unshift(item);
       return next;
     });
+  };
+
+  const applyEditedFile = (id: string, file: File) => {
+    setGallery((current) =>
+      current.map((entry) => {
+        if (entry.id !== id) return entry;
+        if (entry.kind === "file") URL.revokeObjectURL(entry.preview);
+        return { id, kind: "file" as const, file, preview: URL.createObjectURL(file) };
+      })
+    );
   };
 
   const closeEditor = () => {
@@ -383,38 +396,57 @@ export function ProjectsTab() {
               {gallery.map((entry, index) => {
                 const src = entry.kind === "url" ? entry.url : entry.preview;
                 return (
-                  <div key={entry.id} className="layer-2 relative overflow-hidden rounded-lg">
-                    <AdminImagePreview
+                  <div key={entry.id} className="layer-2 rounded-lg p-2">
+                    <AdminEditableImage
                       src={src}
                       file={entry.kind === "file" ? entry.file : null}
-                      className="aspect-[4/3] w-full"
+                      fileName={entry.kind === "file" ? entry.file.name : `project-photo-${index + 1}.jpg`}
+                      alt={`Project photo ${index + 1}`}
+                      className="aspect-[4/3] w-full rounded-md"
                       imgClassName="object-cover"
+                      badge={
+                        index === 0 ? (
+                          <span className="rounded-md bg-primary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
+                            Cover
+                          </span>
+                        ) : null
+                      }
+                      extraActions={
+                        <>
+                          {index > 0 ? (
+                            <AdminImageActionButton
+                              tone="accent"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setCover(entry.id);
+                              }}
+                              aria-label="Set as cover"
+                              title="Set cover"
+                            >
+                              <Star className="h-3.5 w-3.5" />
+                            </AdminImageActionButton>
+                          ) : null}
+                          <AdminImageActionButton
+                            tone="danger"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              removeGalleryEntry(entry.id);
+                            }}
+                            aria-label="Remove image"
+                            title="Remove"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </AdminImageActionButton>
+                        </>
+                      }
+                      onEdited={(file) => {
+                        applyEditedFile(entry.id, file);
+                        toast({
+                          title: "Photo updated",
+                          description: "Save the project to keep this edit on the site.",
+                        });
+                      }}
                     />
-                    {index === 0 ? (
-                      <span className="absolute left-2 top-2 rounded bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
-                        Cover
-                      </span>
-                    ) : null}
-                    <div className="absolute right-2 top-2 flex gap-1">
-                      {index > 0 ? (
-                        <button
-                          type="button"
-                          className="rounded bg-background/90 p-1 text-foreground backdrop-blur-sm"
-                          onClick={() => setCover(entry.id)}
-                          aria-label="Set as cover"
-                        >
-                          <Star className="h-3.5 w-3.5" />
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="rounded bg-background/90 p-1 text-foreground backdrop-blur-sm"
-                        onClick={() => removeGalleryEntry(entry.id)}
-                        aria-label="Remove image"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
                   </div>
                 );
               })}

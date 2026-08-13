@@ -1,19 +1,22 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { Download, Save, Trash2, Upload, X } from "lucide-react";
+import { Download, ImagePlus, Save, Trash2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AdminImagePreview } from "@/features/admin/components/AdminImagePreview";
+import { Label } from "@/components/ui/label";
+import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
 import {
   AdminMasterDetail,
   AdminSidebarCard,
   AdminSidebarSkeleton,
   AdminSidebarThumb,
+  adminSidebarBodyClass,
   adminSidebarMutedClass,
   adminSidebarTitleClass,
 } from "@/features/admin/components/AdminMasterDetail";
 import { useHeroImages } from "@/features/admin/hooks/useHeroImages";
+import { downloadImageSrc } from "@/features/admin/lib/adminImageActions";
 import { useToast } from "@/hooks/use-toast";
 
 const slots = [1, 2, 3, 4] as const;
@@ -111,41 +114,21 @@ export function HeroImagesTab() {
 
   const downloadImageForSlot = async (slot: number) => {
     const existing = bySlot.get(slot);
-    if (!existing?.image_url) return false;
+    const pending = previewUrls[slot];
+    const src = pending ?? existing?.image_url;
+    if (!src) return false;
     try {
-      const response = await fetch(existing.image_url);
-      if (!response.ok) throw new Error("Failed to fetch image.");
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const urlPath = new URL(existing.image_url).pathname;
-      const extension = urlPath.includes(".") ? urlPath.split(".").pop() : "jpg";
-      const fileName = `hero-image-slot-${slot}.${extension}`;
-
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(objectUrl);
+      await downloadImageSrc(src, `hero-image-slot-${slot}.jpg`);
       return true;
     } catch {
       return false;
     }
   };
 
-  const onDownload = async (slot: number) => {
-    const ok = await downloadImageForSlot(slot);
-    if (ok) return;
-    toast({
-      title: "Download failed",
-      description: "Could not download this hero image. Please try again.",
-      variant: "destructive",
-    });
-  };
-
   const onDownloadAll = async () => {
-    const availableSlots = slots.filter((slot) => Boolean(bySlot.get(slot)?.image_url));
+    const availableSlots = slots.filter(
+      (slot) => Boolean(previewUrls[slot] || bySlot.get(slot)?.image_url)
+    );
     if (availableSlots.length === 0) return;
 
     setIsDownloadingAll(true);
@@ -176,6 +159,9 @@ export function HeroImagesTab() {
 
   const existing = bySlot.get(selectedSlot);
   const preview = previewUrls[selectedSlot];
+  const displaySrc = preview ?? existing?.image_url ?? null;
+  const pendingFile = selected[selectedSlot];
+  const labelValue = labels[selectedSlot] ?? existing?.label ?? "";
 
   return (
     <AdminMasterDetail
@@ -186,7 +172,10 @@ export function HeroImagesTab() {
           type="button"
           variant="outline"
           size="sm"
-          disabled={isDownloadingAll || slots.every((slot) => !bySlot.get(slot)?.image_url)}
+          disabled={
+            isDownloadingAll ||
+            slots.every((slot) => !previewUrls[slot] && !bySlot.get(slot)?.image_url)
+          }
           onClick={() => void onDownloadAll()}
         >
           <Download className="mr-2 h-4 w-4" />
@@ -206,18 +195,25 @@ export function HeroImagesTab() {
         ) : (
           slots.map((slot) => {
             const item = bySlot.get(slot);
-            const selected = selectedSlot === slot;
+            const isSelected = selectedSlot === slot;
             const src = previewUrls[slot] ?? item?.image_url;
             return (
-              <AdminSidebarCard key={slot} selected={selected} onClick={() => setSelectedSlot(slot)}>
+              <AdminSidebarCard
+                key={slot}
+                selected={isSelected}
+                compact
+                onClick={() => setSelectedSlot(slot)}
+              >
                 <AdminSidebarThumb
                   src={src}
                   alt={`Hero slot ${slot}`}
-                  className="aspect-video w-full"
+                  className="h-16 w-[5.5rem]"
                 />
-                <div className="space-y-1 p-2.5">
-                  <p className={adminSidebarTitleClass(selected)}>Hero Image {slot}</p>
-                  <p className={adminSidebarMutedClass(selected)}>{item?.label || "No label"}</p>
+                <div className={adminSidebarBodyClass()}>
+                  <p className={adminSidebarTitleClass(isSelected)}>Hero Image {slot}</p>
+                  <p className={adminSidebarMutedClass(isSelected)}>
+                    {selected[slot] ? "Pending upload" : item?.label || "Empty slot"}
+                  </p>
                 </div>
               </AdminSidebarCard>
             );
@@ -225,87 +221,131 @@ export function HeroImagesTab() {
         )
       }
       detailTitle={`Hero Image ${selectedSlot}`}
-      detailDescription="Replace the photo, update the label, or download this slot."
+      detailDescription="Click the photo to edit. Replace, label, or delete this homepage slot."
+      detailActions={
+        <>
+          {pendingFile ? (
+            <Button
+              type="button"
+              size="sm"
+              disabled={isSaving}
+              onClick={() => void onUpload(selectedSlot)}
+            >
+              <Upload className="mr-2 h-3.5 w-3.5" />
+              {isSaving ? "Saving..." : existing ? "Replace" : "Upload"}
+            </Button>
+          ) : null}
+          {existing ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isSaving}
+              onClick={() => void onDelete(selectedSlot)}
+            >
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
+              Delete
+            </Button>
+          ) : null}
+        </>
+      }
       isEditorOpen
     >
-      <div className="space-y-4">
-        <div className="layer-2 flex h-40 items-center justify-center overflow-hidden rounded-lg sm:h-56">
-          {preview ?? existing?.image_url ? (
-            <AdminImagePreview
-              src={(preview ?? existing?.image_url) as string}
+      <div className="mx-auto w-full max-w-3xl space-y-5">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <Label>Photo</Label>
+            {pendingFile ? (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                Unsaved edit — click {existing ? "Replace" : "Upload"}
+              </span>
+            ) : null}
+          </div>
+
+          {displaySrc ? (
+            <AdminEditableImage
+              src={displaySrc}
               alt={`Hero slot ${selectedSlot}`}
-              file={selected[selectedSlot]}
-              className="h-40 w-full sm:h-56"
+              file={pendingFile}
+              fileName={pendingFile?.name || `hero-image-slot-${selectedSlot}.jpg`}
+              className="aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted"
               imgClassName="object-cover"
+              onEdited={(file) => {
+                setSelected((prev) => ({ ...prev, [selectedSlot]: file }));
+                toast({
+                  title: "Hero image edited",
+                  description: `Click ${existing ? "Replace" : "Upload"} to save it to this slot.`,
+                });
+              }}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
-              Empty image slot
-            </div>
+            <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/40 text-muted-foreground transition-[color,background-color,border-color] hover:border-primary hover:bg-primary/5 hover:text-primary">
+              <input
+                key={`hero-empty-${selectedSlot}-${fileInputKeys[selectedSlot]}`}
+                type="file"
+                accept="image/*"
+                onChange={onPickFile(selectedSlot)}
+                className="sr-only"
+              />
+              <ImagePlus className="h-8 w-8" strokeWidth={1.75} />
+              <span className="text-sm font-medium">Add hero photo</span>
+              <span className="text-xs">Widescreen image works best</span>
+            </label>
           )}
         </div>
 
-        <input
-          key={`hero-file-${selectedSlot}-${fileInputKeys[selectedSlot]}`}
-          type="file"
-          accept="image/*"
-          onChange={onPickFile(selectedSlot)}
-          className="layer-1 w-full rounded-md px-3 py-2 text-sm"
-        />
+        <div className="space-y-2">
+          <Label htmlFor={`hero-label-${selectedSlot}`}>Label</Label>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              id={`hero-label-${selectedSlot}`}
+              type="text"
+              placeholder="e.g. Prep & Sinks"
+              value={labelValue}
+              onChange={(e) => setLabels((prev) => ({ ...prev, [selectedSlot]: e.target.value }))}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!existing || isSaving}
+              onClick={() => void onSaveLabel(selectedSlot)}
+              className="sm:shrink-0"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Save label
+            </Button>
+          </div>
+        </div>
 
-        <Input
-          type="text"
-          placeholder="Image label (e.g. Prep & Sinks)"
-          value={labels[selectedSlot] ?? existing?.label ?? ""}
-          onChange={(e) => setLabels((prev) => ({ ...prev, [selectedSlot]: e.target.value }))}
-        />
-
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <Button
-            type="button"
-            disabled={!selected[selectedSlot] || isSaving}
-            onClick={() => void onUpload(selectedSlot)}
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            {isSaving ? "Saving..." : existing ? "Replace" : "Upload"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!existing}
-            onClick={() => void onDownload(selectedSlot)}
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Download
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!existing || isSaving}
-            onClick={() => void onSaveLabel(selectedSlot)}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save Label
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!selected[selectedSlot] || isSaving}
-            onClick={() => onClearSelection(selectedSlot)}
-          >
-            <X className="mr-2 h-4 w-4" />
-            Clear Selection
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!existing || isSaving}
-            onClick={() => void onDelete(selectedSlot)}
-            className="col-span-2"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete
-          </Button>
+        <div className="space-y-2">
+          <Label htmlFor={`hero-file-${selectedSlot}`}>Replace file</Label>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input
+              id={`hero-file-${selectedSlot}`}
+              key={`hero-file-${selectedSlot}-${fileInputKeys[selectedSlot]}`}
+              type="file"
+              accept="image/*"
+              onChange={onPickFile(selectedSlot)}
+              className="layer-1 w-full rounded-md px-3 py-2 text-sm"
+            />
+            {pendingFile ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSaving}
+                onClick={() => onClearSelection(selectedSlot)}
+                className="sm:shrink-0"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+            ) : null}
+          </div>
+          {pendingFile ? (
+            <p className="text-xs text-muted-foreground">
+              Selected: <span className="font-medium text-foreground">{pendingFile.name}</span>
+            </p>
+          ) : null}
         </div>
       </div>
     </AdminMasterDetail>

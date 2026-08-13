@@ -7,6 +7,8 @@ import {
   FlipHorizontal2,
   FlipVertical2,
   ImageDown,
+  Copy,
+  Download,
   RotateCcw,
   RotateCw,
 } from "lucide-react";
@@ -26,8 +28,13 @@ import {
   exportEditedImage,
   type ImageEditAspect,
 } from "@/features/admin/lib/editImage";
+import {
+  copyImageSrc,
+  downloadImageSrc,
+} from "@/features/admin/lib/adminImageActions";
 import { WEB_43_MAX_HEIGHT, WEB_43_MAX_WIDTH } from "@/features/admin/lib/optimizeImageToWeb43";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 type AdminImageEditDialogProps = {
   open: boolean;
@@ -81,6 +88,7 @@ export function AdminImageEditDialog({
   onOpenChange,
   onSave,
 }: AdminImageEditDialogProps) {
+  const { toast } = useToast();
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -198,14 +206,44 @@ export function AdminImageEditDialog({
     }
   };
 
+  const handleCopy = async () => {
+    const src = workingSrc ?? imageSrc;
+    if (!src) return;
+    try {
+      await copyImageSrc(src);
+      toast({ title: "Image copied", description: "Paste it anywhere that accepts images." });
+    } catch (e) {
+      toast({
+        title: "Copy failed",
+        description: e instanceof Error ? e.message : "Could not copy this image.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownload = async () => {
+    const src = workingSrc ?? imageSrc;
+    if (!src) return;
+    try {
+      await downloadImageSrc(src, fileName);
+      toast({ title: "Image saved", description: "Check your downloads folder." });
+    } catch (e) {
+      toast({
+        title: "Download failed",
+        description: e instanceof Error ? e.message : "Could not save this image.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[92dvh] w-[min(96vw,56rem)] max-w-none flex-col gap-0 overflow-hidden p-0">
         <DialogHeader className="shrink-0 space-y-1 border-b border-border px-4 py-3 pr-12 text-left sm:px-5">
-          <DialogTitle>Edit product photo</DialogTitle>
+          <DialogTitle>Edit image</DialogTitle>
           <DialogDescription>
             Crop, zoom, rotate, flip, and adjust brightness or contrast. 4:3 saves up to{" "}
-            {WEB_43_MAX_WIDTH} × {WEB_43_MAX_HEIGHT}.
+            {WEB_43_MAX_WIDTH} × {WEB_43_MAX_HEIGHT}. Use Copy or Download to keep a local copy.
           </DialogDescription>
         </DialogHeader>
 
@@ -360,18 +398,35 @@ export function AdminImageEditDialog({
           </div>
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border px-4 py-3 sm:px-5">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={() => void handleSave()}
-            disabled={!workingSrc || !croppedAreaPixels || isSaving}
-            className={cn(isSaving && "opacity-80")}
-          >
-            {isSaving ? "Saving..." : "Apply to photo"}
-          </Button>
+        <DialogFooter className="shrink-0 gap-2 border-t border-border px-4 py-3 sm:justify-between sm:px-5">
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => void handleCopy()} disabled={!imageSrc || isSaving}>
+              <Copy className="mr-1.5 h-3.5 w-3.5" />
+              Copy
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void handleDownload()}
+              disabled={!imageSrc || isSaving}
+            >
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              Download
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={!workingSrc || !croppedAreaPixels || isSaving}
+              className={cn(isSaving && "opacity-80")}
+            >
+              {isSaving ? "Saving..." : "Apply to photo"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
