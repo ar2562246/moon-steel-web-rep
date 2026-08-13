@@ -20,6 +20,7 @@ export type ContactInquiry = {
   project_type: string;
   message: string;
   file_name: string | null;
+  file_urls?: unknown;
   status: ContactInquiryStatus;
   created_at: string;
 };

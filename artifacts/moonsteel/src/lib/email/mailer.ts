@@ -1,5 +1,11 @@
 import nodemailer from "nodemailer";
 
+export type EmailAttachment = {
+  filename: string;
+  content: Buffer;
+  contentType?: string;
+};
+
 export type SendEmailInput = {
   to: string;
   from?: string;
@@ -7,6 +13,7 @@ export type SendEmailInput = {
   subject: string;
   text: string;
   html?: string;
+  attachments?: EmailAttachment[];
 };
 
 export function isSmtpConfigured() {
@@ -46,6 +53,11 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
     subject: input.subject,
     text: input.text,
     html: input.html,
+    attachments: input.attachments?.map((file) => ({
+      filename: file.filename,
+      content: file.content,
+      contentType: file.contentType,
+    })),
   });
 
   return true;

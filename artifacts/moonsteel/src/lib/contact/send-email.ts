@@ -1,10 +1,21 @@
+import type { ContactAttachmentMeta } from "@/lib/contact/attachments";
+import {
+  formatAttachmentBytes,
+  shouldAttachFilesToEmail,
+} from "@/lib/contact/attachments";
 import type { ContactInquiryRecord } from "@/lib/contact/schema";
-import { getDefaultFromAddress, isSmtpConfigured, sendEmail } from "@/lib/email/mailer";
+import {
+  getDefaultFromAddress,
+  isSmtpConfigured,
+  sendEmail,
+  type EmailAttachment,
+} from "@/lib/email/mailer";
 
 type ContactEmailOptions = {
   to: string;
   from?: string;
   inquiry: ContactInquiryRecord;
+  attachments?: EmailAttachment[];
 };
 
 function escapeHtml(value: string) {
@@ -44,11 +55,33 @@ function inquiryRows(inquiry: ContactInquiryRecord) {
     .join("");
 }
 
+function attachmentSummary(files: ContactAttachmentMeta[], emailed: boolean) {
+  if (files.length === 0) return { text: "", html: "" };
+
+  const lines = files.map((file) => `${file.name} (${formatAttachmentBytes(file.size)})`);
+  const note = emailed
+    ? "Files are attached to this email and stored in Admin → Inquiries."
+    : "Files are over the email size limit. Download them from Admin → Inquiries.";
+
+  return {
+    text: ["", "Attachments:", ...lines.map((line) => `- ${line}`), note].join("\n"),
+    html: `<p style="margin:16px 0 8px;font-weight:bold;">Attachments</p>
+     <ul style="margin:0;padding-left:18px;line-height:1.5;">${lines
+       .map((line) => `<li>${escapeHtml(line)}</li>`)
+       .join("")}</ul>
+     <p style="margin:8px 0 0;color:#71717a;font-size:13px;">${escapeHtml(note)}</p>`,
+  };
+}
+
 export async function sendContactNotificationEmail({
   to,
   from,
   inquiry,
+  attachments = [],
 }: ContactEmailOptions): Promise<boolean> {
+  const files = inquiry.file_urls ?? [];
+  const emailed = attachments.length > 0 && shouldAttachFilesToEmail(files.map((file) => file.size));
+  const summary = attachmentSummary(files, emailed);
   const subject = `New quote request from ${inquiry.full_name} (${inquiry.company})`;
   const text = [
     "New Moon Steel quote request",
@@ -61,29 +94,60 @@ export async function sendContactNotificationEmail({
     "",
     "Message:",
     inquiry.message,
-  ].join("\n");
+    summary.text,
+  ]
+    .filter((line, index, all) => !(line === "" && all[index - 1] === ""))
+    .join("\n")
+    .trim();
 
   const html = wrapHtml(
     "New quote request",
     `<table style="width:100%;border-collapse:collapse;font-size:14px;">${inquiryRows(inquiry)}</table>
      <p style="margin:16px 0 8px;font-weight:bold;">Message</p>
-     <p style="margin:0;white-space:pre-wrap;line-height:1.5;">${escapeHtml(inquiry.message)}</p>`
+     <p style="margin:0;white-space:pre-wrap;line-height:1.5;">${escapeHtml(inquiry.message)}</p>
+     ${summary.html}`
   );
+
+  const mail = {
+    to,
+    from: from ?? getDefaultFromAddress(),
+    replyTo: inquiry.email,
+    subject,
+    text,
+    html,
+    attachments: emailed ? attachments : undefined,
+  };
 
   try {
     if (isSmtpConfigured()) {
-      return await sendEmail({
-        to,
-        from: from ?? getDefaultFromAddress(),
-        replyTo: inquiry.email,
-        subject,
-        text,
-        html,
-      });
+      try {
+        return await sendEmail(mail);
+      } catch (error) {
+        if (!emailed) throw error;
+        console.error("Contact notification with attachments failed, retrying without files:", error);
+        return await sendEmail({ ...mail, attachments: undefined });
+      }
     }
 
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) return false;
+
+    const payload: Record<string, unknown> = {
+      from: mail.from,
+      to: [to],
+      reply_to: inquiry.email,
+      subject,
+      text,
+      html,
+    };
+
+    if (emailed) {
+      payload.attachments = attachments.map((file) => ({
+        filename: file.filename,
+        content: file.content.toString("base64"),
+        content_type: file.contentType,
+      }));
+    }
 
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -91,17 +155,25 @@ export async function sendContactNotificationEmail({
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        from: from ?? getDefaultFromAddress(),
-        to: [to],
-        reply_to: inquiry.email,
-        subject,
-        text,
-        html,
-      }),
+      body: JSON.stringify(payload),
     });
 
-    return response.ok;
+    if (response.ok) return true;
+
+    if (emailed) {
+      delete payload.attachments;
+      const retry = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      return retry.ok;
+    }
+
+    return false;
   } catch (error) {
     console.error("Contact notification email failed:", error);
     return false;

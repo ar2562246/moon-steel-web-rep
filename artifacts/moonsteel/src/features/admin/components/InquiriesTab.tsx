@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { Archive, Mail, Phone, Trash2 } from "lucide-react";
+import { Archive, Download, Mail, Phone, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AdminDetailSkeleton,
@@ -14,7 +14,13 @@ import {
   adminSidebarTitleClass,
 } from "@/features/admin/components/AdminMasterDetail";
 import { useContactInquiries } from "@/features/admin/hooks/useContactInquiries";
+import { downloadContactAttachment } from "@/features/admin/services/contactInquiries";
 import type { ContactInquiry, ContactInquiryStatus } from "@/features/admin/types";
+import {
+  attachmentsFromInquiryFields,
+  formatAttachmentBytes,
+  type ContactAttachmentMeta,
+} from "@/lib/contact/attachments";
 
 const PROJECT_TYPE_LABELS: Record<string, string> = {
   "commercial-kitchen": "Commercial Kitchen",
@@ -61,6 +67,9 @@ export function InquiriesTab() {
   const selectedInquiry = selected
     ? inquiries.find((item) => item.id === selected.id) ?? selected
     : null;
+  const selectedAttachments = selectedInquiry
+    ? attachmentsFromInquiryFields(selectedInquiry.file_urls, selectedInquiry.file_name)
+    : [];
 
   const openInquiry = async (row: ContactInquiry) => {
     setSelected(row);
@@ -188,7 +197,17 @@ export function InquiriesTab() {
                 {selectedInquiry.phone}
               </a>
             </Field>
-            {selectedInquiry.file_name ? (
+            {selectedAttachments.length > 0 ? (
+              <div className="sm:col-span-2">
+                <Field label="Attachments">
+                  <ul className="space-y-2">
+                    {selectedAttachments.map((file) => (
+                      <InquiryAttachmentRow key={file.path} file={file} />
+                    ))}
+                  </ul>
+                </Field>
+              </div>
+            ) : selectedInquiry.file_name && !selectedInquiry.file_name.trim().startsWith("[") ? (
               <Field label="Attachments noted" value={selectedInquiry.file_name} />
             ) : null}
             <label className="grid gap-1.5 text-sm">
@@ -215,6 +234,41 @@ export function InquiriesTab() {
         </div>
       ) : null}
     </AdminMasterDetail>
+  );
+}
+
+function InquiryAttachmentRow({ file }: { file: ContactAttachmentMeta }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onDownload = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await downloadContactAttachment(file.path, file.name);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Download failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <li className="flex flex-col gap-1">
+      <div className="flex items-center justify-between gap-3">
+        <span className="truncate text-sm text-foreground">
+          {file.name}
+          {file.size > 0 ? (
+            <span className="ml-2 text-xs text-muted-foreground">{formatAttachmentBytes(file.size)}</span>
+          ) : null}
+        </span>
+        <Button type="button" variant="outline" size="sm" className="h-8 shrink-0" onClick={() => void onDownload()} disabled={busy}>
+          <Download className="mr-1.5 h-3.5 w-3.5" />
+          {busy ? "Preparing…" : "Download"}
+        </Button>
+      </div>
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+    </li>
   );
 }
 

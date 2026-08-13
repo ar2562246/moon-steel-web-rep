@@ -10,6 +10,7 @@ create table if not exists public.contact_inquiries (
   project_type text not null,
   message text not null,
   file_name text,
+  file_urls jsonb not null default '[]'::jsonb,
   status text not null default 'new' check (status in ('new', 'read', 'archived')),
   created_at timestamptz not null default now()
 );
@@ -39,4 +40,36 @@ create policy "Admins update contact inquiries"
     exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.role = 'admin')
   );
 
+drop policy if exists "Admins delete contact inquiries" on public.contact_inquiries;
+create policy "Admins delete contact inquiries"
+  on public.contact_inquiries for delete
+  to authenticated
+  using (
+    exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.role = 'admin')
+  );
+
 -- No insert policy for anon/authenticated: API uses SUPABASE_SERVICE_ROLE_KEY.
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('contact-attachments', 'contact-attachments', false, 26214400)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit;
+
+drop policy if exists "Admins read contact-attachments" on storage.objects;
+create policy "Admins read contact-attachments"
+  on storage.objects for select
+  to authenticated
+  using (
+    bucket_id = 'contact-attachments'
+    and exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.role = 'admin')
+  );
+
+drop policy if exists "Admins delete contact-attachments" on storage.objects;
+create policy "Admins delete contact-attachments"
+  on storage.objects for delete
+  to authenticated
+  using (
+    bucket_id = 'contact-attachments'
+    and exists (select 1 from public.profiles where profiles.id = auth.uid() and profiles.role = 'admin')
+  );

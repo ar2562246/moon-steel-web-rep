@@ -27,7 +27,14 @@ import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { FileDropzone } from "@/components/ui/FileDropzone";
+import { Spinner } from "@/components/ui/spinner";
 import { ContactVCardQr } from "@/components/ContactVCardQr";
+import {
+  CONTACT_ATTACHMENT_MAX_FILES,
+  formatAttachmentBytes,
+  validateAttachmentLimits,
+  type ContactAttachmentMeta,
+} from "@/lib/contact/attachments";
 import {
   CONTACT_DRAWING_ACCEPT,
   CONTACT_DRAWING_HINT,
@@ -50,9 +57,16 @@ const formSchema = z.object({
 
 export function ContactForm({ standalone = false }: { standalone?: boolean }) {
   const { toast } = useToast();
-  const [fileNames, setFileNames] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [submitStage, setSubmitStage] = useState<"idle" | "uploading" | "sending">("idle");
   const honeypotRef = useRef<HTMLInputElement>(null);
+  const isSubmitting = submitStage !== "idle";
+  const statusLabel =
+    submitStage === "uploading"
+      ? "Uploading drawings…"
+      : submitStage === "sending"
+        ? "Sending your quote request…"
+        : null;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -67,14 +81,27 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true);
+    const limitError = validateAttachmentLimits(files);
+    if (limitError) {
+      toast({
+        variant: "destructive",
+        title: "Attachments not accepted",
+        description: limitError,
+      });
+      return;
+    }
+
+    setSubmitStage(files.length > 0 ? "uploading" : "sending");
     try {
+      const attachments = await uploadContactAttachments(files);
+      setSubmitStage("sending");
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          fileName: fileNames.length > 0 ? fileNames.join(", ") : undefined,
+          attachments: attachments.length > 0 ? attachments : undefined,
+          fileName: attachments.length > 0 ? attachments.map((file) => file.name).join(", ") : undefined,
           website: honeypotRef.current?.value ?? "",
         }),
       });
@@ -103,15 +130,18 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
       });
 
       form.reset();
-      setFileNames([]);
-    } catch {
+      setFiles([]);
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Submission failed",
-        description: "Network error. Please try again or call us directly.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Network error. Please try again or call us directly.",
       });
     } finally {
-      setIsSubmitting(false);
+      setSubmitStage("idle");
     }
   };
 
@@ -217,7 +247,11 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
             <h3 className="text-2xl font-display font-semibold mb-6 text-foreground">Request a Quote</h3>
             
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+                aria-busy={isSubmitting}
+              >
                 <input
                   ref={honeypotRef}
                   type="text"
@@ -227,6 +261,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   className="hidden"
                   aria-hidden="true"
                 />
+                <fieldset disabled={isSubmitting} className={cn("space-y-6 border-0 p-0", isSubmitting && "opacity-60")}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
@@ -333,27 +368,48 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   <FileDropzone
                     accept={CONTACT_DRAWING_ACCEPT}
                     multiple
+                    disabled={isSubmitting}
                     label="Drop drawings or CAD files here, or click to browse"
                     hint={CONTACT_DRAWING_HINT}
-                    onFiles={(files) => {
-                      setFileNames((current) => {
+                    onFiles={(incoming) => {
+                      setFiles((current) => {
                         const next = [...current];
-                        for (const file of files) {
-                          if (!next.includes(file.name)) next.push(file.name);
+                        for (const file of incoming) {
+                          if (!next.some((item) => item.name === file.name && item.size === file.size)) {
+                            next.push(file);
+                          }
                         }
-                        return next;
+                        return next.slice(0, CONTACT_ATTACHMENT_MAX_FILES);
                       });
                     }}
                   />
-                  {fileNames.length > 0 ? (
+                  {files.length > 0 ? (
                     <ul className="space-y-1">
-                      {fileNames.map((name) => (
-                        <li key={name} className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
-                          <span className="truncate">{name}</span>
+                      {files.map((file) => (
+                        <li
+                          key={`${file.name}-${file.size}-${file.lastModified}`}
+                          className="flex items-center justify-between gap-3 text-sm text-muted-foreground"
+                        >
+                          <span className="truncate">
+                            {file.name}
+                            <span className="ml-2 text-xs opacity-80">{formatAttachmentBytes(file.size)}</span>
+                          </span>
                           <button
                             type="button"
-                            className="shrink-0 text-xs text-primary hover:underline"
-                            onClick={() => setFileNames((current) => current.filter((item) => item !== name))}
+                            disabled={isSubmitting}
+                            className="shrink-0 text-xs text-primary hover:underline disabled:opacity-50"
+                            onClick={() =>
+                              setFiles((current) =>
+                                current.filter(
+                                  (item) =>
+                                    !(
+                                      item.name === file.name &&
+                                      item.size === file.size &&
+                                      item.lastModified === file.lastModified
+                                    )
+                                )
+                              )
+                            }
                           >
                             Remove
                           </button>
@@ -362,6 +418,15 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                     </ul>
                   ) : null}
                 </div>
+                </fieldset>
+
+                {statusLabel ? (
+                  <p className="flex items-center gap-2 text-sm font-medium text-foreground" role="status" aria-live="polite">
+                    <Spinner className="size-4 text-primary" />
+                    {statusLabel}
+                    <span className="font-normal text-muted-foreground">Please keep this page open.</span>
+                  </p>
+                ) : null}
 
                 <Button
                   type="submit"
@@ -369,8 +434,12 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   disabled={isSubmitting}
                   className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium group"
                 >
-                  <Send className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                  {isSubmitting ? "Submitting..." : "Submit Request"}
+                  {isSubmitting ? (
+                    <Spinner className="mr-2 size-4" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
+                  )}
+                  {statusLabel ?? "Submit Request"}
                 </Button>
               </form>
             </Form>
@@ -380,4 +449,55 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
       </div>
     </section>
   );
+}
+
+type SignedUploadFile = ContactAttachmentMeta & {
+  signedUrl: string;
+};
+
+async function uploadContactAttachments(files: File[]): Promise<ContactAttachmentMeta[]> {
+  if (files.length === 0) return [];
+
+  const signResponse = await fetch("/api/contact/uploads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      files: files.map((file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      })),
+    }),
+  });
+
+  const signPayload = (await signResponse.json().catch(() => null)) as
+    | { error?: string; files?: SignedUploadFile[] }
+    | null;
+
+  if (!signResponse.ok || !signPayload?.files || signPayload.files.length !== files.length) {
+    throw new Error(
+      (signPayload && "error" in signPayload && signPayload.error) ||
+        "Could not upload drawings. Please try again or email the files separately."
+    );
+  }
+
+  for (let index = 0; index < files.length; index += 1) {
+    const signed = signPayload.files[index];
+    const file = files[index];
+    const upload = await fetch(signed.signedUrl, {
+      method: "PUT",
+      headers: { "Content-Type": signed.contentType || file.type || "application/octet-stream" },
+      body: file,
+    });
+    if (!upload.ok) {
+      throw new Error(`Could not upload ${file.name}. Please try again.`);
+    }
+  }
+
+  return signPayload.files.map((file) => ({
+    name: file.name,
+    path: file.path,
+    size: file.size,
+    contentType: file.contentType,
+  }));
 }

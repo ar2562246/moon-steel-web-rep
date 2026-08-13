@@ -38,7 +38,7 @@ export const CONTACT_DRAWING_ACCEPT = [
 ].join(",");
 
 export const CONTACT_DRAWING_HINT =
-  "PDF, CAD (DWG, DXF, STEP, IGES, STL, SolidWorks, Inventor), images, or ZIP — multiple files allowed";
+  "PDF, CAD (DWG, DXF, STEP, IGES, STL, SolidWorks, Inventor), images, or ZIP — up to 10 files, 25 MB each";
 
 export function contactVCard() {
   const lines = [
