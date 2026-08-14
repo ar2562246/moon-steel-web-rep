@@ -28,6 +28,7 @@ import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { FileDropzone } from "@/components/ui/FileDropzone";
 import { Spinner } from "@/components/ui/spinner";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { ContactVCardQr } from "@/components/ContactVCardQr";
 import {
   CONTACT_ATTACHMENT_MAX_FILES,
@@ -154,10 +155,12 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
       )}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <div className="grid lg:grid-cols-5 gap-12 lg:gap-8 max-w-6xl mx-auto">
+        <div className="mx-auto max-w-6xl">
+        {standalone ? <ParentBackLink href="/" label="home" /> : null}
+        <div className="grid items-start lg:grid-cols-5 gap-12 lg:gap-10">
           
           {/* Contact Info Panel */}
-          <div className="lg:col-span-2 layer-2 space-y-8 text-foreground p-8 md:p-10 rounded-xl">
+          <div className="lg:col-span-2 space-y-8 text-foreground">
             <div>
               <h2 className="text-3xl font-display font-semibold mb-4">Let's Build It Right.</h2>
               <p className="text-muted-foreground">
@@ -165,7 +168,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="layer-2 space-y-6 p-8 md:p-10 rounded-xl">
               <div className="flex items-start gap-4">
                 <MapPin className="w-6 h-6 text-primary shrink-0" />
                 <div>
@@ -193,11 +196,11 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
+              <div className="flex items-center gap-4">
                 <svg
                   viewBox="0 0 24 24"
                   aria-hidden="true"
-                  className="mt-0.5 h-6 w-6 shrink-0"
+                  className="h-6 w-6 shrink-0"
                   fill="none"
                 >
                   <circle cx="12" cy="12" r="11" fill="#25D366" />
@@ -206,17 +209,15 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                     d="M17.34 14.15c-.28-.14-1.63-.8-1.88-.89-.25-.09-.43-.14-.61.14-.18.28-.7.89-.86 1.08-.16.18-.31.21-.58.07-.28-.14-1.17-.43-2.23-1.36-.82-.73-1.38-1.62-1.54-1.9-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.46.14-.16.18-.28.28-.46.09-.18.05-.35-.02-.5-.07-.14-.61-1.47-.84-2.02-.22-.52-.45-.45-.61-.45h-.52c-.18 0-.46.07-.7.35-.24.28-.91.89-.91 2.16s.93 2.5 1.06 2.67c.14.18 1.81 2.75 4.38 3.85.61.26 1.09.42 1.46.54.61.19 1.17.16 1.61.1.49-.07 1.63-.67 1.86-1.32.23-.65.23-1.21.16-1.32-.07-.12-.25-.19-.52-.33Z"
                   />
                 </svg>
-                <div>
-                  <h4 className="font-medium text-foreground mb-1">WhatsApp</h4>
-                  <a
-                    href={WHATSAPP_HREF}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground text-sm hover:text-primary transition-colors"
-                  >
-                    {WHATSAPP_DISPLAY}
-                  </a>
-                </div>
+                <a
+                  href={WHATSAPP_HREF}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`WhatsApp ${WHATSAPP_DISPLAY}`}
+                  className="text-muted-foreground text-sm hover:text-primary transition-colors"
+                >
+                  {WHATSAPP_DISPLAY}
+                </a>
               </div>
 
               <div className="flex items-start gap-4">
@@ -229,22 +230,11 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
             </div>
 
             <ContactVCardQr />
-
-            <div className="pt-8 border-t border-border mt-8">
-              <a 
-                href={WHATSAPP_HREF}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 w-full min-h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full border border-primary/80 font-medium transition-colors"
-              >
-                Chat on WhatsApp · {WHATSAPP_DISPLAY}
-              </a>
-            </div>
           </div>
 
           {/* Form */}
-          <div className="lg:col-span-3 lg:pl-8">
-            <h3 className="text-2xl font-display font-semibold mb-6 text-foreground">Request a Quote</h3>
+          <div className="lg:col-span-3">
+            <h2 className="text-3xl font-display font-semibold mb-4 text-foreground">Request a Quote</h2>
             
             <Form {...form}>
               <form
@@ -420,6 +410,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                 </div>
                 </fieldset>
 
+                <div className="flex flex-col items-end gap-3">
                 {statusLabel ? (
                   <p className="flex items-center gap-2 text-sm font-medium text-foreground" role="status" aria-live="polite">
                     <Spinner className="size-4 text-primary" />
@@ -432,7 +423,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium group"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium group"
                 >
                   {isSubmitting ? (
                     <Spinner className="mr-2 size-4" />
@@ -441,10 +432,12 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   )}
                   {statusLabel ?? "Submit Request"}
                 </Button>
+                </div>
               </form>
             </Form>
           </div>
 
+        </div>
         </div>
       </div>
     </section>

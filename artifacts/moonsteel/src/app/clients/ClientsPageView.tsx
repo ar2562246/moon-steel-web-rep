@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { CmsImage } from "@/components/ui/CmsImage";
 import type { CustomerLogo } from "@/features/admin/types";
 import { groupClientsByIndustry } from "@/features/clients/types";
@@ -21,6 +22,7 @@ export function ClientsPageView({ clients, references, logos = [] }: ClientsPage
   return (
     <main className="layer-0 pb-16 pt-28">
       <div className="container mx-auto px-4 md:px-6">
+        <ParentBackLink href="/" label="home" />
         <div className="mx-auto mb-14 max-w-3xl text-center">
           <h1 className="apple-section-title mb-6 section-title-accent">Our Clients</h1>
           <p className="apple-section-copy">

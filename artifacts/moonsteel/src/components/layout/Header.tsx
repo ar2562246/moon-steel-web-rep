@@ -14,6 +14,7 @@ const navLinks = [
   { name: "Clients", href: "/clients", sectionId: "clients" },
   { name: "Products", href: "/products", sectionId: "products" },
   { name: "Materials", href: "/materials", sectionId: "materials" },
+  { name: "Process", href: "/process", sectionId: "process" },
   { name: "About", href: "/about", sectionId: "about" },
   { name: "Blog", href: "/blog", sectionId: "blog" },
   { name: "Contact", href: "/contact", sectionId: "contact" },
@@ -25,6 +26,7 @@ function isNavLinkActive(sectionId: string, pathname: string, activeSection: str
   if (sectionId === "home") return pathname === "/" && activeSection === null;
   if (sectionId === "products") return pathname.startsWith("/products");
   if (sectionId === "materials") return pathname.startsWith("/materials");
+  if (sectionId === "process") return pathname.startsWith("/process");
   if (sectionId === "clients") return pathname.startsWith("/clients");
   if (sectionId === "blog") return pathname.startsWith("/blog");
   if (sectionId === "about") return pathname.startsWith("/about");

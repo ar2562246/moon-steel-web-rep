@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../index.css";
 import { Header } from "@/components/layout/Header";
+import { SiteGoogleAnalytics } from "@/components/GoogleAnalytics";
 import { VercelInsights } from "@/components/VercelInsights";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AuthProvider } from "@/providers/AuthProvider";
@@ -60,6 +61,7 @@ export default function RootLayout({
           </div>
         </AuthProvider>
         <Toaster />
+        <SiteGoogleAnalytics />
         <VercelInsights />
       </body>
     </html>

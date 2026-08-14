@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { SectionReveal } from "@/components/motion/SectionReveal";
 import {
   Accordion,
@@ -74,6 +75,7 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
   return (
     <main className="layer-0 pb-20 pt-28">
       <div className="container mx-auto px-4 md:px-6">
+        <ParentBackLink href="/products" label="products" />
         <section className="mb-12">
           <div className="layer-1 overflow-hidden rounded-2xl p-6 md:p-10">
             <p className="apple-eyebrow mb-3">Commercial Kitchen Drainage</p>

@@ -57,3 +57,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Local tooling
+artifacts/moonsteel/supabase/.temp/

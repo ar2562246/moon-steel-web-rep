@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { CmsImage } from "@/components/ui/CmsImage";
 import { formatBlogDate, getBlogCoverImageUrl } from "@/features/blog/types";
 import type { BlogPost } from "@/features/blog/types";
@@ -21,13 +22,7 @@ export function BlogPostView({ post, linkedProducts = [] }: BlogPostViewProps) {
   return (
     <main className="layer-0 pb-20 pt-28">
       <article className="container mx-auto px-4 md:px-6">
-        <Link
-          href="/blog"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to blog
-        </Link>
+        <ParentBackLink href="/blog" label="blog" />
 
         <div className="mx-auto max-w-3xl">
           {dateLabel ? (

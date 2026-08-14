@@ -174,7 +174,7 @@ export function Footer() {
               <li><a href="/materials" className="text-sm text-muted-foreground hover:text-primary transition-colors">Materials Guide</a></li>
               <li><a href="/grease-traps" className="text-sm text-muted-foreground hover:text-primary transition-colors">Grease Traps</a></li>
               <li><a href="/clients" className="text-sm text-muted-foreground hover:text-primary transition-colors">Clients</a></li>
-              <li><a href="/#process" className="text-sm text-muted-foreground hover:text-primary transition-colors">Process</a></li>
+              <li><a href="/process" className="text-sm text-muted-foreground hover:text-primary transition-colors">Process</a></li>
               <li><a href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</a></li>
               <li><a href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</a></li>
               <li><a href="/collaboration/food-fusion" className="text-sm text-muted-foreground hover:text-primary transition-colors">Food Fusion Collab</a></li>

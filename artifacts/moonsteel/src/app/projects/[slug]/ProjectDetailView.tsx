@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { ProjectGallery } from "@/app/projects/[slug]/ProjectGallery";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -19,13 +19,7 @@ export function ProjectDetailView({ project }: ProjectDetailViewProps) {
     <>
       <main className="pt-28 pb-24">
         <div className="container mx-auto px-4 md:px-6">
-          <Link
-            href="/#projects"
-            className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to projects
-          </Link>
+          <ParentBackLink href="/projects" label="projects" />
 
           <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
             <div className="space-y-6">

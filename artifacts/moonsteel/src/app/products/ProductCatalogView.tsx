@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { SectionReveal } from "@/components/motion/SectionReveal";
 import { ProductCardImage } from "@/app/products/ProductCardImage";
 import { getCatalogCategoryFilterPath, getCatalogProductPath } from "@/features/catalog/paths";
 import type { CatalogCategorySummary, CatalogProduct } from "@/features/catalog/types";
 import { cn } from "@/lib/utils";
+import { GreaseTrapCardSpecsList } from "@/app/grease-traps/GreaseTrapCardSpecs";
 
 type ProductCatalogViewProps = {
   products: CatalogProduct[];
@@ -105,6 +107,10 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
   return (
     <main className="pt-28 pb-24">
       <div className="container mx-auto px-4 md:px-6">
+        <ParentBackLink
+          href={activeCategory ? "/products" : "/"}
+          label={activeCategory ? "all products" : "home"}
+        />
         {categories.length > 0 ? (
           <MobileCategoryChips categories={categories} activeCategory={activeCategory} />
         ) : null}
@@ -174,9 +180,13 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
                       <h3 className="text-xl font-display font-semibold text-foreground transition-colors group-hover:text-primary">
                         {product.name}
                       </h3>
-                      <p className="line-clamp-3 whitespace-pre-line text-sm text-muted-foreground">
-                        {product.details}
-                      </p>
+                      {product.categories.some((category) => category.slug === "grease-traps") ? (
+                        <GreaseTrapCardSpecsList product={product} />
+                      ) : (
+                        <p className="line-clamp-3 whitespace-pre-line text-sm text-muted-foreground">
+                          {product.details}
+                        </p>
+                      )}
                       <div className="flex items-center justify-between pt-2 text-sm text-primary">
                         <span>View product</span>
                         <ChevronRight className="h-4 w-4 -translate-x-2 opacity-0 transition-[opacity,transform] md:group-hover:translate-x-0 md:group-hover:opacity-100" />

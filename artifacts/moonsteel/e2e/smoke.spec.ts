@@ -28,6 +28,16 @@ test.describe("marketing site smoke tests", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Our Clients" })).toBeVisible();
   });
 
+  test("process page loads with the four stages", async ({ page }) => {
+    await page.goto("/process");
+    await expect(page.getByRole("heading", { level: 1, name: "From Concept to Kitchen." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Consultation" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Design / Drawing" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Fabrication" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Delivery & Installation" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /back to home/i })).toBeVisible();
+  });
+
   test("about page loads with company history", async ({ page }) => {
     await page.goto("/about");
     await expect(page.getByRole("heading", { level: 1, name: "About Moon Steel" })).toBeVisible();

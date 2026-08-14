@@ -78,6 +78,7 @@ export default async function GreaseTrapsPage() {
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
+          { name: "Products", path: "/products" },
           { name: "Grease Traps", path: "/grease-traps" },
         ])}
       />

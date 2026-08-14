@@ -65,7 +65,7 @@ export const greaseTrapProducts: GreaseTrapProduct[] = [
     outlet: "3″",
     inletIn: 3,
     outletIn: 3,
-    internals: "Removable baffles",
+    internals: "1× bucket, 1× baffle",
     application: "Restaurants and moderate commercial kitchens",
     positioning: "Commercial",
     uses: ["Restaurant", "Bakery", "Commercial kitchen", "Moderate food preparation"],
@@ -87,6 +87,7 @@ export const greaseTrapProducts: GreaseTrapProduct[] = [
     outlet: "4″",
     inletIn: 4,
     outletIn: 4,
+    internals: "2× buckets, 2× compartments",
     application: "Hotels, catering, and high-volume kitchens",
     positioning: "Large commercial",
     uses: ["Hotel", "Large restaurant", "Catering kitchen", "Institutional kitchen", "Central kitchen"],
@@ -115,6 +116,59 @@ export function pickGreaseTrapCatalogImages(
         },
       ]),
   );
+}
+
+export type GreaseTrapCardSpecs = {
+  size?: string;
+  inlet?: string;
+  outlet?: string;
+  flow?: string;
+};
+
+function specLineValue(details: string, label: string) {
+  const pattern = new RegExp(`(?:^|[\\n•\\-*])\\s*${label}\\s*:\\s*(.+)`, "i");
+  const match = details.match(pattern);
+  return match?.[1]?.trim().split("\n")[0]?.replace(/[•*].*$/, "").trim() || undefined;
+}
+
+export function parseGreaseTrapCardSpecs(details: string): GreaseTrapCardSpecs {
+  return {
+    size: specLineValue(details, "size"),
+    inlet: specLineValue(details, "inlet"),
+    outlet: specLineValue(details, "outlet"),
+    flow: specLineValue(details, "flow"),
+  };
+}
+
+export function greaseTrapCardSpecsForProduct(product: { slug: string; details: string }): GreaseTrapCardSpecs {
+  const parsed = parseGreaseTrapCardSpecs(product.details);
+  const fallback = greaseTrapProducts.find((item) => item.slug === product.slug);
+  return {
+    size: parsed.size || fallback?.size,
+    inlet: parsed.inlet || fallback?.inlet,
+    outlet: parsed.outlet || fallback?.outlet,
+    flow: parsed.flow || (fallback ? `${fallback.gpm} GPM` : undefined),
+  };
+}
+
+const SIZE_RANK = ["small", "medium", "large"] as const;
+
+function greaseTrapSizeRank(product: { slug: string; name: string; details: string }) {
+  const bySlug = greaseTrapProducts.findIndex((item) => item.slug === product.slug);
+  if (bySlug >= 0) return bySlug;
+
+  const haystack = `${product.name} ${product.details}`.toLowerCase();
+  const named = SIZE_RANK.findIndex((size) => haystack.includes(size));
+  if (named >= 0) return named;
+
+  const gpm = Number(greaseTrapCardSpecsForProduct(product).flow?.replace(/[^\d.]/g, ""));
+  return Number.isFinite(gpm) ? 100 + gpm : 1000;
+}
+
+export function sortGreaseTrapsSmallToLarge<T extends { slug: string; name: string; details: string }>(
+  products: T[],
+) {
+  return [...products].sort((a, b) => greaseTrapSizeRank(a) - greaseTrapSizeRank(b));
 }
 
 export const howItWorks = [

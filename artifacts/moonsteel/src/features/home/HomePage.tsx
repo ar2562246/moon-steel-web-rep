@@ -29,7 +29,7 @@ export default function HomePage({ data }: HomePageProps) {
         />
         <ProblemSolution />
         <Products categories={data.catalogCategories} />
-        <GreaseTrapCta catalogImages={data.greaseTrapImages} />
+        <GreaseTrapCta section={data.greaseTraps} />
         <MaterialCta />
         <Process />
         <FoodFusionCollab />

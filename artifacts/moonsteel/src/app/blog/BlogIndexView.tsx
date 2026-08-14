@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { CmsImage } from "@/components/ui/CmsImage";
 import { formatBlogDate, getBlogCoverImageUrl, getBlogPath } from "@/features/blog/types";
 import type { BlogPost } from "@/features/blog/types";
@@ -13,6 +14,7 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
   return (
     <main className="layer-0 pb-20 pt-28">
       <div className="container mx-auto px-4 md:px-6">
+        <ParentBackLink href="/" label="home" />
         <div className="mx-auto mb-14 max-w-3xl text-center">
           <h1 className="apple-section-title mb-6 section-title-accent">Blog</h1>
           <p className="apple-section-copy">

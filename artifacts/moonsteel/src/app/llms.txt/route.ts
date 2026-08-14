@@ -25,6 +25,7 @@ const body = `# Moon Steel Fabricators
 - [Products](${PRODUCTION_SITE_URL}/products): Commercial stainless steel kitchen equipment catalog
 - [Grease traps](${PRODUCTION_SITE_URL}/grease-traps): AISI 304 grease traps and sizing calculator
 - [Materials](${PRODUCTION_SITE_URL}/materials): AISI 304 vs 316 grade, thickness, and finish guide
+- [Process](${PRODUCTION_SITE_URL}/process): Consultation, AutoCAD drawings, Karachi fabrication, and on-site installation
 - [Projects](${PRODUCTION_SITE_URL}/projects): Fabrication installations across Pakistan
 - [Clients](${PRODUCTION_SITE_URL}/clients): Hotels, QSRs, hospitals, and industrial clients
 - [About](${PRODUCTION_SITE_URL}/about): Family fabrication business in Karachi since 1947

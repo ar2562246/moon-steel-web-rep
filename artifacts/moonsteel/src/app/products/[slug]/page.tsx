@@ -122,11 +122,20 @@ export default async function CatalogProductPage({ params }: PageProps) {
     <>
       <JsonLd data={jsonLd} />
       <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", path: "/" },
-          { name: "Products", path: "/products" },
-          { name: product.name, path: product.path },
-        ])}
+        data={breadcrumbJsonLd(
+          product.categories.some((category) => category.slug === "grease-traps")
+            ? [
+                { name: "Home", path: "/" },
+                { name: "Products", path: "/products" },
+                { name: "Grease Traps", path: "/grease-traps" },
+                { name: product.name, path: product.path },
+              ]
+            : [
+                { name: "Home", path: "/" },
+                { name: "Products", path: "/products" },
+                { name: product.name, path: product.path },
+              ],
+        )}
       />
       <ProductDetailView product={product} />
       <Footer />

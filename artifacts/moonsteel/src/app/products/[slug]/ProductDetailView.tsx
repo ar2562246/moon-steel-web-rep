@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { ImageGallery } from "@/components/media/ImageGallery";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { getCatalogCategoryFilterPath, getCatalogProductImages } from "@/features/catalog/paths";
 import type { CatalogProduct } from "@/features/catalog/types";
 
@@ -44,17 +44,16 @@ function QuoteButton({ className }: { className?: string }) {
 
 export function ProductDetailView({ product }: ProductDetailViewProps) {
   const images = getCatalogProductImages(product);
+  const isGreaseTrap = product.categories.some((category) => category.slug === "grease-traps");
 
   return (
     <main className="pt-20 pb-28 md:pt-28 md:pb-24">
       <div className="container mx-auto px-4 md:px-6">
-        <Link
-          href="/products"
-          className="mb-3 inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground md:mb-8"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to catalog
-        </Link>
+        <ParentBackLink
+          href={isGreaseTrap ? "/grease-traps" : "/products"}
+          label={isGreaseTrap ? "grease traps" : "catalog"}
+          className="mb-3 md:mb-8"
+        />
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] lg:items-start lg:gap-10 md:gap-6">
           <div className="space-y-5 md:space-y-6">

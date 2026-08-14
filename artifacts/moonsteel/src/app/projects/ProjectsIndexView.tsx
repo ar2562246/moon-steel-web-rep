@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { CmsImage } from "@/components/ui/CmsImage";
 import { getProjectCoverImage } from "@/features/projects/images";
 import type { Project } from "@/features/projects/types";
@@ -13,6 +14,7 @@ export function ProjectsIndexView({ projects }: ProjectsIndexViewProps) {
   return (
     <main className="layer-0 pb-12 pt-28">
       <div className="container mx-auto px-4 md:px-6">
+        <ParentBackLink href="/" label="home" />
         <div className="mx-auto mb-12 max-w-3xl text-center">
           <h1 className="apple-section-title mb-6 section-title-accent">Our Projects</h1>
           <p className="apple-section-copy">

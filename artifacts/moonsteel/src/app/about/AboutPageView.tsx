@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Award, Building2, Cog, Factory, PenTool, ShieldCheck, Wrench } from "lucide-react";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { SectionReveal } from "@/components/motion/SectionReveal";
 import { CmsImage } from "@/components/ui/CmsImage";
 
@@ -95,6 +96,7 @@ export function AboutPageView() {
   return (
     <main className="layer-0 pb-16 pt-28">
       <div className="container mx-auto px-4 md:px-6">
+        <ParentBackLink href="/" label="home" />
         <div className="mx-auto mb-16 max-w-3xl text-center">
           <h1 className="apple-section-title mb-6 section-title-accent">About Moon Steel</h1>
           <p className="apple-section-copy">

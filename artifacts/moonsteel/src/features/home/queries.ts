@@ -9,11 +9,8 @@ import {
   listPublishedCatalogCategories,
   listPublishedCatalogProducts,
 } from "@/features/catalog/queries";
-import type { CatalogCategoryCard } from "@/features/catalog/types";
-import {
-  pickGreaseTrapCatalogImages,
-  type GreaseTrapCatalogImage,
-} from "@/app/grease-traps/grease-traps-data";
+import type { CatalogCategory, CatalogCategoryCard, CatalogProduct } from "@/features/catalog/types";
+import { sortGreaseTrapsSmallToLarge } from "@/app/grease-traps/grease-traps-data";
 import { defaultProjects } from "@/features/projects/defaultProjects";
 import { listPublishedProjects } from "@/features/projects/queries";
 import { defaultTestimonials } from "@/features/testimonials/defaultTestimonials";
@@ -23,19 +20,56 @@ import type { Project } from "@/features/projects/types";
 import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 
 const DEFAULT_LOGO_SLIDER_SPEED = 52;
+const GREASE_TRAP_CATEGORY_SLUG = "grease-traps";
+
+export type HomeGreaseTrapSection = {
+  title: string;
+  description: string;
+  products: CatalogProduct[];
+};
 
 export type HomePageData = {
   heroImages: HeroImage[];
   customerLogos: CustomerLogo[];
   logoSliderSpeed: number;
   catalogCategories: CatalogCategoryCard[];
-  greaseTrapImages: Record<string, GreaseTrapCatalogImage>;
+  greaseTraps: HomeGreaseTrapSection;
   projects: Project[];
   testimonials: Testimonial[];
 };
 
 function defaultCategoryCards() {
   return buildCatalogCategoryCards(defaultCatalogCategories, defaultCatalogProducts);
+}
+
+function firstDetailsParagraph(details: string) {
+  return (
+    details
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .find(Boolean) ?? ""
+  );
+}
+
+export function buildGreaseTrapSection(
+  categories: Array<Pick<CatalogCategory, "slug" | "name" | "description">>,
+  products: CatalogProduct[],
+): HomeGreaseTrapSection {
+  const category = categories.find((item) => item.slug === GREASE_TRAP_CATEGORY_SLUG);
+  const greaseTrapProducts = sortGreaseTrapsSmallToLarge(
+    products.filter((product) => product.categories.some((item) => item.slug === GREASE_TRAP_CATEGORY_SLUG)),
+  );
+  const fromCategory = category?.description?.trim() ?? "";
+  const fromProducts = firstDetailsParagraph(greaseTrapProducts[0]?.details ?? "");
+
+  return {
+    title: category?.name ?? "Grease Traps",
+    description:
+      fromCategory ||
+      fromProducts ||
+      "Stainless steel grease traps and interceptors for commercial kitchen drainage.",
+    products: greaseTrapProducts,
+  };
 }
 
 async function fetchHeroImages(supabase: SupabaseClient) {
@@ -107,7 +141,7 @@ export async function resolveHomePageData(): Promise<HomePageData> {
         customerLogos,
         logoSliderSpeed,
         catalogCategories,
-        greaseTrapImages: pickGreaseTrapCatalogImages(products),
+        greaseTraps: buildGreaseTrapSection(categories, products),
         projects: projects.length > 0 ? projects : defaultProjects,
         testimonials: testimonials.length > 0 ? testimonials : defaultTestimonials,
       };
@@ -121,7 +155,13 @@ export async function resolveHomePageData(): Promise<HomePageData> {
     customerLogos: [],
     logoSliderSpeed: DEFAULT_LOGO_SLIDER_SPEED,
     catalogCategories: defaultCategoryCards(),
-    greaseTrapImages: pickGreaseTrapCatalogImages(defaultCatalogProducts),
+    greaseTraps: buildGreaseTrapSection(
+      defaultCatalogCategories.map((category) => ({
+        ...category,
+        description: null,
+      })),
+      defaultCatalogProducts,
+    ),
     projects: defaultProjects,
     testimonials: defaultTestimonials,
   };

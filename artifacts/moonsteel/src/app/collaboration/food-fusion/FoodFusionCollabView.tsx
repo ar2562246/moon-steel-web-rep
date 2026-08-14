@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, ExternalLink } from "lucide-react";
+import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { SectionReveal } from "@/components/motion/SectionReveal";
 import { CmsImage } from "@/components/ui/CmsImage";
 import {
@@ -13,6 +14,7 @@ export function FoodFusionCollabView() {
   return (
     <main className="layer-0 pb-16 pt-28">
       <div className="container mx-auto px-4 md:px-6">
+        <ParentBackLink href="/" label="home" />
         <div className="mx-auto mb-16 max-w-3xl text-center">
           <div className="mb-8 flex items-center justify-center gap-5 md:gap-7">
             <img
