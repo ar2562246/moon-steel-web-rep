@@ -1,9 +1,11 @@
+import { TrackedContactLink } from "@/components/analytics/TrackedContactLink";
 import { WHATSAPP_DISPLAY, WHATSAPP_HREF } from "@/lib/contact/details";
 import { MessageCircle } from "lucide-react";
 
 export function WhatsAppButton() {
   return (
-    <a
+    <TrackedContactLink
+      method="whatsapp"
       href={`${WHATSAPP_HREF}?text=Hi%2C%20I%27d%20like%20to%20request%20a%20quote%20from%20Moon%20Steel.`}
       target="_blank"
       rel="noopener noreferrer"
@@ -11,6 +13,6 @@ export function WhatsAppButton() {
       aria-label={`Contact on WhatsApp ${WHATSAPP_DISPLAY}`}
     >
       <MessageCircle className="w-7 h-7 relative z-10" />
-    </a>
+    </TrackedContactLink>
   );
 }

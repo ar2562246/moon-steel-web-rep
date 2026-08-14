@@ -29,7 +29,9 @@ import { cn } from "@/lib/utils";
 import { FileDropzone } from "@/components/ui/FileDropzone";
 import { Spinner } from "@/components/ui/spinner";
 import { ParentBackLink } from "@/components/layout/ParentBackLink";
+import { TrackedContactLink } from "@/components/analytics/TrackedContactLink";
 import { ContactVCardQr } from "@/components/ContactVCardQr";
+import { trackGenerateLead } from "@/lib/analytics/gtag";
 import {
   CONTACT_ATTACHMENT_MAX_FILES,
   formatAttachmentBytes,
@@ -130,6 +132,12 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
         description: "We'll get back to you within 24 hours.",
       });
 
+      trackGenerateLead({
+        method: "quote_form",
+        project_type: values.projectType,
+        has_attachments: attachments.length > 0,
+      });
+
       form.reset();
       setFiles([]);
     } catch (error) {
@@ -184,7 +192,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                 <Phone className="w-6 h-6 text-primary shrink-0" />
                 <div>
                   <h4 className="font-medium text-foreground mb-1">Direct Line</h4>
-                  <a href={`tel:${PHONE_TEL}`} className="text-muted-foreground text-sm hover:text-primary transition-colors">{PHONE_DISPLAY}</a>
+                  <TrackedContactLink method="phone" href={`tel:${PHONE_TEL}`} className="text-muted-foreground text-sm hover:text-primary transition-colors">{PHONE_DISPLAY}</TrackedContactLink>
                 </div>
               </div>
 
@@ -192,7 +200,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                 <Mail className="w-6 h-6 text-primary shrink-0" />
                 <div>
                   <h4 className="font-medium text-foreground mb-1">Email</h4>
-                  <a href={`mailto:${EMAIL}`} className="text-muted-foreground text-sm hover:text-primary transition-colors">{EMAIL}</a>
+                  <TrackedContactLink method="email" href={`mailto:${EMAIL}`} className="text-muted-foreground text-sm hover:text-primary transition-colors">{EMAIL}</TrackedContactLink>
                 </div>
               </div>
 
@@ -209,7 +217,8 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                     d="M17.34 14.15c-.28-.14-1.63-.8-1.88-.89-.25-.09-.43-.14-.61.14-.18.28-.7.89-.86 1.08-.16.18-.31.21-.58.07-.28-.14-1.17-.43-2.23-1.36-.82-.73-1.38-1.62-1.54-1.9-.16-.28-.02-.43.12-.57.12-.12.28-.31.42-.46.14-.16.18-.28.28-.46.09-.18.05-.35-.02-.5-.07-.14-.61-1.47-.84-2.02-.22-.52-.45-.45-.61-.45h-.52c-.18 0-.46.07-.7.35-.24.28-.91.89-.91 2.16s.93 2.5 1.06 2.67c.14.18 1.81 2.75 4.38 3.85.61.26 1.09.42 1.46.54.61.19 1.17.16 1.61.1.49-.07 1.63-.67 1.86-1.32.23-.65.23-1.21.16-1.32-.07-.12-.25-.19-.52-.33Z"
                   />
                 </svg>
-                <a
+                <TrackedContactLink
+                  method="whatsapp"
                   href={WHATSAPP_HREF}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -217,7 +226,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   className="text-muted-foreground text-sm hover:text-primary transition-colors"
                 >
                   {WHATSAPP_DISPLAY}
-                </a>
+                </TrackedContactLink>
               </div>
 
               <div className="flex items-start gap-4">

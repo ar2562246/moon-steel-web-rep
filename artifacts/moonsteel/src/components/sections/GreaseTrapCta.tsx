@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { SectionReveal } from "@/components/motion/SectionReveal";
 import { ProductCardImage } from "@/app/products/ProductCardImage";
 import { getCatalogProductPath } from "@/features/catalog/paths";
 import type { CatalogProduct } from "@/features/catalog/types";
 import type { HomeGreaseTrapSection } from "@/features/home/queries";
+import { catalogItem, trackSelectItem, trackViewItemList } from "@/lib/analytics/gtag";
 import { GreaseTrapCardSpecsList } from "@/app/grease-traps/GreaseTrapCardSpecs";
 
 type GreaseTrapCtaProps = {
@@ -22,6 +24,14 @@ function sectionTitle(title: string) {
 
 export function GreaseTrapCta({ section }: GreaseTrapCtaProps) {
   const products = section.products;
+
+  useEffect(() => {
+    trackViewItemList(
+      "homepage-grease-traps",
+      "Grease Traps",
+      products.map((product, index) => catalogItem(product, index)),
+    );
+  }, [products]);
 
   return (
     <section id="grease-traps" className="bg-muted py-24">
@@ -78,6 +88,9 @@ function GreaseTrapProductCard({
     <Link
       href={getCatalogProductPath(product.slug)}
       className="layer-1 group flex flex-col overflow-hidden rounded-2xl transition-colors hover:border-primary/40"
+      onClick={() =>
+        trackSelectItem("homepage-grease-traps", "Grease Traps", catalogItem(product))
+      }
     >
       <ProductCardImage product={product} priority={priority} />
       <div className="flex flex-1 flex-col p-6">

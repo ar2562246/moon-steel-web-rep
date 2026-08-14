@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { SectionReveal } from "@/components/motion/SectionReveal";
 import { ProductCardImage } from "@/app/products/ProductCardImage";
 import { getCatalogCategoryFilterPath, getCatalogProductPath } from "@/features/catalog/paths";
 import type { CatalogCategorySummary, CatalogProduct } from "@/features/catalog/types";
+import { catalogItem, trackSelectItem, trackViewItemList } from "@/lib/analytics/gtag";
 import { cn } from "@/lib/utils";
 import { GreaseTrapCardSpecsList } from "@/app/grease-traps/GreaseTrapCardSpecs";
 
@@ -103,6 +105,16 @@ function MobileCategoryChips({
 
 export function ProductCatalogView({ products, categories, activeCategory }: ProductCatalogViewProps) {
   const activeName = categories.find((category) => category.slug === activeCategory)?.name;
+  const listId = activeCategory ?? "all-products";
+  const listName = activeName ?? "All products";
+
+  useEffect(() => {
+    trackViewItemList(
+      listId,
+      listName,
+      products.map((product, index) => catalogItem(product, index)),
+    );
+  }, [listId, listName, products]);
 
   return (
     <main className="pt-28 pb-24">
@@ -164,6 +176,7 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
                     key={product.id}
                     href={getCatalogProductPath(product.slug)}
                     className="group layer-1 overflow-hidden rounded-xl transition-colors hover:border-primary/40"
+                    onClick={() => trackSelectItem(listId, listName, catalogItem(product, index))}
                   >
                     <ProductCardImage product={product} priority={index < 2} />
                     <div className="space-y-3 p-6">

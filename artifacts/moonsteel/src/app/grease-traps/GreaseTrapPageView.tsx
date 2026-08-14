@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { SectionReveal } from "@/components/motion/SectionReveal";
@@ -13,6 +14,7 @@ import {
 import { getCatalogProductPath } from "@/features/catalog/paths";
 import { ProductCardImage } from "@/app/products/ProductCardImage";
 import type { CatalogProduct } from "@/features/catalog/types";
+import { catalogItem, trackSelectItem, trackViewItemList } from "@/lib/analytics/gtag";
 import { GreaseTrapCalculator } from "@/app/grease-traps/GreaseTrapCalculator";
 import {
   cleaningSteps,
@@ -72,6 +74,19 @@ type GreaseTrapPageViewProps = {
 };
 
 export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewProps) {
+  useEffect(() => {
+    trackViewItemList(
+      "grease-traps",
+      "Grease Traps",
+      greaseTrapProducts.map((product, index) =>
+        catalogItem(
+          { slug: product.slug, name: product.name, categories: [{ name: "Grease Traps" }] },
+          index,
+        ),
+      ),
+    );
+  }, []);
+
   return (
     <main className="layer-0 pb-20 pt-28">
       <div className="container mx-auto px-4 md:px-6">
@@ -218,7 +233,21 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                 id={product.id}
                 className="layer-1 flex flex-col overflow-hidden rounded-2xl scroll-mt-28"
               >
-                <Link href={getCatalogProductPath(product.slug)} className="block">
+                <Link
+                  href={getCatalogProductPath(product.slug)}
+                  className="block"
+                  onClick={() =>
+                    trackSelectItem(
+                      "grease-traps",
+                      "Grease Traps",
+                      catalogItem({
+                        slug: product.slug,
+                        name: product.name,
+                        categories: [{ name: "Grease Traps" }],
+                      }),
+                    )
+                  }
+                >
                     <ProductCardImage
                     product={
                       catalogImages[product.slug] ?? {
@@ -273,6 +302,17 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                 <Link
                   href={getCatalogProductPath(product.slug)}
                   className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-medium text-primary hover:underline"
+                  onClick={() =>
+                    trackSelectItem(
+                      "grease-traps",
+                      "Grease Traps",
+                      catalogItem({
+                        slug: product.slug,
+                        name: product.name,
+                        categories: [{ name: "Grease Traps" }],
+                      }),
+                    )
+                  }
                 >
                   View technical details
                   <ArrowRight className="h-4 w-4" />

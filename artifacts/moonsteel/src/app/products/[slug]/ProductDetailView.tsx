@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { ImageGallery } from "@/components/media/ImageGallery";
 import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { getCatalogCategoryFilterPath, getCatalogProductImages } from "@/features/catalog/paths";
 import type { CatalogProduct } from "@/features/catalog/types";
+import { catalogItem, trackViewItem } from "@/lib/analytics/gtag";
 
 type ProductDetailViewProps = {
   product: CatalogProduct;
@@ -45,6 +47,10 @@ function QuoteButton({ className }: { className?: string }) {
 export function ProductDetailView({ product }: ProductDetailViewProps) {
   const images = getCatalogProductImages(product);
   const isGreaseTrap = product.categories.some((category) => category.slug === "grease-traps");
+
+  useEffect(() => {
+    trackViewItem(catalogItem(product));
+  }, [product.slug]);
 
   return (
     <main className="pt-20 pb-28 md:pt-28 md:pb-24">
