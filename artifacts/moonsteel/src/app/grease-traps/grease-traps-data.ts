@@ -375,6 +375,12 @@ export function recommendedPipeInForGpm(gpm: number) {
   return 6;
 }
 
+export function recommendedInletInForGpm(gpm: number) {
+  const small = greaseTrapProducts[0];
+  if (small && gpm < small.gpm) return small.inletIn;
+  return recommendedPipeInForGpm(gpm);
+}
+
 function grossGallons(lengthIn: number, widthIn: number, heightIn: number) {
   return (lengthIn * widthIn * heightIn) / CUBIC_INCHES_PER_GALLON;
 }
@@ -430,12 +436,11 @@ export function recommendGreaseTrapSize(gpm: number) {
 
   const heightIn = recommendedHeightForGpm(gpm);
   const calculated = calculateGreaseTrapSize(gpm, heightIn);
-  const pipeIn = recommendedPipeInForGpm(gpm);
   return {
     gpm,
     ...calculated,
-    inletIn: pipeIn,
-    outletIn: pipeIn,
+    inletIn: recommendedInletInForGpm(gpm),
+    outletIn: recommendedPipeInForGpm(gpm),
     catalogProduct: null,
   };
 }
