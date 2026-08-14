@@ -62,6 +62,13 @@ test.describe("marketing site smoke tests", () => {
     await expect(page.getByRole("heading", { name: "Admin Login" })).toBeVisible();
   });
 
+  test("grease traps hub loads with Pakistan manufacturer heading", async ({ page }) => {
+    await page.goto("/grease-traps");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Grease Traps");
+    await expect(page.getByRole("link", { name: /upload drawings/i }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Built to your specification." })).toBeVisible();
+  });
+
   test("contact page loads", async ({ page }) => {
     await page.goto("/contact");
     await expect(page.locator("#contact")).toBeVisible();

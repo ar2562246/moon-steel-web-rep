@@ -25,8 +25,8 @@ export function ProcessPageView() {
               From Concept to Kitchen.
             </h1>
             <p className="mb-8 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              {PROCESS_INTRO} Four stages — consultation, drawing approval, Karachi fabrication, and
-              on-site installation — so commercial kitchen equipment lands to spec.
+              {PROCESS_INTRO} Four stages — consultation, drawing approval, manufacturing in Karachi, and
+              supply across Pakistan — so commercial kitchen equipment lands to spec.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link

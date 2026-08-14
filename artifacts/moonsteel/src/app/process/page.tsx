@@ -10,7 +10,7 @@ import { absoluteUrl } from "@/lib/site";
 export const metadata: Metadata = {
   title: "From Concept to Kitchen — Fabrication Process",
   description:
-    "How Moon Steel Fabricators takes commercial kitchen equipment from consultation and AutoCAD drawings to Karachi fabrication and on-site installation.",
+    "How Moon Steel Fabricators takes commercial kitchen equipment from consultation and AutoCAD drawings to manufacturing in Karachi and supply across Pakistan.",
   keywords: [
     "stainless steel fabrication process",
     "commercial kitchen fabrication Karachi",

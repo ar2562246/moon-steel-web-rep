@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { FileDropzone } from "@/components/ui/FileDropzone";
 import { Spinner } from "@/components/ui/spinner";
@@ -82,6 +82,27 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
       message: "",
     },
   });
+
+  const projectType = form.watch("projectType");
+  const isGreaseTrapQuote = projectType === "grease-trap";
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const project = params.get("project");
+    const gpm = params.get("gpm");
+    const size = params.get("size");
+    if (project === "grease-trap") {
+      form.setValue("projectType", "grease-trap");
+      if (!form.getValues("message")) {
+        const parts = [
+          gpm ? `Required flow: ${gpm} GPM.` : null,
+          size ? `Recommended size: ${size.replace(/x/g, " × ")} in.` : null,
+          "Please quote a grease trap.",
+        ].filter(Boolean);
+        if (parts.length > 1) form.setValue("message", parts.join(" "));
+      }
+    }
+  }, [form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const limitError = validateAttachmentLimits(files);
@@ -325,13 +346,14 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Project Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || undefined}>
                         <FormControl>
                           <SelectTrigger className="layer-1">
                             <SelectValue placeholder="Select a project category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="grease-trap">Grease Trap</SelectItem>
                           <SelectItem value="commercial-kitchen">Commercial Kitchen</SelectItem>
                           <SelectItem value="exhaust-system">Exhaust System</SelectItem>
                           <SelectItem value="sinks-tables">Sinks & Tables</SelectItem>
@@ -352,7 +374,11 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                       <FormLabel>Project Details</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Please provide dimensions, specific requirements, or the scope of work..." 
+                          placeholder={
+                            isGreaseTrapQuote
+                              ? "GPM, overall size, inlet and outlet — or attach the consultant or customer drawing."
+                              : "Please provide dimensions, specific requirements, or the scope of work..."
+                          } 
                           className="layer-1 min-h-[120px]"
                           {...field} 
                         />
@@ -363,12 +389,20 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                 />
 
                 <div className="space-y-2">
-                  <Label>Attach Drawings (Optional)</Label>
+                  <Label>
+                    {isGreaseTrapQuote
+                      ? "Attach drawings or consultant specs"
+                      : "Attach Drawings (Optional)"}
+                  </Label>
                   <FileDropzone
                     accept={CONTACT_DRAWING_ACCEPT}
                     multiple
                     disabled={isSubmitting}
-                    label="Drop drawings or CAD files here, or click to browse"
+                    label={
+                      isGreaseTrapQuote
+                        ? "Drop the consultant or customer drawing here, or click to browse"
+                        : "Drop drawings or CAD files here, or click to browse"
+                    }
                     hint={CONTACT_DRAWING_HINT}
                     onFiles={(incoming) => {
                       setFiles((current) => {

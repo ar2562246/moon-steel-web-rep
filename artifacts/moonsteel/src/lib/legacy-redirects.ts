@@ -42,4 +42,13 @@ export const legacyWordpressRedirects: Redirect[] = [
   permanent("/shop", "/products"),
   permanent("/shop/", "/products"),
   permanent("/shop/:path*", "/products"),
+
+  permanent(
+    "/the-benefits-of-using-a-stainless-steel-grease-trap-in-your-restaurant",
+    "/blog/the-benefits-of-using-a-stainless-steel-grease-trap-in-your-restaurant",
+  ),
+  permanent(
+    "/the-benefits-of-using-a-stainless-steel-grease-trap-in-your-restaurant/",
+    "/blog/the-benefits-of-using-a-stainless-steel-grease-trap-in-your-restaurant",
+  ),
 ];

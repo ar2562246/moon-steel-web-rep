@@ -8,11 +8,12 @@ import { getCatalogProductBySlug } from "@/features/catalog/queries";
 import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site";
+import { getCatalogProductPath } from "@/features/catalog/paths";
 
 export const metadata: Metadata = {
-  title: "Commercial Stainless Steel Grease Traps",
+  title: "Stainless Steel Grease Trap Manufacturer in Pakistan",
   description:
-    "AISI 304 stainless steel grease traps for commercial kitchens in Pakistan. Compare Small, Medium, and Large sizes and estimate required flow with the grease trap sizing calculator.",
+    "Moon Steel manufactures AISI 304 stainless steel grease traps in Karachi and supplies them across Pakistan. Standard Small, Medium, and Large sizes, or custom tanks built from customer and consultant drawings.",
   keywords: [
     "stainless steel grease trap",
     "commercial grease trap",
@@ -22,7 +23,8 @@ export const metadata: Metadata = {
     "SS 304 grease trap",
     "grease trap manufacturer Pakistan",
     "grease trap Karachi",
-    "custom grease trap",
+    "grease interceptor Pakistan",
+    "custom grease trap from drawings",
     "grease trap sizing",
     "grease trap capacity",
     "grease trap size calculator",
@@ -33,9 +35,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: absoluteUrl("/grease-traps"),
-    title: "Commercial Stainless Steel Grease Traps | Moon Steel Fabricators",
+    title: "Stainless Steel Grease Trap Manufacturer in Pakistan | Moon Steel Fabricators",
     description:
-      "Fabricated AISI 304 grease traps with gross tank volumes for Small, Medium, and Large commercial kitchens — plus a sizing calculator.",
+      "AISI 304 grease traps manufactured in Karachi — standard 17 / 34 / 120 GPM sizes, or built to your consultant drawing.",
   },
 };
 
@@ -75,6 +77,19 @@ export default async function GreaseTrapsPage() {
   return (
     <>
       <JsonLd data={faqSchema} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Stainless steel grease traps manufactured in Pakistan",
+          itemListElement: greaseTrapProducts.map((product, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: product.name,
+            url: absoluteUrl(getCatalogProductPath(product.slug)),
+          })),
+        }}
+      />
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },

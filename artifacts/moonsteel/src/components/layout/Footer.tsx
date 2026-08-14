@@ -37,7 +37,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-              AISI 304 and AISI 316 stainless steel fabrication for commercial kitchens, hospitals, and industrial facilities. Manufactured in Karachi, Pakistan.
+              AISI 304 and AISI 316 stainless steel equipment for commercial kitchens, hospitals, and industrial facilities. Manufactured in Karachi. Built and supplied across Pakistan.
             </p>
             <div className="flex items-center gap-2">
               <a
@@ -173,9 +173,9 @@ export function Footer() {
             <h4 className="font-display font-semibold text-foreground mb-6 text-sm">Quick Links</h4>
             <ul className="space-y-3">
               <li><a href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</a></li>
+              <li><a href="/grease-traps" className="text-sm text-muted-foreground hover:text-primary transition-colors">Grease Traps</a></li>
               <li><a href="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">Products & Specs</a></li>
               <li><a href="/materials" className="text-sm text-muted-foreground hover:text-primary transition-colors">Materials Guide</a></li>
-              <li><a href="/grease-traps" className="text-sm text-muted-foreground hover:text-primary transition-colors">Grease Traps</a></li>
               <li><a href="/clients" className="text-sm text-muted-foreground hover:text-primary transition-colors">Clients</a></li>
               <li><a href="/process" className="text-sm text-muted-foreground hover:text-primary transition-colors">Process</a></li>
               <li><a href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About Us</a></li>

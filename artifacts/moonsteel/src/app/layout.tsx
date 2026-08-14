@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | Moon Steel Fabricators",
   },
   description:
-    "Moon Steel Fabricators fabricates AISI 304 and AISI 316 commercial kitchen equipment and custom stainless steel work for hotels, restaurants, QSRs, hospitals, and industrial facilities in Pakistan.",
+    "Moon Steel Fabricators manufactures AISI 304 and AISI 316 commercial kitchen equipment at our Karachi plant and supplies hotels, restaurants, QSRs, hospitals, and industrial facilities across Pakistan.",
   alternates: {
     canonical: "/",
   },
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     title: "Commercial Kitchen Equipment Manufacturer in Pakistan | Moon Steel Fabricators",
     description:
-      "AISI 304 and AISI 316 stainless steel fabrication for commercial kitchens — from drawings to fabrication and installation in Karachi.",
+      "AISI 304 and AISI 316 commercial kitchen equipment — manufactured in Karachi and supplied across Pakistan.",
     siteName: "Moon Steel Fabricators",
   },
   twitter: {

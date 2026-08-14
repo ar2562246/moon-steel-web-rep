@@ -15,7 +15,7 @@ const generations = [
     era: "Second generation",
     year: "1974",
     name: "Muhammad Suleman",
-    body: "Muhammad Suleman joined his father in the business, and together they delivered the company's first dedicated steel fabrication project in 1974. Under their partnership the workshop grew from general metalwork into specialist stainless steel fabrication for commercial kitchens, hotels, hospitals, and laboratories.",
+    body: "Muhammad Suleman joined his father in the business, and together they delivered the company's first dedicated steel fabrication project in 1974. Under their partnership the operation grew from general metalwork into a manufacturing facility for commercial kitchen, hotel, hospital, and laboratory stainless equipment.",
   },
   {
     era: "Third generation",
@@ -100,9 +100,9 @@ export function AboutPageView() {
         <div className="mx-auto mb-16 max-w-3xl text-center">
           <h1 className="apple-section-title mb-6 section-title-accent">About Moon Steel</h1>
           <p className="apple-section-copy">
-            A three-generation family business in Karachi, fabricating customized stainless steel
-            equipment for commercial kitchens, hospitals, laboratories, hotels, and industry since
-            1947.
+            A three-generation manufacturing facility in Karachi. We build and supply customized
+            stainless steel equipment for commercial kitchens, hospitals, laboratories, hotels, and
+            industry across Pakistan.
           </p>
         </div>
 
@@ -119,7 +119,7 @@ export function AboutPageView() {
 
         <section className="mb-20">
           <div className="mb-10 max-w-2xl">
-            <h2 className="apple-section-title mb-4 text-3xl">Three generations, one workshop.</h2>
+            <h2 className="apple-section-title mb-4 text-3xl">Three generations, one manufacturing facility.</h2>
             <p className="apple-section-copy">
               Moon Steel Fabricators has been passed from father to son twice. The same family that
               started it still runs it — which is why our clients deal directly with the people whose
@@ -190,9 +190,9 @@ export function AboutPageView() {
                   Our facility
                 </h3>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Plot 142, Sector 24, Korangi Industrial Area, Karachi &mdash; our own fabrication
-                  workshop, where design, cutting, forming, welding, and finishing happen under one
-                  roof before installation teams take equipment to site.
+                  Plot 142, Sector 24, Korangi Industrial Area, Karachi &mdash; our manufacturing
+                  facility, where we design, cut, form, weld, and finish equipment under one roof,
+                  then supply it to sites across Pakistan.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -251,7 +251,7 @@ export function AboutPageView() {
           <div className="mb-10 max-w-2xl">
             <h2 className="apple-section-title mb-4 text-3xl">Our team.</h2>
             <p className="apple-section-copy">
-              You deal with the family directly — no account layers between you and the workshop.
+              You deal with the family directly — no account layers between you and the people who build the work.
             </p>
           </div>
 

@@ -11,7 +11,7 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   title: "Stainless Steel Fabricators in Karachi Since 1947",
   description:
-    "Moon Steel Fabricators is a three-generation family business in Karachi, fabricating customized stainless steel equipment for commercial kitchens, hospitals, and laboratories since 1947.",
+    "Moon Steel Fabricators is a three-generation manufacturing facility in Karachi, building and supplying customized stainless steel equipment for commercial kitchens, hospitals, and laboratories across Pakistan.",
   alternates: {
     canonical: "/about",
   },

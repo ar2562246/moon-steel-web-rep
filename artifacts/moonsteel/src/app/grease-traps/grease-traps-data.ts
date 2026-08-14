@@ -1,3 +1,5 @@
+export const GREASE_TRAP_QUOTE_HREF = "/contact?project=grease-trap";
+
 export type GreaseTrapClass = "small" | "medium" | "large";
 
 export type GreaseTrapProduct = {
@@ -38,9 +40,9 @@ export const greaseTrapProducts: GreaseTrapProduct[] = [
     grossGal: 17.1,
     grossLitres: 65,
     material: "1.50mm AISI 304",
-    inlet: "1″",
+    inlet: "1.5″",
     outlet: "2″",
-    inletIn: 1,
+    inletIn: 1.5,
     outletIn: 2,
     internals: "1× bucket, 1× baffle",
     greaseHolding: "9.5 kg",
@@ -93,6 +95,8 @@ export const greaseTrapProducts: GreaseTrapProduct[] = [
     uses: ["Hotel", "Large restaurant", "Catering kitchen", "Institutional kitchen", "Central kitchen"],
   },
 ];
+
+export const standardGreaseTrapGpms = new Set(greaseTrapProducts.map((item) => item.gpm));
 
 export type GreaseTrapCatalogImage = {
   name: string;
@@ -213,15 +217,15 @@ export const features = [
   },
   {
     title: "Defined connections",
-    body: "Small 1″ / 2″, Medium 3″ / 3″, Large 4″ / 4″ inlet and outlet. Custom sizes on request.",
+    body: "Small 1.5″ / 2″, Medium 3″ / 3″, Large 4″ / 4″ inlet and outlet. Custom sizes on request.",
   },
   {
     title: "Easy-clean internals",
     body: "Serviceable baffles and a clear grease/solids layout rather than sealed compartments.",
   },
   {
-    title: "Three standard sizes",
-    body: "17 GPM, 34 GPM, and 120 GPM, plus custom fabrication for other flows and layouts.",
+    title: "Three standard sizes plus custom",
+    body: "17 GPM, 34 GPM, and 120 GPM in stock classes. Other flows and layouts are manufactured from the customer or consultant drawing.",
   },
   {
     title: "Made in Karachi",
@@ -245,8 +249,8 @@ export const specRows: Array<[string, string]> = [
   ["Welding", "TIG welded, leak-resistant"],
   ["Cover", "Removable"],
   ["Nominal flow", "Small 17 GPM · Medium 34 GPM · Large 120 GPM"],
-  ["Inlet / outlet", "Small 1″ / 2″ · Medium 3″ / 3″ · Large 4″ / 4″"],
-  ["Fabrication", "Custom sizes available"],
+  ["Inlet / outlet", "Small 1.5″ / 2″ · Medium 3″ / 3″ · Large 4″ / 4″"],
+  ["Fabrication", "Custom sizes from customer or consultant drawings"],
 ];
 
 export const installPoints = [
@@ -301,8 +305,8 @@ export const faqs = [
     a: "It depends on the local plumbing authority and the project specification. Enter the dishwasher as a fixture in the calculator only if it will actually connect to the trap, then confirm with your designer or inspector.",
   },
   {
-    q: "Can you manufacture a custom grease trap?",
-    a: "Yes. Moon Steel fabricates custom stainless steel grease traps to kitchen layout, inlet and outlet size, and project drawings.",
+    q: "Can you manufacture a custom grease trap from our drawing?",
+    a: "Yes. Send the customer or consultant drawing (PDF, DWG, DXF) or a written specification — flow (GPM), overall dimensions, inlet and outlet, and cover. We manufacture the tank to that spec at our Karachi plant. If a standard 17, 34, or 120 GPM unit fits, we quote that instead.",
   },
   {
     q: "What stainless steel grade do you use?",
@@ -314,15 +318,127 @@ export const faqs = [
   },
   {
     q: "What inlet and outlet size should I use?",
-    a: "Small uses a 1″ inlet and 2″ outlet, Medium uses 3″ inlet and outlet, and Large uses 4″ inlet and outlet. Confirm the connection against the kitchen drainage design.",
+    a: "Small uses a 1.5″ inlet and 2″ outlet, Medium uses 3″ inlet and outlet, and Large uses 4″ inlet and outlet. Confirm the connection against the kitchen drainage design.",
   },
 ] as const;
 
 export const gpmOptions = [10, 17, 20, 34, 50, 75, 100, 120, 150, 200, 300, 500] as const;
 
-export type SizeUnit = "in" | "mm";
+export type SizeUnit = "in" | "ft" | "mm" | "cm" | "m";
+
+export const sizeUnits: { id: SizeUnit; label: string }[] = [
+  { id: "in", label: "in" },
+  { id: "ft", label: "ft" },
+  { id: "mm", label: "mm" },
+  { id: "cm", label: "cm" },
+  { id: "m", label: "m" },
+];
 
 const MM_PER_INCH = 25.4;
+const CM_PER_INCH = 2.54;
+const M_PER_INCH = 0.0254;
+const FT_PER_INCH = 1 / 12;
+
+export function greaseTrapQuoteHref(gpm?: number, heightIn?: number, size?: string) {
+  const params = new URLSearchParams({ project: "grease-trap" });
+  if (gpm) params.set("gpm", String(gpm));
+  if (heightIn) params.set("height", String(heightIn));
+  if (size) params.set("size", size);
+  return `/contact?${params.toString()}`;
+}
+
+export const GREASE_TRAP_HEIGHTS = [12, 15, 18, 24, 30, 36, 42] as const;
+export type GreaseTrapHeight = (typeof GREASE_TRAP_HEIGHTS)[number];
+
+const CUBIC_INCHES_PER_GALLON = 231;
+const MIN_WIDTH_IN = 10;
+
+export function recommendedHeightForGpm(gpm: number): GreaseTrapHeight {
+  if (gpm <= 17) return 12;
+  if (gpm <= 20) return 15;
+  if (gpm <= 50) return 18;
+  if (gpm <= 120) return 24;
+  if (gpm <= 200) return 30;
+  if (gpm <= 300) return 36;
+  return 42;
+}
+
+export function recommendedFootprintForGpm(gpm: number) {
+  const product = gpm <= 20 ? greaseTrapProducts[0] : gpm <= 50 ? greaseTrapProducts[1] : greaseTrapProducts[2];
+  return { lengthIn: product.lengthIn, widthIn: product.widthIn };
+}
+
+export function recommendedPipeInForGpm(gpm: number) {
+  if (gpm <= 20) return 2;
+  if (gpm <= 40) return 3;
+  if (gpm <= 125) return 4;
+  return 6;
+}
+
+function grossGallons(lengthIn: number, widthIn: number, heightIn: number) {
+  return (lengthIn * widthIn * heightIn) / CUBIC_INCHES_PER_GALLON;
+}
+
+export function calculateGreaseTrapSize(gpm: number, heightIn: number) {
+  const footprint = recommendedFootprintForGpm(gpm);
+  const scale = Math.sqrt(
+    (gpm * CUBIC_INCHES_PER_GALLON) / (footprint.lengthIn * footprint.widthIn * heightIn),
+  );
+
+  let widthIn = Math.max(MIN_WIDTH_IN, Math.round(scale * footprint.widthIn));
+  let lengthIn = Math.round(scale * footprint.lengthIn);
+  if (lengthIn <= widthIn) {
+    lengthIn = Math.max(widthIn + 1, Math.round(widthIn * (footprint.lengthIn / footprint.widthIn)));
+  }
+
+  const current = grossGallons(lengthIn, widthIn, heightIn);
+  const shorter = grossGallons(lengthIn - 1, widthIn, heightIn);
+  const longer = grossGallons(lengthIn + 1, widthIn, heightIn);
+  if (lengthIn - 1 > widthIn && Math.abs(shorter - gpm) < Math.abs(current - gpm)) {
+    lengthIn -= 1;
+  } else if (Math.abs(longer - gpm) < Math.abs(current - gpm)) {
+    lengthIn += 1;
+  }
+
+  const grossGal = Number(grossGallons(lengthIn, widthIn, heightIn).toFixed(1));
+  return {
+    lengthIn,
+    widthIn,
+    heightIn,
+    grossGal,
+    elongated: lengthIn / widthIn > 3,
+    sizeLabel: `${lengthIn} × ${widthIn} × ${heightIn}`,
+  };
+}
+
+export function recommendGreaseTrapSize(gpm: number) {
+  const catalogProduct = greaseTrapProducts.find((item) => item.gpm === gpm) ?? null;
+  if (catalogProduct) {
+    return {
+      gpm,
+      lengthIn: catalogProduct.lengthIn,
+      widthIn: catalogProduct.widthIn,
+      heightIn: catalogProduct.heightIn,
+      grossGal: catalogProduct.grossGal,
+      inletIn: catalogProduct.inletIn,
+      outletIn: catalogProduct.outletIn,
+      elongated: false,
+      sizeLabel: `${catalogProduct.lengthIn} × ${catalogProduct.widthIn} × ${catalogProduct.heightIn}`,
+      catalogProduct,
+    };
+  }
+
+  const heightIn = recommendedHeightForGpm(gpm);
+  const calculated = calculateGreaseTrapSize(gpm, heightIn);
+  const pipeIn = recommendedPipeInForGpm(gpm);
+  return {
+    gpm,
+    ...calculated,
+    inletIn: pipeIn,
+    outletIn: pipeIn,
+    catalogProduct: null,
+  };
+}
 
 export type InchRange = { min: number; max: number };
 
@@ -448,9 +564,22 @@ export function typicalDimensionsForGpm(gpm: number) {
 }
 
 export function formatInchesValue(inches: number, unit: SizeUnit) {
-  if (unit === "mm") return `${Math.round(inches * MM_PER_INCH)} mm`;
-  const rounded = Number.isInteger(inches) ? String(inches) : inches.toFixed(1);
-  return `${rounded}″`;
+  switch (unit) {
+    case "mm":
+      return `${Math.round(inches * MM_PER_INCH)} mm`;
+    case "cm": {
+      const cm = inches * CM_PER_INCH;
+      return `${cm >= 10 ? Math.round(cm) : cm.toFixed(1)} cm`;
+    }
+    case "m":
+      return `${(inches * M_PER_INCH).toFixed(2)} m`;
+    case "ft":
+      return `${(inches * FT_PER_INCH).toFixed(2)} ft`;
+    default: {
+      const rounded = Number.isInteger(inches) ? String(inches) : inches.toFixed(1);
+      return `${rounded}″`;
+    }
+  }
 }
 
 export function formatInchRange(range: InchRange, unit: SizeUnit) {
@@ -463,18 +592,18 @@ export function formatProductSize(product: GreaseTrapProduct, unit: SizeUnit) {
 }
 
 export function formatProductPipe(inches: number, unit: SizeUnit) {
+  if (unit === "ft") return formatInchesValue(inches, "in");
+  if (unit === "m") return formatInchesValue(inches, "mm");
   return formatInchesValue(inches, unit);
 }
 
 export function matchGreaseTrap(gpm: number): {
-  product: GreaseTrapProduct;
+  product: GreaseTrapProduct | null;
   fitsStandard: boolean;
 } {
-  const ranked = [...greaseTrapProducts].sort((a, b) => a.gpm - b.gpm);
-  const largest = ranked[ranked.length - 1] ?? greaseTrapProducts[0];
-  const product = ranked.find((item) => item.gpm >= gpm) ?? largest;
+  const product = greaseTrapProducts.find((item) => item.gpm === gpm) ?? null;
   return {
     product,
-    fitsStandard: product.gpm >= gpm,
+    fitsStandard: Boolean(product),
   };
 }

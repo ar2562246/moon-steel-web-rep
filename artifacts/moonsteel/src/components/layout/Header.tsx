@@ -10,13 +10,11 @@ import { cn } from "@/lib/utils";
 const logoUrl = "/ms3-logo.svg";
 
 const navLinks = [
-  { name: "Home", href: "/", sectionId: "home" },
-  { name: "Clients", href: "/clients", sectionId: "clients" },
+  { name: "Grease Traps", href: "/grease-traps", sectionId: "grease-traps" },
   { name: "Products", href: "/products", sectionId: "products" },
   { name: "Materials", href: "/materials", sectionId: "materials" },
   { name: "Process", href: "/process", sectionId: "process" },
   { name: "About", href: "/about", sectionId: "about" },
-  { name: "Blog", href: "/blog", sectionId: "blog" },
   { name: "Contact", href: "/contact", sectionId: "contact" },
 ] as const;
 
@@ -24,6 +22,7 @@ const homeSectionIds = ["process"] as const;
 
 function isNavLinkActive(sectionId: string, pathname: string, activeSection: string | null) {
   if (sectionId === "home") return pathname === "/" && activeSection === null;
+  if (sectionId === "grease-traps") return pathname.startsWith("/grease-traps");
   if (sectionId === "products") return pathname.startsWith("/products");
   if (sectionId === "materials") return pathname.startsWith("/materials");
   if (sectionId === "process") return pathname.startsWith("/process");

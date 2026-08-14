@@ -42,8 +42,8 @@ export function FoodFusionCollabView() {
           <p className="apple-section-copy">
             Food Fusion is Pakistan&rsquo;s largest digital food brand. When they moved from recipes
             into physical kitchen tools, they needed a fabricator who could hold a tolerance at
-            production volume — and hand-finish the result. That work happens in our Karachi
-            workshop.
+            production volume — and hand-finish the result. That work happens at our Karachi
+            manufacturing facility.
           </p>
         </div>
 

@@ -41,7 +41,7 @@ export const foodFusionProducts: CollabProduct[] = [
     slug: "kulfi-molds",
     name: "Kulfi Mould Stand",
     blurb:
-      "The freezer stand that holds the moulds steady — laser-cut and bent to millimetric tolerances in our workshop.",
+      "The freezer stand that holds the moulds steady — laser-cut and bent to millimetric tolerances at our manufacturing facility.",
     image: "/images/partners/food-fusion/kulfi-molds.jpg",
     url: "https://www.fusionhomepk.com/products/kulfi-molds-6-pcs-with-lids-and-stainless-steel-stand",
     creditsMoonSteel: true,
@@ -90,6 +90,6 @@ export const foodFusionContributions = [
   },
   {
     title: "Production fabrication",
-    body: "Welding, finishing, and assembly at volume in our Korangi workshop, to the same tolerances as our commercial work.",
+    body: "Welding, finishing, and assembly at volume in our Korangi manufacturing facility, to the same tolerances as our commercial work.",
   },
 ];

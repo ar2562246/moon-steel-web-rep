@@ -99,7 +99,7 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
             <div className="relative z-10 w-full max-w-xl">
               <div className="mb-6 flex items-center gap-4">
                 <div className="h-px w-12 bg-primary" />
-                <span className="apple-eyebrow text-primary">Stainless steel fabrication · Made in Pakistan</span>
+                <span className="apple-eyebrow text-primary">Fabricated in Karachi · Supplied across Pakistan</span>
               </div>
 
               <h1 className="mb-6 text-5xl font-display font-semibold leading-[1.1] tracking-tight text-foreground md:text-7xl">
@@ -108,8 +108,9 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
               </h1>
 
               <p className="apple-section-copy mb-10 max-w-xl">
-                Moon Steel Fabricators builds AISI 304 and AISI 316 equipment for hotels, restaurants, QSRs,
-                hospitals, and industrial facilities — from drawings through fabrication and installation.
+                Moon Steel Fabricators manufactures AISI 304 and AISI 316 equipment for hotels, restaurants,
+                QSRs, hospitals, and industrial facilities across Pakistan — drawn, built at our Karachi
+                plant, and supplied nationwide.
               </p>
 
               <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 py-1.5">

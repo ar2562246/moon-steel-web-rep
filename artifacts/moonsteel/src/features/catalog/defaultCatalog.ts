@@ -77,7 +77,7 @@ export const defaultCatalogProducts: CatalogProduct[] = [
     slug: "grease-trap-grease-interceptor",
     name: "Grease Trap Small 17 GPM",
     details:
-      "Small grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 22″ × 15″ × 12″\n• Flow: 17 GPM\n• Gross tank volume: ~17.1 gal / 65 L\n• Material: 1.50mm AISI 304\n• Inlet: 1″\n• Outlet: 2″\n• Internals: 1× bucket, 1× baffle\n• Grease holding capacity: 9.5 kg\n\nSuitable for cafés and light-duty sinks. Custom sizes available on request.",
+      "Small grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 22″ × 15″ × 12″\n• Flow: 17 GPM\n• Gross tank volume: ~17.1 gal / 65 L\n• Material: 1.50mm AISI 304\n• Inlet: 1.5″\n• Outlet: 2″\n• Internals: 1× bucket, 1× baffle\n• Grease holding capacity: 9.5 kg\n\nSuitable for cafés and light-duty sinks. Custom sizes available on request.",
     image_url: "",
     image_urls: [],
     sort_order: 30,

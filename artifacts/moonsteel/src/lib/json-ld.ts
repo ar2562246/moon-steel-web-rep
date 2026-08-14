@@ -20,7 +20,7 @@ export function organizationGraph() {
         email: "info@moonsteelfab.com",
         telephone: "+92-21-35121145",
         description:
-          "Moon Steel Fabricators is a stainless steel fabrication company based in Karachi, Pakistan, specializing in commercial kitchen equipment and custom stainless steel fabrication for hotels, restaurants, QSRs, healthcare, pharmaceutical and industrial facilities.",
+          "Moon Steel Fabricators is a stainless steel manufacturing facility in Karachi, Pakistan. The plant builds and supplies commercial kitchen equipment and custom stainless steel products for hotels, restaurants, QSRs, healthcare, pharmaceutical, and industrial facilities across Pakistan.",
         address: {
           "@type": "PostalAddress",
           streetAddress: "Plot 142, Sector 24, Korangi Industrial Area",

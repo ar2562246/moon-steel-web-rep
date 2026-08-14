@@ -19,7 +19,7 @@ export function BlogIndexView({ posts }: BlogIndexViewProps) {
           <h1 className="apple-section-title mb-6 section-title-accent">Blog</h1>
           <p className="apple-section-copy">
             Notes on commercial stainless fabrication, material grades, and kitchen projects from
-            the Moon Steel workshop in Karachi.
+            the Moon Steel manufacturing facility in Karachi.
           </p>
         </div>
 

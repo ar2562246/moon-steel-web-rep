@@ -10,7 +10,7 @@ const stats = [
   { value: "50+", label: "Years fabricating steel" },
   { value: "850+", label: "Projects Delivered" },
   { value: "304 / 316", label: "Guaranteed" },
-  { value: "Karachi", label: "Korangi Industrial Area" },
+  { value: "Pakistan", label: "Build and supply nationwide" },
 ] as const;
 
 type TrustBandProps = {

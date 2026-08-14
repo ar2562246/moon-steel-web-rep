@@ -10,12 +10,13 @@ import type { CatalogProduct } from "@/features/catalog/types";
 import type { HomeGreaseTrapSection } from "@/features/home/queries";
 import { catalogItem, trackSelectItem, trackViewItemList } from "@/lib/analytics/gtag";
 import { GreaseTrapCardSpecsList } from "@/app/grease-traps/GreaseTrapCardSpecs";
+import { GREASE_TRAP_QUOTE_HREF } from "@/app/grease-traps/grease-traps-data";
 
 type GreaseTrapCtaProps = {
   section: HomeGreaseTrapSection;
 };
 
-const highlights = ["AISI 304 stainless", "Size calculator", "Custom sizes"];
+const highlights = ["AISI 304 stainless", "Custom from drawings", "Size calculator"];
 
 function sectionTitle(title: string) {
   const trimmed = title.trim().replace(/\.$/, "");
@@ -66,10 +67,10 @@ export function GreaseTrapCta({ section }: GreaseTrapCtaProps) {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/grease-traps#calculator"
+            href={GREASE_TRAP_QUOTE_HREF}
             className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background px-6 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
           >
-            Open size calculator
+            Upload drawings
           </Link>
         </div>
       </div>

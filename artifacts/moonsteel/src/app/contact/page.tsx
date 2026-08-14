@@ -9,7 +9,7 @@ import { absoluteUrl } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Request a stainless steel fabrication quote from Moon Steel in Karachi. Call, email, WhatsApp, or send project details for a response within 24 hours.",
+    "Request a stainless steel fabrication quote from Moon Steel. Manufacturing facility in Karachi; we build and supply across Pakistan. Call, email, WhatsApp, or send project details.",
   alternates: {
     canonical: "/contact",
   },

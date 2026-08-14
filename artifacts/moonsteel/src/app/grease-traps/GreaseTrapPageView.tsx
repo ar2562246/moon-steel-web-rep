@@ -22,6 +22,7 @@ import {
   faqs,
   features,
   greaseTrapProducts,
+  GREASE_TRAP_QUOTE_HREF,
   howItWorks,
   installPoints,
   specRows,
@@ -95,15 +96,16 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
           <div className="layer-1 overflow-hidden rounded-2xl p-6 md:p-10">
             <p className="apple-eyebrow mb-3">Commercial Kitchen Drainage</p>
             <h1 className="apple-section-title mb-4 max-w-3xl section-title-accent">
-              Commercial Stainless Steel Grease Traps
+              Stainless Steel Grease Traps for Commercial Kitchens in Pakistan
             </h1>
             <p className="mb-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Heavy-duty AISI 304 stainless steel grease traps designed to separate fats, oils, and
-              grease from commercial kitchen wastewater. Fabricated in Karachi for restaurants,
-              hotels, and institutional kitchens across Pakistan.
+              Heavy-duty AISI 304 stainless steel grease traps that separate fats, oils, and grease
+              from commercial kitchen wastewater. Manufactured in Karachi and supplied across Pakistan.
+              Standard Small, Medium, and Large sizes are listed below. If the kitchen has a
+              consultant drawing or a custom specification, we build to that.
             </p>
             <ul className="mb-8 flex flex-wrap gap-x-5 gap-y-2 text-sm text-foreground">
-              {["AISI 304", "1.50 mm body", "TIG welded", "Custom sizes"].map((item) => (
+              {["AISI 304", "1.50 mm body", "Built to drawings", "Custom sizes"].map((item) => (
                 <li key={item} className="inline-flex items-center gap-1.5">
                   <Check className="h-4 w-4 text-primary" />
                   {item}
@@ -118,10 +120,10 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                 Calculate Your Required Size
               </a>
               <Link
-                href="/contact"
+                href={GREASE_TRAP_QUOTE_HREF}
                 className="inline-flex min-h-11 items-center rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
               >
-                Request a Quote
+                Upload drawings
               </Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-2">
@@ -134,6 +136,12 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                   {product.positioning}
                 </a>
               ))}
+              <a
+                href="#custom"
+                className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+              >
+                Custom from drawings
+              </a>
             </div>
           </div>
         </section>
@@ -323,6 +331,48 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
           </SectionReveal>
         </section>
 
+        <section id="custom" className="mb-16 scroll-mt-28">
+          <div className="layer-1 rounded-2xl p-6 md:p-10">
+            <p className="apple-eyebrow mb-3">Consultant and customer drawings</p>
+            <h2 className="text-2xl font-display font-semibold text-foreground md:text-3xl">
+              Built to your specification.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Standard 17, 34, and 120 GPM units cover many kitchens. When the drainage design is
+              already drawn, we manufacture the grease trap to that drawing — from the consultant,
+              the kitchen designer, or the customer.
+            </p>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-3">
+              <li className="text-sm text-foreground">
+                <span className="block font-medium">Send the drawing</span>
+                <span className="mt-1 block text-muted-foreground">
+                  PDF, DWG, DXF, or a written spec with GPM, overall size, inlet, outlet, and cover.
+                </span>
+              </li>
+              <li className="text-sm text-foreground">
+                <span className="block font-medium">We build to it</span>
+                <span className="mt-1 block text-muted-foreground">
+                  AISI 304 tank manufactured at the Karachi plant to the dimensions you approve.
+                </span>
+              </li>
+              <li className="text-sm text-foreground">
+                <span className="block font-medium">Supplied to site</span>
+                <span className="mt-1 block text-muted-foreground">
+                  Quoted and shipped across Pakistan. Standard sizes used when a custom tank is not needed.
+                </span>
+              </li>
+            </ul>
+            <div className="mt-8">
+              <Link
+                href={GREASE_TRAP_QUOTE_HREF}
+                className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Upload drawings and request a quote
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <section className="mb-16">
           <div className="mb-6 max-w-2xl">
             <h2 className="text-2xl font-display font-semibold text-foreground md:text-3xl">
@@ -416,20 +466,6 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
         </section>
 
         <section className="mb-16">
-          <div className="layer-1 rounded-2xl p-6 md:p-8">
-            <h2 className="text-2xl font-display font-semibold text-foreground md:text-3xl">
-              Need a Different Size?
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              We manufacture custom stainless steel grease traps to suit kitchen layout, drainage
-              requirements, and project specifications — including inlet and outlet size, cover
-              arrangement, and overall dimensions.
-            </p>
-            <InlineCta href="/contact" label="Request a custom size" />
-          </div>
-        </section>
-
-        <section className="mb-16">
           <h2 className="mb-5 text-2xl font-display font-semibold text-foreground md:text-3xl">
             Frequently Asked Questions
           </h2>
@@ -447,7 +483,7 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
               ))}
             </Accordion>
           </div>
-          <InlineCta href="/contact" label="Speak with a fabrication specialist" />
+          <InlineCta href={GREASE_TRAP_QUOTE_HREF} label="Speak with a fabrication specialist" />
         </section>
 
         <section className="mb-16">
@@ -456,9 +492,9 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
               Commercial Grease Trap Manufacturer in Pakistan
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Moon Steel fabricates stainless steel grease traps and grease interceptors in Karachi
-              for restaurant kitchens, hotels, and food-service drainage. Standard Small, Medium, and
-              Large sizes are listed above; custom grease trap sizing is quoted from drawings.
+              Moon Steel manufactures stainless steel grease traps and grease interceptors in Karachi
+              and supplies them across Pakistan. Use a standard Small, Medium, or Large unit when it
+              fits. When the consultant or customer has a drawing, we build the tank to that spec.
             </p>
           </div>
         </section>
@@ -468,7 +504,8 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
             Not sure which grease trap you need?
           </h2>
           <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground">
-            Tell us about your kitchen and we will help determine the appropriate configuration.
+            Use the calculator for a standard size, or upload the consultant or customer drawing and
+            we will quote the tank to that specification.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
@@ -479,10 +516,10 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
               <ArrowRight className="h-4 w-4" />
             </a>
             <Link
-              href="/contact"
+              href={GREASE_TRAP_QUOTE_HREF}
               className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border px-6 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
             >
-              Request a Quote
+              Upload drawings
             </Link>
           </div>
         </section>
