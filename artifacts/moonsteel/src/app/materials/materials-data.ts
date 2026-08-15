@@ -215,8 +215,8 @@ export const finishes = [
     name: "No.4 Satin",
     use: "Most commercial kitchens",
     visual: "brushed",
-    image: "/images/finishes/no4-satin.jpg",
-    credit: "Wikimedia Commons — Brushed metal (public domain)",
+    image: "/images/finishes/hairline.jpg",
+    credit: "Wikimedia Commons — Brushed aluminium",
   },
   {
     name: "Mirror",
@@ -229,8 +229,8 @@ export const finishes = [
     name: "Hairline",
     use: "Architectural",
     visual: "hairline",
-    image: "/images/finishes/hairline.jpg",
-    credit: "Wikimedia Commons — Brushed aluminium",
+    image: "/images/finishes/no4-satin.jpg",
+    credit: "Wikimedia Commons — Brushed metal (public domain)",
   },
   {
     name: "2B",

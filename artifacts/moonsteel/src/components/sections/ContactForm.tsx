@@ -299,7 +299,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="John Doe" {...field} className="layer-1" />
+                          <Input placeholder="Enter name" {...field} className="layer-1" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -312,7 +312,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                       <FormItem>
                         <FormLabel>Company / Business</FormLabel>
                         <FormControl>
-                          <Input placeholder="Acme Hospitality" {...field} className="layer-1" />
+                          <Input placeholder="Enter company name" {...field} className="layer-1" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
