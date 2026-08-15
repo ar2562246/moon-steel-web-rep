@@ -9,10 +9,10 @@ export function ProblemSolution() {
       <div className="container relative z-10 mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="apple-section-title mb-6">
-            What Separates Professional Fabrication From Commodity Work
+            What Separates Moon Steel From General SS Fabrication
           </h2>
           <p className="apple-section-copy">
-            Commodity stainless work is often unspecified. Moon Steel fabricates to named grades, controlled thickness, and documented dimensions.
+            General stainless fabrication in the market is often unspecified. Moon Steel fabricates to named grades, controlled thickness, and documented dimensions.
           </p>
         </div>
 
@@ -20,7 +20,7 @@ export function ProblemSolution() {
           <div className="apple-surface p-8">
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border">
               <XCircle className="w-8 h-8 text-destructive" />
-              <h3 className="text-2xl font-display font-semibold text-foreground">Commodity Fabrication</h3>
+              <h3 className="text-2xl font-display font-semibold text-foreground">General SS Fabrication</h3>
             </div>
             <ul className="space-y-5">
               {[

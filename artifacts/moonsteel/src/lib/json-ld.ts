@@ -1,4 +1,5 @@
 import { absoluteUrl, getSiteUrl } from "@/lib/site";
+import { GOOGLE_MAPS_HREF } from "@/lib/contact/details";
 
 export const ORGANIZATION_ID = `${getSiteUrl()}/#organization`;
 export const WEBSITE_ID = `${getSiteUrl()}/#website`;
@@ -41,7 +42,9 @@ export function organizationGraph() {
         sameAs: [
           "https://www.facebook.com/moonsteelfab",
           "https://www.instagram.com/moonsteelfab/",
+          GOOGLE_MAPS_HREF,
         ],
+        hasMap: GOOGLE_MAPS_HREF,
       },
       {
         "@type": "WebSite",
@@ -72,5 +75,53 @@ export function breadcrumbJsonLd(items: Array<{ name: string; path: string }>) {
       name: item.name,
       item: absoluteUrl(item.path),
     })),
+  };
+}
+
+export function catalogProductJsonLd(product: {
+  name: string;
+  details: string;
+  path: string;
+  slug: string;
+  images: string[];
+  categoryNames: string[];
+}) {
+  const url = absoluteUrl(product.path);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.details,
+    image: product.images.length > 0 ? product.images : undefined,
+    url,
+    sku: product.slug,
+    category: product.categoryNames.join(", ") || undefined,
+    brand: {
+      "@type": "Brand",
+      name: "Moon Steel Fabricators",
+    },
+    manufacturer: {
+      "@type": "Organization",
+      "@id": ORGANIZATION_ID,
+      name: "Moon Steel Fabricators",
+      url: getSiteUrl(),
+    },
+    offers: {
+      "@type": "Offer",
+      url,
+      priceCurrency: "PKR",
+      availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: {
+        "@type": "Organization",
+        "@id": ORGANIZATION_ID,
+        name: "Moon Steel Fabricators",
+      },
+      areaServed: {
+        "@type": "Country",
+        name: "Pakistan",
+      },
+    },
   };
 }

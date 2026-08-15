@@ -65,7 +65,7 @@ export function Comparison() {
               </div>
               <div className="col-span-4 p-5 border-l border-border/70">
                 <span className="font-display text-sm font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  Commodity Fabrication
+                  General SS Fabrication
                 </span>
               </div>
             </div>
@@ -97,7 +97,7 @@ export function Comparison() {
 
                   <div className="md:col-span-4 p-5 border-t md:border-t-0 md:border-l border-border/70">
                     <p className="text-xs uppercase tracking-[0.06em] text-muted-foreground mb-2 md:hidden">
-                      Commodity Fabrication
+                      General SS Fabrication
                     </p>
                     <div className="flex items-center gap-2">
                       <X className="w-4 h-4 text-destructive shrink-0" />

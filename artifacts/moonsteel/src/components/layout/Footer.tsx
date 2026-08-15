@@ -2,6 +2,7 @@ import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { TrackedContactLink } from "@/components/analytics/TrackedContactLink";
 import {
   EMAIL,
+  GOOGLE_MAPS_HREF,
   PHONE_DISPLAY,
   PHONE_TEL,
   STREET_ADDRESS,
@@ -86,6 +87,32 @@ export function Footer() {
                   <circle cx="17.2" cy="6.8" r="1.25" fill="#FFFFFF" />
                 </svg>
               </a>
+              <a
+                href={GOOGLE_MAPS_HREF}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Moon Steel on Google"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border/80 bg-layer-1 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 shrink-0">
+                  <path
+                    fill="#4285F4"
+                    d="M21.6 12.23c0-.74-.07-1.45-.19-2.13H12v4.03h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.89-1.74 2.99-4.31 2.99-7.42Z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 22c2.7 0 4.96-.9 6.62-2.35l-3.23-2.5c-.9.6-2.04.96-3.39.96-2.6 0-4.81-1.76-5.6-4.12H3.07v2.58A10 10 0 0 0 12 22Z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M6.4 13.99A6.01 6.01 0 0 1 6.08 12c0-.69.12-1.36.32-1.99V7.43H3.07A10 10 0 0 0 2 12c0 1.61.39 3.14 1.07 4.57l3.33-2.58Z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.96c1.47 0 2.78.5 3.82 1.5l2.86-2.86C16.95 2.97 14.7 2 12 2A10 10 0 0 0 3.07 7.43l3.33 2.58C7.19 7.72 9.4 5.96 12 5.96Z"
+                  />
+                </svg>
+              </a>
               <TrackedContactLink
                 method="whatsapp"
                 href={WHATSAPP_HREF}
@@ -115,10 +142,15 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
-                <span>
+                <a
+                  href={GOOGLE_MAPS_HREF}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
                   {STREET_ADDRESS}<br />
                   Karachi-Pakistan
-                </span>
+                </a>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="w-5 h-5 text-primary shrink-0" />

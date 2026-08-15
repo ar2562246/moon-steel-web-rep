@@ -9,6 +9,7 @@ import { ProductCardImage } from "@/app/products/ProductCardImage";
 import { getCatalogCategoryFilterPath, getCatalogProductPath } from "@/features/catalog/paths";
 import type { CatalogCategorySummary, CatalogProduct } from "@/features/catalog/types";
 import { catalogItem, trackSelectItem, trackViewItemList } from "@/lib/analytics/gtag";
+import { rememberProductBackLink } from "@/features/catalog/product-back";
 import { cn } from "@/lib/utils";
 import { GreaseTrapCardSpecsList } from "@/app/grease-traps/GreaseTrapCardSpecs";
 
@@ -176,7 +177,13 @@ export function ProductCatalogView({ products, categories, activeCategory }: Pro
                     key={product.id}
                     href={getCatalogProductPath(product.slug)}
                     className="group layer-1 overflow-hidden rounded-xl transition-colors hover:border-primary/40"
-                    onClick={() => trackSelectItem(listId, listName, catalogItem(product, index))}
+                    onClick={() => {
+                      rememberProductBackLink({
+                        href: activeCategory ? `/products?category=${activeCategory}` : "/products",
+                        label: "catalog",
+                      });
+                      trackSelectItem(listId, listName, catalogItem(product, index));
+                    }}
                   >
                     <ProductCardImage product={product} priority={index < 2} />
                     <div className="space-y-3 p-6">

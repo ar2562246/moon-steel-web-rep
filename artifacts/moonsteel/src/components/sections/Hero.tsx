@@ -79,7 +79,7 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
   const highlighted = hoveredStripe ?? activeStripe;
 
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(165deg,hsl(var(--background))_0%,hsl(210_20%_96%)_48%,hsl(var(--background))_100%)] pt-20 md:pt-24">
+    <section className="relative overflow-hidden bg-[linear-gradient(165deg,hsl(var(--background))_0%,hsl(210_20%_96%)_48%,hsl(var(--background))_100%)] pt-24 pb-8 md:pt-24 md:pb-12 lg:pb-0">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
         style={{
@@ -91,39 +91,44 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
       <div className="container relative z-10 mx-auto px-4 md:px-6">
         <div
           className={
-            "grid min-h-[calc(86vh-5rem)] grid-cols-1 content-start gap-y-10 gap-x-10 md:min-h-[calc(82vh-6rem)] " +
+            "grid grid-cols-1 content-start gap-y-8 gap-x-10 " +
+            "md:min-h-[calc(82vh-6rem)] md:gap-y-10 " +
             "lg:min-h-[calc(90vh-6rem)] lg:grid-cols-2 lg:content-stretch lg:items-center lg:gap-x-12 lg:gap-y-0"
           }
         >
           <div className="relative flex w-full justify-center lg:justify-start">
-            <div className="relative z-10 w-full max-w-xl">
-              <div className="mb-6 flex items-center gap-4">
-                <div className="h-px w-12 bg-primary" />
-                <span className="apple-eyebrow text-primary">Fabricated in Karachi · Supplied across Pakistan</span>
+            <div className="relative z-10 w-full min-w-0 max-w-xl">
+              <div className="mb-4 flex items-start gap-3 sm:mb-6 sm:items-center sm:gap-4">
+                <div className="mt-[0.7em] h-px w-8 shrink-0 bg-primary sm:mt-0 sm:w-12" />
+                <span className="apple-eyebrow min-w-0 leading-5 text-primary">
+                  Fabricated in Karachi
+                  <span className="hidden sm:inline"> · </span>
+                  <span className="block sm:inline">Supplied across Pakistan</span>
+                </span>
               </div>
 
-              <h1 className="mb-6 text-5xl font-display font-semibold leading-[1.1] tracking-tight text-foreground md:text-7xl">
+              <h1 className="mb-5 text-[2.5rem] font-display font-semibold leading-[1.12] tracking-tight text-foreground sm:text-5xl md:mb-6 md:text-7xl md:leading-[1.1]">
                 Commercial kitchen equipment, <br className="hidden md:block" />
                 fabricated to <span className="text-primary">spec.</span>
               </h1>
 
-              <p className="apple-section-copy mb-10 max-w-xl">
+              <p className="apple-section-copy mb-6 max-w-xl md:mb-10">
                 Moon Steel Fabricators manufactures AISI 304 and AISI 316 equipment for hotels, restaurants,
                 QSRs, hospitals, and industrial facilities across Pakistan — drawn, built at our Karachi
                 plant, and supplied nationwide.
               </p>
 
-              <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 py-1.5">
-                <Zap className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
-                <span className="text-xs font-medium uppercase tracking-[0.06em] text-primary">
+              <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-md border border-primary/25 bg-primary/10 px-3 py-1.5">
+                <Zap className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.5} />
+                <span className="text-[0.7rem] font-medium uppercase tracking-[0.06em] text-primary sm:text-xs">
                   Quote Returned in 24 Hours
                 </span>
               </div>
 
-              <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <Button
                   size="lg"
-                  className="group bg-primary font-medium text-primary-foreground hover:bg-primary/90"
+                  className="group w-full bg-primary font-medium text-primary-foreground hover:bg-primary/90 sm:w-auto"
                   onClick={() => {
                     document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
                   }}
@@ -134,7 +139,7 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="group border-foreground/20 font-medium text-foreground hover:bg-foreground/5"
+                  className="group w-full border-foreground/20 font-medium text-foreground hover:bg-foreground/5 sm:w-auto"
                   onClick={() => {
                     document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
                   }}

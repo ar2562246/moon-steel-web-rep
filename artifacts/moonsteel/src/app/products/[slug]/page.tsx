@@ -12,7 +12,7 @@ import {
 } from "@/features/catalog/paths";
 import { getCatalogProductBySlug, listPublishedCatalogProductSlugs } from "@/features/catalog/queries";
 import { createSupabasePublicClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-import { breadcrumbJsonLd, ORGANIZATION_ID } from "@/lib/json-ld";
+import { breadcrumbJsonLd, catalogProductJsonLd } from "@/lib/json-ld";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getSiteUrl } from "@/lib/site";
 
@@ -98,25 +98,14 @@ export default async function CatalogProductPage({ params }: PageProps) {
 
   const images = getCatalogProductImages(product).map((url) => toAbsoluteCatalogImageUrl(url, siteUrl));
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
+  const jsonLd = catalogProductJsonLd({
     name: product.name,
-    description: product.details,
-    image: images.length > 0 ? images : undefined,
-    url: `${siteUrl}${product.path}`,
-    category: product.categories.map((category) => category.name).join(", "),
-    brand: {
-      "@type": "Brand",
-      name: "Moon Steel Fabricators",
-    },
-    manufacturer: {
-      "@type": "Organization",
-      "@id": ORGANIZATION_ID,
-      name: "Moon Steel Fabricators",
-      url: siteUrl,
-    },
-  };
+    details: product.details,
+    path: product.path,
+    slug: product.slug,
+    images,
+    categoryNames: product.categories.map((category) => category.name),
+  });
 
   return (
     <>

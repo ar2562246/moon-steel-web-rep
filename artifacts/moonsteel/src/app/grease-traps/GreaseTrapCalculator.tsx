@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getCatalogProductPath } from "@/features/catalog/paths";
+import { rememberProductBackLink } from "@/features/catalog/product-back";
 import { cn } from "@/lib/utils";
 import {
   formatInchesValue,
@@ -283,6 +284,9 @@ export function GreaseTrapCalculator() {
                 {catalog ? (
                   <Link
                     href={getCatalogProductPath(catalog.slug)}
+                    onClick={() =>
+                      rememberProductBackLink({ href: "/grease-traps", label: "grease traps" })
+                    }
                     className="inline-flex h-10 min-w-[9.5rem] items-center justify-center rounded-full border border-border px-5 text-sm font-bold text-foreground transition-colors hover:border-primary/40"
                   >
                     View product

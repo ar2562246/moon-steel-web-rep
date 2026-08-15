@@ -10,6 +10,8 @@ export const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_E164}`;
 export const STREET_ADDRESS = "Plot 142, Sector 24, Korangi Industrial Area";
 export const ADDRESS_LOCALITY = "Karachi";
 export const ADDRESS_COUNTRY = "Pakistan";
+export const GOOGLE_MAPS_HREF =
+  "https://www.google.com/maps/search/?api=1&query=Moon+Steel+Fabricators+Plot+142+Sector+24+Korangi+Industrial+Area+Karachi";
 
 export const CONTACT_DRAWING_ACCEPT = [
   ".pdf",

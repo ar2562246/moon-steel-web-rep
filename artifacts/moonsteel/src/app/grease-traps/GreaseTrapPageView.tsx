@@ -15,6 +15,7 @@ import { getCatalogProductPath } from "@/features/catalog/paths";
 import { ProductCardImage } from "@/app/products/ProductCardImage";
 import type { CatalogProduct } from "@/features/catalog/types";
 import { catalogItem, trackSelectItem, trackViewItemList } from "@/lib/analytics/gtag";
+import { rememberProductBackLink } from "@/features/catalog/product-back";
 import { GreaseTrapCalculator } from "@/app/grease-traps/GreaseTrapCalculator";
 import {
   cleaningSteps,
@@ -244,7 +245,8 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                 <Link
                   href={getCatalogProductPath(product.slug)}
                   className="block"
-                  onClick={() =>
+                  onClick={() => {
+                    rememberProductBackLink({ href: "/grease-traps", label: "grease traps" });
                     trackSelectItem(
                       "grease-traps",
                       "Grease Traps",
@@ -253,8 +255,8 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                         name: product.name,
                         categories: [{ name: "Grease Traps" }],
                       }),
-                    )
-                  }
+                    );
+                  }}
                 >
                     <ProductCardImage
                     product={
@@ -310,7 +312,8 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                 <Link
                   href={getCatalogProductPath(product.slug)}
                   className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-medium text-primary hover:underline"
-                  onClick={() =>
+                  onClick={() => {
+                    rememberProductBackLink({ href: "/grease-traps", label: "grease traps" });
                     trackSelectItem(
                       "grease-traps",
                       "Grease Traps",
@@ -319,8 +322,8 @@ export function GreaseTrapPageView({ catalogImages = {} }: GreaseTrapPageViewPro
                         name: product.name,
                         categories: [{ name: "Grease Traps" }],
                       }),
-                    )
-                  }
+                    );
+                  }}
                 >
                   View technical details
                   <ArrowRight className="h-4 w-4" />

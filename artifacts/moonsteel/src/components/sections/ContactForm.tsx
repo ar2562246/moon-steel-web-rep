@@ -42,6 +42,7 @@ import {
   CONTACT_DRAWING_ACCEPT,
   CONTACT_DRAWING_HINT,
   EMAIL,
+  GOOGLE_MAPS_HREF,
   PHONE_DISPLAY,
   PHONE_TEL,
   STREET_ADDRESS,
@@ -206,6 +207,14 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                     {STREET_ADDRESS}<br />
                     Karachi-Pakistan
                   </p>
+                  <a
+                    href={GOOGLE_MAPS_HREF}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-block text-sm font-medium text-primary hover:opacity-80"
+                  >
+                    View Google Business Profile
+                  </a>
                 </div>
               </div>
 
