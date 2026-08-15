@@ -60,6 +60,13 @@ test.describe("marketing site smoke tests", () => {
   test("login page loads", async ({ page }) => {
     await page.goto("/login");
     await expect(page.getByRole("heading", { name: "Admin Login" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /sign in with passkey/i })).toBeVisible();
+  });
+
+  test("admin security page redirects to login", async ({ page }) => {
+    await page.goto("/admin/security");
+    await expect(page).toHaveURL(/\/login/);
+    await expect(page.getByRole("heading", { name: "Admin Login" })).toBeVisible();
   });
 
   test("grease traps hub loads with Pakistan manufacturer heading", async ({ page }) => {

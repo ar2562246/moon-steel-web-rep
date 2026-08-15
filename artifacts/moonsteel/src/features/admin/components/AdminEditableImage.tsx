@@ -33,6 +33,7 @@ type AdminEditableImageProps = {
   footerActions?: ReactNode;
   /** Optional badge overlaid on the image (e.g. Cover). */
   badge?: ReactNode;
+  variant?: "default" | "logo";
   onEdited: (file: File) => void | Promise<void>;
 };
 
@@ -48,6 +49,7 @@ export function AdminEditableImage({
   extraActions,
   footerActions,
   badge,
+  variant = "default",
   onEdited,
 }: AdminEditableImageProps) {
   const { toast } = useToast();
@@ -168,6 +170,7 @@ export function AdminEditableImage({
         open={open}
         imageSrc={src}
         fileName={resolvedName}
+        variant={variant}
         onOpenChange={setOpen}
         onSave={(next) => {
           void (async () => {

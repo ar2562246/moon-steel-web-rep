@@ -1,0 +1,26 @@
+import { hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { AdminSecurityView } from "@/features/admin/components/AdminSecurityView";
+
+export default async function AdminSecurityPage() {
+  if (!hasSupabaseServerEnv()) {
+    return (
+      <main className="layer-0 min-h-screen px-4 py-12 md:px-6">
+        <section className="layer-1 mx-auto max-w-3xl rounded-xl p-6 md:p-8">
+          <h1 className="text-2xl font-semibold text-foreground">Login security</h1>
+          <p className="mt-2 text-sm text-destructive">
+            Supabase environment variables are not configured.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  await requireAdmin({ redirectTo: "/admin/security" });
+
+  return (
+    <main className="flex h-full min-h-0 flex-col overflow-hidden">
+      <AdminSecurityView />
+    </main>
+  );
+}

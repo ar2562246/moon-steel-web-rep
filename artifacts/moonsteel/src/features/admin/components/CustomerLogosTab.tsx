@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { ImageDown, Trash2 } from "lucide-react";
 import { FileDropzone } from "@/components/ui/FileDropzone";
 import { AdminEditableImage } from "@/features/admin/components/AdminEditableImage";
+import { AdminImageActionButton } from "@/features/admin/components/AdminImageActions";
 import {
   AdminDetailSkeleton,
   AdminMasterDetail,
@@ -17,6 +18,11 @@ import {
 } from "@/features/admin/components/AdminMasterDetail";
 import { useCustomerLogos } from "@/features/admin/hooks/useCustomerLogos";
 import { fetchLogoSliderSpeed, saveLogoSliderSpeed } from "@/features/admin/services/customerLogos";
+import {
+  optimizeImageToWebLogo,
+  WEB_LOGO_MAX_HEIGHT,
+  WEB_LOGO_MAX_WIDTH,
+} from "@/features/admin/lib/optimizeImageToWeb43";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { CustomerLogo } from "@/features/admin/types";
@@ -31,6 +37,7 @@ export function CustomerLogosTab() {
   const [sliderSpeed, setSliderSpeed] = useState(52);
   const [isSavingSpeed, setIsSavingSpeed] = useState(false);
   const [speedError, setSpeedError] = useState<string | null>(null);
+  const [optimizingKey, setOptimizingKey] = useState<string | null>(null);
 
   const isEditorOpen = isUploadingView || Boolean(selectedLogo);
 
@@ -89,9 +96,92 @@ export function CustomerLogosTab() {
 
   const onUpload = async () => {
     if (selectedFiles.length === 0) return;
-    await uploadMany(selectedFiles);
-    setSelectedFiles([]);
-    setIsUploadingView(false);
+    try {
+      const prepared: File[] = [];
+      for (const file of selectedFiles) {
+        const result = await optimizeImageToWebLogo(file, file.name);
+        prepared.push(result.status === "optimized" ? result.file : file);
+      }
+      await uploadMany(prepared);
+      setSelectedFiles([]);
+      setIsUploadingView(false);
+    } catch (e) {
+      toast({
+        title: "Could not prepare logos",
+        description: e instanceof Error ? e.message : "Try a smaller image file.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const replaceSelectedFile = (index: number, file: File) => {
+    setSelectedFiles((current) => current.map((existing, i) => (i === index ? file : existing)));
+  };
+
+  const onOptimizePreview = async (index: number) => {
+    const file = selectedFiles[index];
+    if (!file) return;
+    setOptimizingKey(`preview-${index}`);
+    try {
+      const result = await optimizeImageToWebLogo(file, file.name);
+      if (result.status === "already-standard") {
+        toast({
+          title: "Already thumbnail size",
+          description: `${result.width} × ${result.height} is within ${WEB_LOGO_MAX_WIDTH} × ${WEB_LOGO_MAX_HEIGHT}.`,
+        });
+        return;
+      }
+      replaceSelectedFile(index, result.file);
+      toast({
+        title: "Resized to thumbnail",
+        description: `${result.previousWidth} × ${result.previousHeight} → ${result.width} × ${result.height}. Upload to save.`,
+      });
+    } catch (e) {
+      toast({
+        title: "Could not resize logo",
+        description: e instanceof Error ? e.message : "Try another file.",
+        variant: "destructive",
+      });
+    } finally {
+      setOptimizingKey(null);
+    }
+  };
+
+  const onOptimizeSavedLogo = async (logo: CustomerLogo) => {
+    setOptimizingKey(logo.id);
+    try {
+      const result = await optimizeImageToWebLogo(logo.image_url, `customer-logo-${logo.id}.png`);
+      if (result.status === "already-standard") {
+        toast({
+          title: "Already thumbnail size",
+          description: `${result.width} × ${result.height} is within ${WEB_LOGO_MAX_WIDTH} × ${WEB_LOGO_MAX_HEIGHT}.`,
+        });
+        return;
+      }
+      const created = await upload(result.file);
+      if (!created) {
+        toast({
+          title: "Update failed",
+          description: "Could not upload the resized logo.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const ok = await remove(logo);
+      setSelectedLogo(created);
+      toast({
+        title: ok ? "Logo resized" : "Resized logo uploaded",
+        description: `${result.previousWidth} × ${result.previousHeight} → ${result.width} × ${result.height}.`,
+      });
+    } catch (e) {
+      toast({
+        title: "Could not resize logo",
+        description: e instanceof Error ? e.message : "Try downloading and re-uploading the file.",
+        variant: "destructive",
+      });
+    } finally {
+      setOptimizingKey(null);
+    }
   };
 
   const onDelete = async (logo: CustomerLogo) => {
@@ -116,7 +206,7 @@ export function CustomerLogosTab() {
   return (
     <AdminMasterDetail
       title="Customer Logos"
-      description="Logos in the homepage slider. Select a logo to preview it, or add new files."
+      description="Logos in the homepage slider. Keep them small — they only display as thumbnails."
       addLabel="Add Logos"
       onAdd={startUpload}
       onBack={closeEditor}
@@ -188,7 +278,7 @@ export function CustomerLogosTab() {
           ? "Choose a logo from the sidebar, or add new files."
           : isUploadingView
             ? "Drop image files or pick them from your computer."
-            : "Preview and delete this logo."
+            : "Preview at thumbnail size, resize, or delete this logo."
       }
       detailActions={
         selectedLogo && !isUploadingView ? (
@@ -214,7 +304,7 @@ export function CustomerLogosTab() {
             accept="image/*"
             multiple
             label="Drop logos here or click to browse"
-            hint="Multiple image files"
+            hint={`Multiple image files · resized to ${WEB_LOGO_MAX_WIDTH}×${WEB_LOGO_MAX_HEIGHT} on upload`}
             onFiles={addLogoFiles}
           />
           {previewUrls.length > 0 ? (
@@ -226,12 +316,25 @@ export function CustomerLogosTab() {
                   alt={`Preview ${item.name}`}
                   file={selectedFiles[index]}
                   fileName={item.name}
-                  className="layer-1 aspect-square rounded-md bg-background"
+                  variant="logo"
+                  className="layer-1 h-24 w-full rounded-md bg-background"
                   imgClassName="object-contain p-2"
+                  extraActions={
+                    <AdminImageActionButton
+                      tone="optimize"
+                      disabled={optimizingKey !== null}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void onOptimizePreview(index);
+                      }}
+                      aria-label="Resize to thumbnail"
+                      title={`Thumbnail · max ${WEB_LOGO_MAX_WIDTH}×${WEB_LOGO_MAX_HEIGHT}`}
+                    >
+                      <ImageDown className="h-3.5 w-3.5" />
+                    </AdminImageActionButton>
+                  }
                   onEdited={(file) => {
-                    setSelectedFiles((current) =>
-                      current.map((existing, i) => (i === index ? file : existing))
-                    );
+                    replaceSelectedFile(index, file);
                     toast({
                       title: "Logo edited",
                       description: "Upload to save the edited logo.",
@@ -243,13 +346,32 @@ export function CustomerLogosTab() {
           ) : null}
         </form>
       ) : selectedLogo ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Shown as a small thumbnail on the site. Keep files at or below {WEB_LOGO_MAX_WIDTH} ×{" "}
+            {WEB_LOGO_MAX_HEIGHT}.
+          </p>
           <AdminEditableImage
             src={selectedLogo.image_url}
             alt={logoAltFromUrl(selectedLogo.image_url)}
             fileName={`customer-logo-${selectedLogo.id}.png`}
-            className="layer-2 aspect-[4/3] w-full rounded-lg bg-background"
-            imgClassName="object-contain p-6"
+            variant="logo"
+            className="layer-2 h-[7.5rem] w-[13rem] max-w-full rounded-lg bg-background"
+            imgClassName="object-contain p-3"
+            extraActions={
+              <AdminImageActionButton
+                tone="optimize"
+                disabled={optimizingKey !== null}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void onOptimizeSavedLogo(selectedLogo);
+                }}
+                aria-label="Resize to thumbnail"
+                title={`Thumbnail · max ${WEB_LOGO_MAX_WIDTH}×${WEB_LOGO_MAX_HEIGHT}`}
+              >
+                <ImageDown className="h-3.5 w-3.5" />
+              </AdminImageActionButton>
+            }
             onEdited={async (file) => {
               const created = await upload(file);
               if (!created) {

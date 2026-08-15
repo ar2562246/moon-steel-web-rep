@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { sessionRequiresMfa } from "@/lib/auth/mfa";
 import { createSupabaseServerClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 
 type RequireAdminResult = {
@@ -19,6 +20,11 @@ export async function requireAdmin(
 
   if (!user) {
     redirect(`/login?redirect=${encodeURIComponent(redirectTo)}`);
+  }
+
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal && sessionRequiresMfa(aal)) {
+    redirect(`/login?redirect=${encodeURIComponent(redirectTo)}&mfa=1`);
   }
 
   const { data: profile } = await supabase

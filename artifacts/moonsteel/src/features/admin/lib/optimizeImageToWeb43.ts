@@ -7,6 +7,10 @@ export const WEB_HERO_MAX_WIDTH = 1600;
 export const WEB_HERO_MAX_HEIGHT = 900;
 export const WEB_HERO_RATIO = 16 / 9;
 
+/** Client logos only appear as small slider / grid thumbnails. */
+export const WEB_LOGO_MAX_WIDTH = 480;
+export const WEB_LOGO_MAX_HEIGHT = 160;
+
 const RATIO_TOLERANCE = 0.02;
 
 export type OptimizeImageResult =
@@ -50,6 +54,10 @@ export function isWebStandardHero(width: number, height: number) {
     width <= WEB_HERO_MAX_WIDTH &&
     height <= WEB_HERO_MAX_HEIGHT
   );
+}
+
+export function isWebStandardLogo(width: number, height: number) {
+  return width <= WEB_LOGO_MAX_WIDTH && height <= WEB_LOGO_MAX_HEIGHT;
 }
 
 function cropToRatio(width: number, height: number, ratio: number) {
@@ -116,9 +124,9 @@ function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) 
   });
 }
 
-function fileNameForOutput(name: string, suffix: string, fallback: string) {
+function fileNameForOutput(name: string, suffix: string, fallback: string, extension = "jpg") {
   const base = name.replace(/\.[^.]+$/, "") || fallback;
-  return `${base}-${suffix}.jpg`;
+  return `${base}-${suffix}.${extension}`;
 }
 
 async function optimizeImageForWeb(
@@ -195,4 +203,45 @@ export async function optimizeImageToWebHero(
     fileSuffix: "web-hero",
     defaultName: "hero-image",
   });
+}
+
+export async function optimizeImageToWebLogo(
+  source: Blob | string,
+  originalName = "customer-logo.png"
+): Promise<OptimizeImageResult> {
+  const blob = await blobFromSource(source);
+  const image = await loadImage(blob);
+  const previousWidth = image.naturalWidth;
+  const previousHeight = image.naturalHeight;
+  const fitted = fitWithinMax(previousWidth, previousHeight, WEB_LOGO_MAX_WIDTH, WEB_LOGO_MAX_HEIGHT);
+
+  if (fitted.width === previousWidth && fitted.height === previousHeight) {
+    return { status: "already-standard", width: previousWidth, height: previousHeight };
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = fitted.width;
+  canvas.height = fitted.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not prepare the image canvas.");
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(image, 0, 0, fitted.width, fitted.height);
+
+  const output = await canvasToBlob(canvas, "image/png", 1);
+  const file = new File(
+    [output],
+    fileNameForOutput(originalName, "thumb", "customer-logo", "png"),
+    { type: "image/png" }
+  );
+
+  return {
+    status: "optimized",
+    file,
+    width: fitted.width,
+    height: fitted.height,
+    previousWidth,
+    previousHeight,
+  };
 }

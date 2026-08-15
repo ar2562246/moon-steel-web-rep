@@ -1,5 +1,4 @@
 import type { Area } from "react-easy-crop";
-import { WEB_43_MAX_HEIGHT, WEB_43_MAX_WIDTH } from "@/features/admin/lib/optimizeImageToWeb43";
 
 export type ImageEditAspect = "free" | "4:3" | "1:1";
 
@@ -11,7 +10,8 @@ export type ImageEditExportOptions = {
   brightness: number;
   contrast: number;
   quality?: number;
-  fitWeb43Max?: boolean;
+  fitMax?: { width: number; height: number };
+  outputType?: "image/jpeg" | "image/png";
   fileName?: string;
 };
 
@@ -77,8 +77,8 @@ function applyBrightnessContrast(
   ctx.putImageData(imageData, 0, 0);
 }
 
-function fitWithinMax(width: number, height: number) {
-  const scale = Math.min(1, WEB_43_MAX_WIDTH / width, WEB_43_MAX_HEIGHT / height);
+function fitWithinMax(width: number, height: number, maxWidth: number, maxHeight: number) {
+  const scale = Math.min(1, maxWidth / width, maxHeight / height);
   return {
     width: Math.max(1, Math.round(width * scale)),
     height: Math.max(1, Math.round(height * scale)),
@@ -104,7 +104,8 @@ export async function exportEditedImage(
     brightness,
     contrast,
     quality = 0.92,
-    fitWeb43Max = false,
+    fitMax,
+    outputType = "image/jpeg",
     fileName = "product-image.jpg",
   } = options;
 
@@ -134,8 +135,8 @@ export async function exportEditedImage(
 
   let outW = cropW;
   let outH = cropH;
-  if (fitWeb43Max) {
-    const fitted = fitWithinMax(cropW, cropH);
+  if (fitMax) {
+    const fitted = fitWithinMax(cropW, cropH, fitMax.width, fitMax.height);
     outW = fitted.width;
     outH = fitted.height;
   }
@@ -151,7 +152,8 @@ export async function exportEditedImage(
   outCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, outW, outH);
   applyBrightnessContrast(outCtx, outW, outH, brightness, contrast);
 
-  const blob = await canvasToBlob(output, "image/jpeg", quality);
+  const blob = await canvasToBlob(output, outputType, outputType === "image/png" ? 1 : quality);
   const base = fileName.replace(/\.[^.]+$/, "") || "product-image";
-  return new File([blob], `${base}-edited.jpg`, { type: "image/jpeg" });
+  const extension = outputType === "image/png" ? "png" : "jpg";
+  return new File([blob], `${base}-edited.${extension}`, { type: outputType });
 }

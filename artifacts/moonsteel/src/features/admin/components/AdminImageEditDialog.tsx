@@ -32,7 +32,7 @@ import {
   copyImageSrc,
   downloadImageSrc,
 } from "@/features/admin/lib/adminImageActions";
-import { WEB_43_MAX_HEIGHT, WEB_43_MAX_WIDTH } from "@/features/admin/lib/optimizeImageToWeb43";
+import { WEB_43_MAX_HEIGHT, WEB_43_MAX_WIDTH, WEB_LOGO_MAX_HEIGHT, WEB_LOGO_MAX_WIDTH } from "@/features/admin/lib/optimizeImageToWeb43";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -40,6 +40,7 @@ type AdminImageEditDialogProps = {
   open: boolean;
   imageSrc: string | null;
   fileName?: string;
+  variant?: "default" | "logo";
   onOpenChange: (open: boolean) => void;
   onSave: (file: File) => void;
 };
@@ -85,18 +86,22 @@ export function AdminImageEditDialog({
   open,
   imageSrc,
   fileName = "product-image.jpg",
+  variant = "default",
   onOpenChange,
   onSave,
 }: AdminImageEditDialogProps) {
   const { toast } = useToast();
+  const isLogo = variant === "logo";
+  const defaultAspect: ImageEditAspect = isLogo ? "free" : "4:3";
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
-  const [aspect, setAspect] = useState<ImageEditAspect>("4:3");
+  const [aspect, setAspect] = useState<ImageEditAspect>(defaultAspect);
   const [flipHorizontal, setFlipHorizontal] = useState(false);
   const [flipVertical, setFlipVertical] = useState(false);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
+  const [limitLogoSize, setLimitLogoSize] = useState(true);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [workingSrc, setWorkingSrc] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -106,15 +111,16 @@ export function AdminImageEditDialog({
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setRotation(0);
-    setAspect("4:3");
+    setAspect(defaultAspect);
     setFlipHorizontal(false);
     setFlipVertical(false);
     setBrightness(100);
     setContrast(100);
+    setLimitLogoSize(true);
     setCroppedAreaPixels(null);
     setError(null);
     setIsSaving(false);
-  }, []);
+  }, [defaultAspect]);
 
   useEffect(() => {
     if (!open || !imageSrc) {
@@ -182,6 +188,18 @@ export function AdminImageEditDialog({
     setContrast(100);
   };
 
+  const applyLogoPreset = () => {
+    setAspect("free");
+    setZoom(1);
+    setCrop({ x: 0, y: 0 });
+    setRotation(0);
+    setFlipHorizontal(false);
+    setFlipVertical(false);
+    setBrightness(100);
+    setContrast(100);
+    setLimitLogoSize(true);
+  };
+
   const handleSave = async () => {
     if (!workingSrc || !croppedAreaPixels) return;
     setIsSaving(true);
@@ -194,7 +212,14 @@ export function AdminImageEditDialog({
         flipVertical: false,
         brightness,
         contrast,
-        fitWeb43Max: aspect === "4:3",
+        fitMax: isLogo
+          ? limitLogoSize
+            ? { width: WEB_LOGO_MAX_WIDTH, height: WEB_LOGO_MAX_HEIGHT }
+            : undefined
+          : aspect === "4:3"
+            ? { width: WEB_43_MAX_WIDTH, height: WEB_43_MAX_HEIGHT }
+            : undefined,
+        outputType: isLogo ? "image/png" : "image/jpeg",
         fileName,
       });
       onSave(file);
@@ -248,8 +273,9 @@ export function AdminImageEditDialog({
         <DialogHeader className="shrink-0 space-y-1 border-b border-border px-4 py-3 pr-12 text-left sm:px-5">
           <DialogTitle>Edit image</DialogTitle>
           <DialogDescription>
-            Crop, zoom, rotate, flip, and adjust brightness or contrast. 4:3 saves up to{" "}
-            {WEB_43_MAX_WIDTH} × {WEB_43_MAX_HEIGHT}. Use Copy or Download to keep a local copy.
+            {isLogo
+              ? `Crop, zoom, rotate, flip, and adjust. Logos only appear as thumbnails — keep them at or below ${WEB_LOGO_MAX_WIDTH} × ${WEB_LOGO_MAX_HEIGHT}.`
+              : `Crop, zoom, rotate, flip, and adjust brightness or contrast. 4:3 saves up to ${WEB_43_MAX_WIDTH} × ${WEB_43_MAX_HEIGHT}. Use Copy or Download to keep a local copy.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -391,9 +417,31 @@ export function AdminImageEditDialog({
               />
             </div>
 
-            <Button type="button" variant="outline" className="w-full" onClick={applyWeb43Preset}>
+            {isLogo ? (
+              <label className="flex cursor-pointer items-start gap-2 rounded-md border border-border px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={limitLogoSize}
+                  onChange={(e) => setLimitLogoSize(e.target.checked)}
+                />
+                <span>
+                  Limit to thumbnail size
+                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                    Max {WEB_LOGO_MAX_WIDTH} × {WEB_LOGO_MAX_HEIGHT} — enough for the homepage slider.
+                  </span>
+                </span>
+              </label>
+            ) : null}
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={isLogo ? applyLogoPreset : applyWeb43Preset}
+            >
               <ImageDown className="mr-2 h-3.5 w-3.5" />
-              Reset to web 4:3
+              {isLogo ? "Reset to logo size" : "Reset to web 4:3"}
             </Button>
 
             <Button type="button" variant="ghost" className="w-full" onClick={resetTransforms}>

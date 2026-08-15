@@ -1,14 +1,11 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ExternalLink } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import type { AdminTabKey } from "@/features/admin/types";
-import { AdminLogoutButton } from "@/features/admin/components/AdminLogoutButton";
+import { AdminToolbar } from "@/features/admin/components/AdminToolbar";
 import { CustomerLogosTab } from "@/features/admin/components/CustomerLogosTab";
 import { HeroImagesTab } from "@/features/admin/components/HeroImagesTab";
 import { ProductCategoriesTab } from "@/features/admin/components/ProductCategoriesTab";
@@ -95,9 +92,8 @@ export function AdminDashboard() {
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="flex h-full min-h-0 flex-col overflow-hidden">
-      <header className="shrink-0 border-b border-border bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <div className="mx-auto flex h-12 max-w-none items-center gap-2 px-2 md:px-3">
-          <img src="/ms3-logo.svg" alt="Admin" className="h-7 w-7 shrink-0 object-contain" />
+      <AdminToolbar
+        nav={
           <TabsList className="flex h-9 min-w-0 flex-1 justify-start gap-1 overflow-x-auto overscroll-x-contain rounded-lg p-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {tabConfig.map((tab) => (
               <TabsTrigger
@@ -110,16 +106,8 @@ export function AdminDashboard() {
               </TabsTrigger>
             ))}
           </TabsList>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <Button variant="outline" size="icon" type="button" className="h-9 w-9" asChild>
-              <Link href="/" target="_blank" rel="noreferrer" aria-label="View site" title="View site">
-                <ExternalLink className="h-4 w-4" />
-              </Link>
-            </Button>
-            <AdminLogoutButton />
-          </div>
-        </div>
-      </header>
+        }
+      />
 
       <div className="min-h-0 flex-1 overflow-hidden [&_input]:text-base [&_textarea]:text-base md:[&_input]:text-sm md:[&_textarea]:text-sm">
         <TabsContent value={activeTab} className="mt-0 h-full min-h-0 overflow-hidden [&>*]:h-full [&>*]:min-h-0">
