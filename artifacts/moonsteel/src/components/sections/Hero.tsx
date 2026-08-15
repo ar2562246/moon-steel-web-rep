@@ -98,18 +98,18 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
         >
           <div className="relative flex w-full justify-center lg:justify-start">
             <div className="relative z-10 w-full min-w-0 max-w-xl">
-              <div className="mb-4 flex items-start gap-3 sm:mb-6 sm:items-center sm:gap-4">
-                <div className="mt-[0.7em] h-px w-8 shrink-0 bg-primary sm:mt-0 sm:w-12" />
-                <span className="apple-eyebrow min-w-0 leading-5 text-primary">
-                  Fabricated in Karachi
-                  <span className="hidden sm:inline"> · </span>
-                  <span className="block sm:inline">Supplied across Pakistan</span>
+              <div className="mb-4 flex items-center gap-2 sm:mb-6 sm:gap-4">
+                <div className="hidden h-px w-12 shrink-0 bg-primary sm:block" />
+                <span className="apple-eyebrow whitespace-nowrap tracking-normal text-primary sm:tracking-[0.08em] max-[380px]:text-[0.6rem]">
+                  Fabricated in Karachi · Supplied across Pakistan
                 </span>
               </div>
 
-              <h1 className="mb-5 text-[2.5rem] font-display font-semibold leading-[1.12] tracking-tight text-foreground sm:text-5xl md:mb-6 md:text-7xl md:leading-[1.1]">
-                Commercial kitchen equipment, <br className="hidden md:block" />
-                fabricated to <span className="text-primary">spec.</span>
+              <h1 className="mb-4 text-[2.85rem] font-display font-semibold leading-[1.05] tracking-tight text-foreground sm:mb-5 sm:text-5xl sm:leading-[1.08] md:mb-6 md:text-7xl md:leading-[1.1]">
+                Commercial kitchen
+                <br className="sm:hidden" /> equipment,
+                <br className="hidden md:block" /> fabricated to{" "}
+                <span className="text-primary">spec.</span>
               </h1>
 
               <p className="apple-section-copy mb-6 max-w-xl md:mb-10">
@@ -125,26 +125,26 @@ export function Hero({ initialHeroImages = [] }: HeroProps) {
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+              <div className="flex flex-row gap-2 sm:gap-4">
                 <Button
                   size="lg"
-                  className="group w-full bg-primary font-medium text-primary-foreground hover:bg-primary/90 sm:w-auto"
+                  className="group min-w-0 flex-1 bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 max-[380px]:px-2 max-[380px]:text-xs sm:w-auto sm:flex-none sm:px-8 sm:text-base"
                   onClick={() => {
                     document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
                   Request a Quote
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="ml-1 h-4 w-4 sm:ml-2 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="group w-full border-foreground/20 font-medium text-foreground hover:bg-foreground/5 sm:w-auto"
+                  className="group min-w-0 flex-1 border-foreground/20 px-3 text-sm font-medium text-foreground hover:bg-foreground/5 max-[380px]:px-2 max-[380px]:text-xs sm:w-auto sm:flex-none sm:px-8 sm:text-base"
                   onClick={() => {
                     document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <Download className="mr-2 h-5 w-5" />
+                  <Download className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5" />
                   Upload Drawings
                 </Button>
               </div>
