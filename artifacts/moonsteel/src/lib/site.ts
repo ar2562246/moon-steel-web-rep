@@ -29,10 +29,31 @@ export function getSiteUrl() {
   }
 }
 
+/** Origin used for Meta/Google catalog `link` fields. Always the live site, never localhost. */
+export function catalogPublicOrigin() {
+  return PRODUCTION_SITE_URL;
+}
+
 /** Absolute URL for a site path (`/about` → `https://moonsteelfab.com/about`). */
-export function absoluteUrl(path = "/") {
-  const origin = getSiteUrl();
+export function absoluteUrl(path = "/", origin = getSiteUrl()) {
   if (!path || path === "/") return `${origin}/`;
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${origin}${normalized}`;
+}
+
+export function catalogProductUrl(path: string) {
+  return absoluteUrl(path, catalogPublicOrigin());
+}
+
+export function isPublicCatalogUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    if (host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "::1") return false;
+    if (host.endsWith(".vercel.app")) return false;
+    return true;
+  } catch {
+    return false;
+  }
 }

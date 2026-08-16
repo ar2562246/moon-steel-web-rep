@@ -1,4 +1,5 @@
 import type { NormalizedProduct, ValidationIssue } from "./types";
+import { isPublicCatalogUrl } from "@/lib/site";
 
 const HTTP = /^https?:\/\//i;
 
@@ -16,8 +17,12 @@ export function commonCatalogIssues(
   if (!product.sku.trim()) {
     issues.push({ field: "sku", message: "SKU or slug is required.", fatal: true });
   }
-  if (!product.canonicalUrl || !HTTP.test(product.canonicalUrl)) {
-    issues.push({ field: "url", message: "A public product URL is required.", fatal: true });
+  if (!isPublicCatalogUrl(product.canonicalUrl)) {
+    issues.push({
+      field: "url",
+      message: "Catalog listings need the public https://moonsteelfab.com product URL, not localhost.",
+      fatal: true,
+    });
   }
   if (product.images.length === 0) {
     issues.push({ field: "images", message: "At least one product image is required.", fatal: true });

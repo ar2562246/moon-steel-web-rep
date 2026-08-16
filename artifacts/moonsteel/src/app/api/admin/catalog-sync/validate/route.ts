@@ -4,7 +4,7 @@ import { getCatalogProductById } from "@/features/catalog/queries";
 import { normalizeCatalogProductForSync } from "@/features/catalog-sync/core/normalize";
 import { registerCatalogSyncProviders } from "@/features/catalog-sync/core/register";
 import { getConnectionForPlatform } from "@/features/catalog-sync/connections/store";
-import { getSiteUrl } from "@/lib/site";
+import { catalogPublicOrigin } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     ? body.platformIds
     : registry.platforms().map((platform) => platform.id);
 
-  const normalized = normalizeCatalogProductForSync(product, { siteOrigin: getSiteUrl() });
+  const normalized = normalizeCatalogProductForSync(product, { siteOrigin: catalogPublicOrigin() });
   const results = [];
   for (const platformId of platformIds) {
     const provider = registry.providerForPlatform(platformId);

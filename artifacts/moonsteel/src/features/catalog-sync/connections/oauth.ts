@@ -46,6 +46,21 @@ export function oauthCookieOptions() {
 
 export { STATE_COOKIE };
 
+/** Browser-facing origin for OAuth. Dev server binds 0.0.0.0, which Google rejects. */
+export function oauthPublicOrigin(request: Request) {
+  if (process.env.NODE_ENV === "production") return getSiteUrl();
+
+  const url = new URL(request.url);
+  const headerHost = request.headers.get("x-forwarded-host") || request.headers.get("host") || url.host;
+  const hostname = headerHost.replace(/^\[|\]$/g, "").split("%")[0].split(":")[0];
+  const port = headerHost.match(/:(\d+)$/)?.[1] || url.port || "3000";
+  const loopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0" || hostname === "::" || hostname === "::1";
+  if (loopback) return `http://localhost:${port}`;
+
+  const protocol = (request.headers.get("x-forwarded-proto") || url.protocol.replace(":", "")).replace(/:$/, "");
+  return `${protocol}://${headerHost}`;
+}
+
 export function oauthRedirectUri(provider: string, requestOrigin?: string) {
   const origin = requestOrigin || getSiteUrl();
   return `${origin.replace(/\/+$/, "")}/api/admin/catalog-sync/oauth/${provider}/callback`;

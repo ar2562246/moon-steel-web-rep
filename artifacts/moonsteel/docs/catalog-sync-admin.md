@@ -6,7 +6,7 @@ The website catalog is the source of truth. Facebook, Instagram, WhatsApp, and G
 
 1. Open **Admin → Social Channels**.
 2. **Meta:** Connect, then choose the Facebook Page and product catalog. Instagram Shopping uses that same catalog once the Instagram account is eligible in Meta Business Suite.
-3. **WhatsApp Business:** After Meta is connected, choose a WhatsApp Business Account from Business Suite (not a Page ID) and link the catalog. A normal WhatsApp phone number cannot be managed here. Linking fails until Meta can load that WABA.
+3. **WhatsApp Business:** After Meta is connected, click **Use Meta catalog for WhatsApp**. WhatsApp already shows the same catalog once it is attached in WhatsApp Manager. A Cloud API WABA ID is optional and must be numeric — do not paste a product UUID.
 4. **Google:** Connect Google, then save the Merchant Center ID and API data source ID.
 5. Use **Test connection** after connecting.
 6. On a development site you can connect the **mock catalog** instead of live platforms.
@@ -17,9 +17,9 @@ Sync writes items into **Meta Commerce Manager** (ads/catalog inventory). That i
 
 - **Facebook View** opens Commerce Manager: `https://business.facebook.com/commerce/catalogs/{catalogId}`. Search the product there (for example Hand Wash Sink). A public `facebook.com/{page}/shop/` page only appears after Facebook Shops is enabled on the Page.
 - **Instagram View** opens the Instagram profile. Shopping tags still need an eligible Instagram account in Business Suite.
-- **WhatsApp View** opens `https://wa.me/c/{phone}` (or a product `wa.me/p/...` link). That storefront stays empty until a **Cloud API WhatsApp Business Account** is attached to the same catalog. The website WhatsApp number (`+92 331 2562246`) is a chat link, not proof that a WABA exists.
+- **WhatsApp View** opens `https://wa.me/c/{phone}` (or a product `wa.me/p/...` link). That storefront stays empty until the same Meta catalog is attached in WhatsApp Manager. The website chat number (`+92 331 2562246`) is not a WABA ID.
 
-WhatsApp Sync can look successful while only updating the Meta catalog. The app now refuses to mark WhatsApp as connected unless Graph can load the WABA.
+WhatsApp Sync writes the same Meta catalog as Facebook. If WhatsApp Manager already uses that catalog, Facebook Sync is enough to update WhatsApp listings.
 
 ## Sync one product
 
@@ -42,6 +42,7 @@ Watch the progress dialog. Failures are listed per product; the rest of the batc
 
 - Read the red error on the product’s platform row. It is written for admins, not raw API codes.
 - Typical fixes: reconnect an expired account, add a catalog price, or use a public HTTPS image.
+- WhatsApp **Product link missing** means the catalog item has no crawlable `https://moonsteelfab.com/products/...` URL. Sync from this admin after a site deploy so Meta stores the live link, not localhost.
 - Open **Social Channels → Sync history** for who synced what, and when.
 
 ## Unpublish vs delete

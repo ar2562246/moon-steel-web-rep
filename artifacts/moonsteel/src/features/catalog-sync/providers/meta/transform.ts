@@ -24,6 +24,7 @@ export function toMetaCatalogItem(product: NormalizedProduct) {
     condition: "new",
     price: metaPrice(product),
     link: product.canonicalUrl,
+    mobile_link: product.canonicalUrl,
     image_link: image?.url,
     additional_image_link: additional.slice(0, 20),
     brand: product.brand,

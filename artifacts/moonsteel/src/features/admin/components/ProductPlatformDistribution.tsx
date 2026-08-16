@@ -125,8 +125,8 @@ export function ProductPlatformDistribution({
       <div>
         <h3 className="text-sm font-semibold">Platform distribution</h3>
         <p className="text-xs text-muted-foreground">
-          Sync writes inventory into Meta Commerce Manager. A public Facebook Shop or WhatsApp catalog is a
-          separate Meta setting and does not appear automatically after Sync.
+          Sync writes inventory into Meta Commerce Manager. Facebook, Instagram, and WhatsApp share that catalog.
+          WhatsApp customer listings appear after the catalog is attached in WhatsApp Manager.
         </p>
       </div>
 

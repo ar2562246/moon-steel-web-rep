@@ -1,20 +1,11 @@
-import { CATALOG_CAPABILITIES, type ProviderContext, type SocialProvider } from "../../core/types";
+import { CATALOG_CAPABILITIES, type SocialProvider } from "../../core/types";
 import { commonCatalogIssues } from "../../core/validate-product";
-import { metaAccessToken } from "../meta/graph";
+import { metaAccessToken, metaGraphRequest } from "../meta/graph";
 import { deleteMetaCatalogProduct, upsertMetaCatalogProduct } from "../meta/catalog";
-import { requireWhatsAppAccount, verifyWhatsAppBusinessAccount } from "./account";
+import { verifyWhatsAppBusinessAccount } from "./account";
+import { isWhatsAppBusinessAccountId } from "./ids";
 
 export const WHATSAPP_PROVIDER_ID = "whatsapp";
-
-async function assertLinkedWhatsApp(ctx: ProviderContext) {
-  requireWhatsAppAccount(
-    await verifyWhatsAppBusinessAccount({
-      accessToken: metaAccessToken(ctx.connection.credentials),
-      wabaId: typeof ctx.connection.config.wabaId === "string" ? ctx.connection.config.wabaId : "",
-      catalogId: typeof ctx.connection.config.catalogId === "string" ? ctx.connection.config.catalogId : "",
-    })
-  );
-}
 
 export function createWhatsAppProvider(): SocialProvider {
   return {
@@ -26,7 +17,7 @@ export function createWhatsAppProvider(): SocialProvider {
         providerId: WHATSAPP_PROVIDER_ID,
         label: "WhatsApp Business",
         shortLabel: "WA",
-        description: "Meta Commerce catalog linked to a WhatsApp Business Account.",
+        description: "Same Meta catalog as Facebook. WhatsApp shows those items once the catalog is attached in WhatsApp Manager.",
       },
     ],
     capabilities: () => ({
@@ -34,32 +25,50 @@ export function createWhatsAppProvider(): SocialProvider {
       canPublish: false,
     }),
     async validateConnection(ctx) {
-      const check = await verifyWhatsAppBusinessAccount({
-        accessToken: metaAccessToken(ctx.connection.credentials),
-        wabaId: typeof ctx.connection.config.wabaId === "string" ? ctx.connection.config.wabaId : "",
-        catalogId: typeof ctx.connection.config.catalogId === "string" ? ctx.connection.config.catalogId : "",
+      const catalogId =
+        typeof ctx.connection.config.catalogId === "string" ? ctx.connection.config.catalogId.trim() : "";
+      if (!catalogId) {
+        return { ok: false, error: "Select a Meta product catalog before linking WhatsApp." };
+      }
+
+      const token = metaAccessToken(ctx.connection.credentials);
+      const catalog = await metaGraphRequest<{ id?: string; name?: string }>(catalogId, {
+        accessToken: token,
+        search: { fields: "id,name" },
       });
-      if (!check.ok) return { ok: false, error: check.error };
-      return { ok: true, displayName: check.name || ctx.connection.displayName || "WhatsApp Business" };
+
+      const wabaId =
+        typeof ctx.connection.config.wabaId === "string" ? ctx.connection.config.wabaId.trim() : "";
+      if (isWhatsAppBusinessAccountId(wabaId)) {
+        const check = await verifyWhatsAppBusinessAccount({
+          accessToken: token,
+          wabaId,
+          catalogId,
+        });
+        if (check.ok) {
+          return { ok: true, displayName: check.name || ctx.connection.displayName || "WhatsApp Business" };
+        }
+      }
+
+      return {
+        ok: true,
+        displayName: catalog.name || ctx.connection.displayName || "WhatsApp (Meta catalog)",
+      };
     },
     async validateProduct(product) {
       const issues = commonCatalogIssues(product, { requirePrice: true, requireHttpsImage: true });
       return { ok: issues.length === 0, issues };
     },
     async createProduct(product, ctx) {
-      await assertLinkedWhatsApp(ctx);
       return upsertMetaCatalogProduct(product, ctx);
     },
     async updateProduct(product, ctx, externalProductId) {
-      await assertLinkedWhatsApp(ctx);
       return upsertMetaCatalogProduct(product, ctx, externalProductId);
     },
     async deleteProduct(product, ctx) {
-      await assertLinkedWhatsApp(ctx);
       return deleteMetaCatalogProduct(product, ctx);
     },
     async unpublishProduct(product, ctx, externalProductId) {
-      await assertLinkedWhatsApp(ctx);
       return upsertMetaCatalogProduct({ ...product, availability: "out_of_stock" }, ctx, externalProductId);
     },
   };

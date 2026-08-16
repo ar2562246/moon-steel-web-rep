@@ -7,19 +7,14 @@ import {
   exchangeGoogleCode,
   exchangeMetaCode,
   oauthRedirectUri,
+  oauthPublicOrigin,
   verifyOAuthState,
 } from "@/features/catalog-sync/connections/oauth";
 import { upsertConnection } from "@/features/catalog-sync/connections/store";
 import { metaGraphRequest } from "@/features/catalog-sync/providers/meta/graph";
 import { listMetaBusinessAssets } from "@/features/catalog-sync/providers/meta/assets";
-import { getSiteUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
-
-function originFrom(request: Request) {
-  if (process.env.NODE_ENV !== "production") return new URL(request.url).origin;
-  return getSiteUrl();
-}
 
 function adminRedirect(origin: string, query: Record<string, string>) {
   const url = new URL("/admin", origin);
@@ -30,7 +25,7 @@ function adminRedirect(origin: string, query: Record<string, string>) {
 
 export async function GET(request: Request, context: { params: Promise<{ provider: string }> }) {
   const { provider } = await context.params;
-  const origin = originFrom(request);
+  const origin = oauthPublicOrigin(request);
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");

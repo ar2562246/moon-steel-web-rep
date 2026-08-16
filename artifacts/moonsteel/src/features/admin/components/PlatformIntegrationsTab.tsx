@@ -18,6 +18,7 @@ import {
   type CatalogSyncConnection,
   type CatalogSyncPlatform,
 } from "@/features/admin/services/catalogSync";
+import { isWhatsAppBusinessAccountId } from "@/features/catalog-sync/providers/whatsapp/ids";
 
 function pageAssets(value: unknown): Array<{
   id: string;
@@ -77,7 +78,8 @@ export function PlatformIntegrationsTab() {
     if (typeof google?.config.merchantId === "string") setGoogleMerchantId(google.config.merchantId);
     if (typeof google?.config.dataSource === "string") setGoogleDataSource(google.config.dataSource);
     const whatsappConn = overview.connections.find((item) => item.provider === "whatsapp");
-    if (typeof whatsappConn?.config.wabaId === "string") setWabaId(whatsappConn.config.wabaId);
+    const storedWaba = typeof whatsappConn?.config.wabaId === "string" ? whatsappConn.config.wabaId : "";
+    setWabaId(isWhatsAppBusinessAccountId(storedWaba) ? storedWaba : "");
   };
 
   useEffect(() => {
@@ -149,25 +151,25 @@ export function PlatformIntegrationsTab() {
 
         <ProviderCard
           title="WhatsApp Business"
-          subtitle="Customers only see products in WhatsApp after a Cloud API WhatsApp Business Account is linked to the same Meta catalog. A personal WhatsApp number is not enough."
+          subtitle="WhatsApp uses the same Meta catalog as Facebook. After that catalog is attached in WhatsApp Manager, Facebook Sync already updates WhatsApp. A Cloud API WABA ID is optional."
           connected={whatsapp?.status === "connected"}
           name={whatsapp?.displayName}
           error={whatsapp?.lastError}
         >
           {!meta ? (
-            <p className="text-sm text-muted-foreground">Connect Meta first, then link the WhatsApp Business Account.</p>
+            <p className="text-sm text-muted-foreground">Connect Meta first, then link WhatsApp to that catalog.</p>
           ) : (
             <div className="space-y-3">
               {optionList(meta.config.wabas).length > 0 ? (
                 <div className="space-y-1.5">
-                  <Label htmlFor="waba-id">WhatsApp Business Account</Label>
+                  <Label htmlFor="waba-id">WhatsApp Business Account (optional)</Label>
                   <select
                     id="waba-id"
                     className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                     value={wabaId}
                     onChange={(event) => setWabaId(event.target.value)}
                   >
-                    <option value="">Select a WhatsApp account</option>
+                    <option value="">Use Meta catalog only</option>
                     {optionList(meta.config.wabas).map((account) => (
                       <option key={account.id} value={account.id}>
                         {account.name || account.id}
@@ -176,26 +178,13 @@ export function PlatformIntegrationsTab() {
                   </select>
                 </div>
               ) : (
-                <div className="space-y-1.5">
-                  <Label htmlFor="waba-id">WhatsApp Business Account ID</Label>
-                  <Input
-                    id="waba-id"
-                    value={wabaId}
-                    onChange={(event) => setWabaId(event.target.value)}
-                    placeholder="WABA ID from Business Suite"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    This Meta login has no WhatsApp Business Accounts. Create one in Business Suite → Accounts →
-                    WhatsApp accounts, then reconnect Meta. Do not paste a Facebook Page ID or catalog ID.
-                  </p>
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Leave the WABA field empty unless Meta Business Suite lists a Cloud API WhatsApp account. Do not paste
+                  a product ID, catalog ID, or the website WhatsApp number.
+                </p>
               )}
-              <Button
-                size="sm"
-                disabled={busy || !wabaId.trim()}
-                onClick={() => void onLinkWhatsApp()}
-              >
-                {whatsapp ? "Update WhatsApp link" : "Link WhatsApp catalog"}
+              <Button size="sm" disabled={busy} onClick={() => void onLinkWhatsApp()}>
+                {whatsapp ? "Use Meta catalog for WhatsApp" : "Link WhatsApp to Meta catalog"}
               </Button>
               {whatsapp ? (
                 <Button size="sm" variant="outline" disabled={busy} onClick={() => void onDisconnect(whatsapp.id)}>
@@ -228,6 +217,7 @@ export function PlatformIntegrationsTab() {
               </>
             ) : null}
           </div>
+          <GoogleOAuthHint />
           {google ? (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -346,7 +336,10 @@ export function PlatformIntegrationsTab() {
     }
     setBusy(true);
     try {
-      await linkWhatsAppFromMeta({ wabaId: wabaId.trim(), catalogId });
+      await linkWhatsAppFromMeta({
+        wabaId: isWhatsAppBusinessAccountId(wabaId) ? wabaId.trim() : undefined,
+        catalogId,
+      });
       await load();
     } catch (error) {
       toast({
@@ -394,6 +387,30 @@ function ProviderCard({
       </CardHeader>
       <CardContent className="space-y-3">{children}</CardContent>
     </Card>
+  );
+}
+
+function GoogleOAuthHint() {
+  const [callback, setCallback] = useState("");
+
+  useEffect(() => {
+    const host = window.location.hostname;
+    const local = host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0";
+    const origin = local ? `http://localhost:${window.location.port || "3000"}` : window.location.origin;
+    setCallback(`${origin}/api/admin/catalog-sync/oauth/google/callback`);
+  }, []);
+
+  if (!callback) return null;
+
+  return (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Google <code className="rounded bg-muted px-1 py-0.5 text-[11px]">redirect_uri_mismatch</code> means this exact
+      URL is missing from the OAuth client. In Google Cloud → Credentials → your Web application client, add it under{" "}
+      <span className="text-foreground">Authorized redirect URIs</span> (not JavaScript origins):
+      <span className="mt-1 block break-all font-mono text-[11px] text-foreground">{callback}</span>
+      Also add JavaScript origin <span className="font-mono text-foreground">http://localhost:3000</span> for local
+      testing. Use this admin URL: localhost, not 0.0.0.0.
+    </p>
   );
 }
 

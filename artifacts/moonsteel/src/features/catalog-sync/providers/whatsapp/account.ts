@@ -1,6 +1,8 @@
-import { SYNC_ERROR_CODES, SyncError } from "../../core/errors";
 import { digitsOnly } from "../meta/catalog";
 import { metaGraphRequest } from "../meta/graph";
+import { isWhatsAppBusinessAccountId } from "./ids";
+
+export { isWhatsAppBusinessAccountId } from "./ids";
 
 export type WhatsAppAccountCheck =
   | {
@@ -27,6 +29,9 @@ export async function verifyWhatsAppBusinessAccount(options: {
   const catalogId = options.catalogId.trim();
   if (!wabaId) {
     return { ok: false, error: "Enter a WhatsApp Business Account ID." };
+  }
+  if (!isWhatsAppBusinessAccountId(wabaId)) {
+    return { ok: false, error: missingWabaMessage() };
   }
   if (!catalogId) {
     return { ok: false, error: "Select a Meta product catalog before linking WhatsApp." };
@@ -93,11 +98,4 @@ export async function verifyWhatsAppBusinessAccount(options: {
     displayPhoneDigits,
     catalogLinked: true,
   };
-}
-
-export function requireWhatsAppAccount(check: WhatsAppAccountCheck) {
-  if (!check.ok) {
-    throw new SyncError(check.error, { code: SYNC_ERROR_CODES.VALIDATION });
-  }
-  return check;
 }

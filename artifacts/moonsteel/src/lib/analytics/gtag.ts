@@ -46,6 +46,10 @@ export function trackContactClick(method: "whatsapp" | "phone" | "email") {
   trackEvent(`${method}_click`, { method });
 }
 
+export function trackShare(params: { method: string; item_id: string; item_name: string }) {
+  trackEvent("share", params);
+}
+
 export function trackViewItem(item: GaItem) {
   trackEvent("view_item", { items: [item] });
 }

@@ -175,7 +175,7 @@ export async function updateCatalogConnection(
   return readJson<{ ok: boolean }>(response);
 }
 
-export async function linkWhatsAppFromMeta(input: { wabaId: string; catalogId: string; displayName?: string }) {
+export async function linkWhatsAppFromMeta(input: { wabaId?: string; catalogId: string; displayName?: string }) {
   const response = await fetch("/api/admin/catalog-sync/whatsapp/from-meta", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

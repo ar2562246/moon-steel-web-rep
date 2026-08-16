@@ -7,16 +7,11 @@ import {
   googleOAuthUrl,
   metaOAuthUrl,
   oauthCookieOptions,
+  oauthPublicOrigin,
   oauthRedirectUri,
 } from "@/features/catalog-sync/connections/oauth";
-import { getSiteUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
-
-function originFrom(request: Request) {
-  if (process.env.NODE_ENV !== "production") return new URL(request.url).origin;
-  return getSiteUrl();
-}
 
 export async function GET(request: Request, context: { params: Promise<{ provider: string }> }) {
   const auth = await requireAdminApi();
@@ -27,7 +22,7 @@ export async function GET(request: Request, context: { params: Promise<{ provide
   }
 
   const oauthProvider = provider === "whatsapp" ? "meta" : provider;
-  const origin = originFrom(request);
+  const origin = oauthPublicOrigin(request);
   const redirectUri = oauthRedirectUri(oauthProvider, origin);
   const state = createOAuthState(oauthProvider);
   const store = await cookies();

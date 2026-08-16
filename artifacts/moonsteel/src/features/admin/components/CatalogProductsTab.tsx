@@ -766,12 +766,12 @@ export function CatalogProductsTab() {
                   <Field
                     label="Product details"
                     htmlFor="product-details"
-                    hint="This is the description on the product page. Line breaks are kept."
+                    hint="Use the standard layout: 1–2 sentence lead, then Specifications bullets, then Suitable for… and Custom sizes available on request."
                   >
                     <AutoGrowTextarea
                       id="product-details"
                       value={form.details}
-                      placeholder="Material, size, construction, and what this product is for."
+                      placeholder={"Work table with one undershelf for commercial kitchen prep.\n\nSpecifications\n• Top: 1.50 mm AISI 304 stainless steel\n• Feet: Adjustable\n\nSuitable for commercial kitchens. Custom sizes available on request."}
                       onChange={(details) => setForm((current) => ({ ...current, details }))}
                     />
                   </Field>

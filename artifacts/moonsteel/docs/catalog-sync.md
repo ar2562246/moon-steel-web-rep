@@ -56,7 +56,7 @@ Deleting a website product does **not** delete the external catalog item.
 ## Official APIs used
 
 - **Meta / Facebook / Instagram:** Marketing Catalog `/{catalog_id}/items_batch` (Graph API v22). Instagram Shopping visibility still requires an eligible IG account linked in Business Suite. This module does **not** publish Instagram/Facebook posts.
-- **WhatsApp Business:** Same Meta catalog, linked to a WABA via `/{waba-id}/product_catalogs`. Consumer WhatsApp is not supported. Catalog *messages* are out of scope.
+- **WhatsApp Business:** Same Meta catalog as Facebook (`/{catalog_id}/items_batch`). A Cloud API WABA is optional. Consumer WhatsApp and catalog *messages* are out of scope.
 - **Google:** Merchant API `accounts.productInputs` (replaces Content API for Shopping, shutdown 18 Aug 2026). Google Business Profile local posts are **not** implemented.
 - **Mock:** In-memory catalog for local testing. Enabled outside production unless `CATALOG_SYNC_ENABLE_MOCK=true`.
 

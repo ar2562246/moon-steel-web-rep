@@ -126,6 +126,13 @@ describe("validation", () => {
     const mock = commonCatalogIssues(missingPrice, { requirePrice: false, requireHttpsImage: false });
     expect(mock.some((issue) => issue.field === "price")).toBe(false);
   });
+
+  it("rejects localhost product links for commerce catalogs", () => {
+    const local = product({ canonicalUrl: "http://localhost:3000/products/ss-304-grease-trap" });
+    expect(commonCatalogIssues(local, { requirePrice: true, requireHttpsImage: true }).some((issue) => issue.field === "url")).toBe(
+      true
+    );
+  });
 });
 
 describe("sync engine", () => {
@@ -265,7 +272,8 @@ describe("provider transformers", () => {
     const item = toMetaCatalogItem(product());
     expect(item.id).toBe("prod-1");
     expect(item.price).toBe("150000.00 PKR");
-    expect(item.link).toContain("/products/ss-304-grease-trap");
+    expect(item.link).toBe("https://moonsteelfab.com/products/ss-304-grease-trap");
+    expect(item.mobile_link).toBe(item.link);
     expect(item.brand).toBe("Moon Steel Fabricators");
   });
 

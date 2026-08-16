@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getSiteUrl } from "@/lib/site";
+import { catalogPublicOrigin } from "@/lib/site";
 import { getCatalogProductById } from "@/features/catalog/queries";
 import { createSyncEngine, shouldRetry, backoffMs } from "../core/engine";
 import { registerCatalogSyncProviders } from "../core/register";
@@ -88,7 +88,7 @@ export async function processSyncJob(
         continue;
       }
 
-      const normalized = normalizeCatalogProductForSync(product, { siteOrigin: getSiteUrl() });
+      const normalized = normalizeCatalogProductForSync(product, { siteOrigin: catalogPublicOrigin() });
       let result = await engine.run({
         product: normalized,
         productSlug: product.slug,

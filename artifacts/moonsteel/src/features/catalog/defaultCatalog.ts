@@ -7,7 +7,7 @@ export const defaultCatalogProducts: CatalogProduct[] = [
     slug: "stainless-steel-work-table",
     name: "Stainless Steel Work Table",
     details:
-      "SS 304 work table with reinforced under-bracing, adjustable bullet feet, and optional splashbacks. Built for high-volume commercial kitchens.",
+      "Work table with reinforced under-bracing and adjustable feet for high-volume prep.\n\nSpecifications\n• Material: AISI 304 stainless steel\n• Feet: Adjustable\n• Options: Splashbacks\n\nSuitable for commercial kitchens. Custom sizes available on request.",
     image_url: "/images/hero-kitchen-stainless.png",
     image_urls: ["/images/hero-kitchen-stainless.png"],
     sort_order: 10,
@@ -21,7 +21,7 @@ export const defaultCatalogProducts: CatalogProduct[] = [
     slug: "triple-bowl-commercial-sink",
     name: "Triple Bowl Commercial Sink",
     details:
-      "Fully welded SS 304 triple compartment sink with deep-drawn bowls, radiused corners, and integrated drainboards.",
+      "Three-bowl sink table for wash–rinse–sanitize workflows in professional kitchens.\n\nSpecifications\n• Material: AISI 304 stainless steel\n• Bowls: Triple compartment, radiused corners\n\nSuitable for restaurants, hotels, and institutional kitchens. Custom bowl sizes and drainboards available on request.",
     image_url: "/images/hero-kitchen-stainless.png",
     image_urls: ["/images/hero-kitchen-stainless.png"],
     sort_order: 20,
@@ -35,7 +35,7 @@ export const defaultCatalogProducts: CatalogProduct[] = [
     slug: "canopy-exhaust-hood",
     name: "Canopy Exhaust Hood",
     details:
-      "SS 304/430 canopy hood with baffle filters, grease cups, and integrated lighting for restaurant cooklines.",
+      "Exhaust canopy with baffle filters, grease cups, and lighting for restaurant cooklines.\n\nSpecifications\n• Material: AISI 304 stainless steel\n• Filters: Baffle-type grease filters\n\nSuitable for commercial cooklines. Custom lengths and lighting options available on request.",
     image_url: "/images/hero-kitchen-stainless.png",
     image_urls: ["/images/hero-kitchen-stainless.png"],
     sort_order: 30,
@@ -49,7 +49,7 @@ export const defaultCatalogProducts: CatalogProduct[] = [
     slug: "grease-trap-large",
     name: "Grease Trap Large 120 GPM",
     details:
-      "Large grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 48″ × 24″ × 24″\n• Flow: 120 GPM\n• Gross tank volume: ~119.7 gal / 453 L\n• Material: 1.50mm AISI 304\n• Inlet: 4″\n• Outlet: 4″\n• Internals: 2× buckets, 2× compartments\n\nSuitable for hotels, catering, and high-volume kitchens. Custom sizes available on request.",
+      "Large grease interceptor that separates fats, oils, and grease from kitchen wastewater before it enters the drain.\n\nSpecifications\n• Material: 1.50 mm AISI 304 stainless steel\n• Size: 48″ × 24″ × 24″\n• Flow: 120 GPM\n• Gross tank volume: ~119.7 gal / 453 L\n• Inlet: 4″\n• Outlet: 4″\n• Internals: 2× buckets, 2× compartments\n\nSuitable for hotels, catering, and high-volume kitchens. Custom sizes available on request.",
     image_url: "",
     image_urls: [],
     sort_order: 10,
@@ -63,7 +63,7 @@ export const defaultCatalogProducts: CatalogProduct[] = [
     slug: "stainless-steel-grease-trap-33-gpm",
     name: "Grease Trap Medium 34 GPM",
     details:
-      "Medium grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 24″ × 18″ × 18″\n• Flow: 34 GPM\n• Gross tank volume: ~33.7 gal / 128 L\n• Material: 1.50mm AISI 304\n• Inlet: 3″\n• Outlet: 3″\n• Internals: 1× bucket, 1× baffle\n\nSuitable for restaurants and moderate commercial kitchens. Custom sizes available on request.",
+      "Medium grease interceptor that separates fats, oils, and grease from kitchen wastewater before it enters the drain.\n\nSpecifications\n• Material: 1.50 mm AISI 304 stainless steel\n• Size: 24″ × 18″ × 18″\n• Flow: 34 GPM\n• Gross tank volume: ~33.7 gal / 128 L\n• Inlet: 3″\n• Outlet: 3″\n• Internals: 1× bucket, 1× baffle\n\nSuitable for restaurants and moderate commercial kitchens. Custom sizes available on request.",
     image_url: "",
     image_urls: [],
     sort_order: 20,
@@ -77,7 +77,7 @@ export const defaultCatalogProducts: CatalogProduct[] = [
     slug: "grease-trap-grease-interceptor",
     name: "Grease Trap Small 17 GPM",
     details:
-      "Small grease interceptor that separates fats, oils, and grease from kitchen wastewater.\n\nSpecifications\n• Size: 22″ × 15″ × 12″\n• Flow: 17 GPM\n• Gross tank volume: ~17.1 gal / 65 L\n• Material: 1.50mm AISI 304\n• Inlet: 1.5″\n• Outlet: 2″\n• Internals: 1× bucket, 1× baffle\n• Grease holding capacity: 9.5 kg\n\nSuitable for cafés and light-duty sinks. Custom sizes available on request.",
+      "Small grease interceptor that separates fats, oils, and grease from kitchen wastewater before it enters the drain.\n\nSpecifications\n• Material: 1.50 mm AISI 304 stainless steel\n• Size: 22″ × 15″ × 12″\n• Flow: 17 GPM\n• Gross tank volume: ~17.1 gal / 65 L\n• Inlet: 1.5″\n• Outlet: 2″\n• Internals: 1× bucket, 1× baffle\n• Grease holding capacity: 9.5 kg\n\nSuitable for cafés and light-duty sinks. Custom sizes available on request.",
     image_url: "",
     image_urls: [],
     sort_order: 30,

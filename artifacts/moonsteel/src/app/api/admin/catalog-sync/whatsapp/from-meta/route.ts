@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/requireAdminApi";
 import { getConnectedProvider, upsertConnection } from "@/features/catalog-sync/connections/store";
 import { metaAccessToken } from "@/features/catalog-sync/providers/meta/graph";
-import { verifyWhatsAppBusinessAccount } from "@/features/catalog-sync/providers/whatsapp/account";
+import {
+  isWhatsAppBusinessAccountId,
+  verifyWhatsAppBusinessAccount,
+} from "@/features/catalog-sync/providers/whatsapp/account";
+import { WHATSAPP_E164 } from "@/lib/contact/details";
 
 export const runtime = "nodejs";
 
@@ -21,36 +25,58 @@ export async function POST(request: Request) {
   };
 
   const catalogId = body.catalogId || (typeof meta.config.catalogId === "string" ? meta.config.catalogId : null);
-  if (!body.wabaId || !catalogId) {
+  if (!catalogId) {
     return NextResponse.json(
-      { error: "WhatsApp Business Account ID and catalog ID are required." },
+      { error: "Select a Meta product catalog before linking WhatsApp." },
       { status: 400 }
     );
   }
 
-  const check = await verifyWhatsAppBusinessAccount({
-    accessToken: metaAccessToken(meta.credentials),
-    wabaId: body.wabaId,
-    catalogId,
-    attachIfMissing: true,
-  });
-  if (!check.ok) {
-    return NextResponse.json({ error: check.error }, { status: 400 });
+  const requestedWaba = body.wabaId?.trim() || "";
+  let wabaId: string | null = null;
+  let displayName = body.displayName || "WhatsApp (Meta catalog)";
+  let displayPhone: string | null = null;
+  let displayPhoneDigits: string | null = WHATSAPP_E164;
+
+  if (requestedWaba) {
+    if (!isWhatsAppBusinessAccountId(requestedWaba)) {
+      return NextResponse.json(
+        {
+          error:
+            "That is not a WhatsApp Business Account ID. Leave it blank to use the Meta catalog (WhatsApp already updates when Facebook catalog updates), or paste the numeric WABA ID from Business Suite.",
+        },
+        { status: 400 }
+      );
+    }
+    const check = await verifyWhatsAppBusinessAccount({
+      accessToken: metaAccessToken(meta.credentials),
+      wabaId: requestedWaba,
+      catalogId,
+      attachIfMissing: true,
+    });
+    if (!check.ok) {
+      return NextResponse.json({ error: check.error }, { status: 400 });
+    }
+    wabaId = check.wabaId;
+    displayName = body.displayName || check.name || "WhatsApp Business";
+    displayPhone = check.displayPhone;
+    displayPhoneDigits = check.displayPhoneDigits || WHATSAPP_E164;
   }
 
   const connection = await upsertConnection(auth.ctx.admin, {
     provider: "whatsapp",
-    displayName: body.displayName || check.name || "WhatsApp Business",
+    displayName,
     status: "connected",
     connectedBy: auth.ctx.userId,
     credentials: meta.credentials,
     config: {
-      wabaId: check.wabaId,
+      wabaId,
       catalogId,
       catalogName: meta.config.catalogName ?? null,
       sharedMetaConnectionId: meta.id,
-      displayPhone: check.displayPhone,
-      displayPhoneDigits: check.displayPhoneDigits,
+      displayPhone,
+      displayPhoneDigits,
+      mirrorsMetaCatalog: true,
     },
   });
 

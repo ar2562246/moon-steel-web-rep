@@ -9,6 +9,7 @@ import type { CatalogProduct } from "@/features/catalog/types";
 import { catalogItem, trackViewItem } from "@/lib/analytics/gtag";
 import { readProductBackLink, type ProductBackLink } from "@/features/catalog/product-back";
 import { ProductBuyForm } from "@/app/products/[slug]/ProductBuyForm";
+import { ProductShareBar } from "@/app/products/[slug]/ProductShareBar";
 
 type ProductDetailViewProps = {
   product: CatalogProduct;
@@ -115,12 +116,12 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           </div>
 
           <aside className="space-y-6 rounded-2xl border border-border p-6 layer-1">
-            <div className="hidden lg:block">
-              <CategoryPills product={product} />
-            </div>
-
-            <div className="hidden space-y-2 lg:block">
-              <h1 className="text-3xl font-display font-semibold text-foreground">{product.name}</h1>
+            <div className="flex items-start justify-between gap-3">
+              <div className="hidden min-w-0 flex-1 space-y-2 lg:block">
+                <CategoryPills product={product} />
+                <h1 className="text-3xl font-display font-semibold text-foreground">{product.name}</h1>
+              </div>
+              <ProductShareBar product={product} className="ml-auto shrink-0" />
             </div>
 
             {images.length > 1 ? (
