@@ -1,9 +1,18 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { Share } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { PRODUCTION_SITE_URL } from "@/lib/site";
 import { trackShare } from "@/lib/analytics/gtag";
+import { cn } from "@/lib/utils";
 
 type ShareProduct = {
   slug: string;
@@ -11,8 +20,8 @@ type ShareProduct = {
   path: string;
 };
 
-const buttonClass =
-  "inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/80 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary";
+const triggerClass =
+  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary";
 
 export function productSharePayload(product: ShareProduct) {
   const url = `${PRODUCTION_SITE_URL}${product.path.startsWith("/") ? product.path : `/${product.path}`}`;
@@ -103,64 +112,63 @@ export function ProductShareBar({ product, className }: { product: ShareProduct;
   }
 
   return (
-    <div className={className}>
-      <p className="sr-only">Share this product</p>
-      <div className="flex flex-wrap items-center justify-end gap-1.5">
-        {canNativeShare ? (
-          <button type="button" className={buttonClass} onClick={() => void onNativeShare()} aria-label="Share with device apps">
-            <ShareGlyph />
+    <div className={cn("shrink-0", className)}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className={triggerClass} aria-label="Share this product">
+            <Share className="h-5 w-5" strokeWidth={2} />
           </button>
-        ) : null}
-        <button type="button" className={buttonClass} onClick={() => void onFacebook()} aria-label="Share on Facebook">
-          <FacebookGlyph />
-        </button>
-        <button
-          type="button"
-          className={buttonClass}
-          onClick={() =>
-            void copyThenOpen(
-              "instagram",
-              "https://www.instagram.com/",
-              "Paste it into an Instagram post, story, or reel. Instagram does not allow websites to publish for you.",
-            )
-          }
-          aria-label="Share on Instagram"
-        >
-          <InstagramGlyph gradientId={gradientId} />
-        </button>
-        <button
-          type="button"
-          className={buttonClass}
-          onClick={() =>
-            void copyThenOpen(
-              "google",
-              "https://business.google.com/posts",
-              "Paste the product into a Google Business Profile post. Google does not allow websites to publish that post for you.",
-            )
-          }
-          aria-label="Share to a Google Business Profile post"
-        >
-          <GoogleGlyph />
-        </button>
-        <button type="button" className={buttonClass} onClick={() => void onWhatsApp()} aria-label="Share on WhatsApp">
-          <WhatsAppGlyph />
-        </button>
-        <button type="button" className={buttonClass} onClick={() => void onCopy()} aria-label="Copy product link">
-          {copied ? <CheckGlyph /> : <CopyGlyph />}
-        </button>
-      </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" sideOffset={8} className="w-52">
+          {canNativeShare ? (
+            <>
+              <DropdownMenuItem onSelect={() => void onNativeShare()}>
+                <Share />
+                More apps
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
+          <DropdownMenuItem onSelect={() => void onFacebook()}>
+            <FacebookGlyph />
+            Facebook
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() =>
+              void copyThenOpen(
+                "instagram",
+                "https://www.instagram.com/",
+                "Paste it into an Instagram post, story, or reel. Instagram does not allow websites to publish for you.",
+              )
+            }
+          >
+            <InstagramGlyph gradientId={gradientId} />
+            Instagram
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() =>
+              void copyThenOpen(
+                "google",
+                "https://business.google.com/posts",
+                "Paste the product into a Google Business Profile post. Google does not allow websites to publish that post for you.",
+              )
+            }
+          >
+            <GoogleGlyph />
+            Google
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void onWhatsApp()}>
+            <WhatsAppGlyph />
+            WhatsApp
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => void onCopy()}>
+            {copied ? <CheckGlyph /> : <CopyGlyph />}
+            {copied ? "Copied" : "Copy link"}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
-  );
-}
-
-function ShareGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
-      <path
-        fill="currentColor"
-        d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .17 1H8.83A3.001 3.001 0 1 0 6 9c.46 0 .89-.1 1.28-.29l6.1 3.56A3 3 0 0 0 13 14a3 3 0 0 0 .17 1l-6.1 3.56A3 3 0 1 0 9 21c0-.35-.06-.68-.17-1h6.34c.11.32.17.65.17 1a3 3 0 1 0 2.83-4 3 3 0 0 0-1.28.29l-6.1-3.56c.08-.23.13-.48.13-.73s-.05-.5-.13-.73l6.1-3.56A3 3 0 0 0 18 8Z"
-      />
-    </svg>
   );
 }
 

@@ -1,4 +1,4 @@
-import { humanizeGoogleError, SyncError, SYNC_ERROR_CODES } from "../../core/errors";
+import { humanizeGoogleError, isSyncError, SyncError, SYNC_ERROR_CODES } from "../../core/errors";
 
 const MERCHANT_API = "https://merchantapi.googleapis.com";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -61,11 +61,13 @@ function googleRefreshTokenMessage(error?: string, description?: string) {
 }
 
 export async function googleAccessToken(credentials: Record<string, unknown>) {
-  const stored = typeof credentials.accessToken === "string" ? credentials.accessToken.trim() : "";
   try {
     return await refreshGoogleAccessToken(credentials);
   } catch (error) {
-    if (stored) return stored;
+    if (isSyncError(error) && error.code === SYNC_ERROR_CODES.NETWORK) {
+      const stored = typeof credentials.accessToken === "string" ? credentials.accessToken.trim() : "";
+      if (stored) return stored;
+    }
     throw error;
   }
 }
@@ -103,11 +105,31 @@ export async function googleMerchantRequest<T>(
   }
 
   if (response.status === 204) return {} as T;
-  const json = (await response.json().catch(() => ({}))) as T & {
-    error?: { message?: string; status?: string };
-  };
+  const json = (await response.json().catch(() => ({}))) as T & GoogleErrorBody;
   if (!response.ok) {
-    throw humanizeGoogleError(response.status, json.error?.message);
+    throw humanizeGoogleError(response.status, googleApiErrorMessage(json));
   }
   return json;
+}
+
+type GoogleErrorBody = {
+  error?: {
+    message?: string;
+    status?: string;
+    details?: Array<{
+      reason?: string;
+      description?: string;
+      metadata?: Record<string, string>;
+    }>;
+  };
+};
+
+export function googleApiErrorMessage(json: GoogleErrorBody) {
+  const parts = [json.error?.message, json.error?.status];
+  for (const detail of json.error?.details ?? []) {
+    if (detail.reason) parts.push(detail.reason);
+    if (detail.description) parts.push(detail.description);
+    if (detail.metadata) parts.push(...Object.values(detail.metadata));
+  }
+  return parts.filter(Boolean).join(" — ") || undefined;
 }

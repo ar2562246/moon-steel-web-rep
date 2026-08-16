@@ -426,14 +426,16 @@ function GoogleOAuthHint() {
         is not registered. Enable{" "}
         <a
           className="text-foreground underline"
-          href="https://console.cloud.google.com/apis/library/merchantapi.googleapis.com"
+          href="https://console.cloud.google.com/apis/library/merchantapi.googleapis.com?project=moon-steel-fab-project"
           target="_blank"
           rel="noreferrer"
         >
           Merchant API
         </a>
         , then in Merchant Center → Settings → People confirm the Google account you click Connect with is Admin. The
-        website must be verified. Connect again so Moon Steel can register this Cloud project with Merchant Center.
+        website must be verified. Click <span className="text-foreground">Connect Google</span> (not Test) so Moon Steel
+        can register this Cloud project. Google may return 401 until that registration finishes; wait a few minutes if
+        the first connect still fails.
       </p>
       <p>
         Google <code className="rounded bg-muted px-1 py-0.5 text-[11px]">redirect_uri_mismatch</code> means this exact

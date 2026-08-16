@@ -97,7 +97,10 @@ export function googleOAuthUrl(state: string, redirectUri: string) {
   url.searchParams.set("access_type", "offline");
   url.searchParams.set("prompt", "consent");
   url.searchParams.set("include_granted_scopes", "true");
-  url.searchParams.set("scope", "https://www.googleapis.com/auth/content");
+  url.searchParams.set(
+    "scope",
+    ["https://www.googleapis.com/auth/content", "https://www.googleapis.com/auth/userinfo.email"].join(" ")
+  );
   url.searchParams.set("state", state);
   return url.toString();
 }

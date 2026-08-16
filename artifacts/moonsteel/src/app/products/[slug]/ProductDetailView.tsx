@@ -101,9 +101,12 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
 
             <div className="space-y-3 lg:hidden">
               <CategoryPills product={product} />
-              <h1 className="text-2xl font-display font-semibold leading-snug text-foreground">
-                {product.name}
-              </h1>
+              <div className="flex items-start gap-3">
+                <h1 className="min-w-0 flex-1 text-2xl font-display font-semibold leading-snug text-foreground">
+                  {product.name}
+                </h1>
+                <ProductShareBar product={product} className="mt-0.5" />
+              </div>
               <BuyJumpButton />
             </div>
 
@@ -116,12 +119,12 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           </div>
 
           <aside className="space-y-6 rounded-2xl border border-border p-6 layer-1">
-            <div className="flex items-start justify-between gap-3">
-              <div className="hidden min-w-0 flex-1 space-y-2 lg:block">
+            <div className="hidden items-start justify-between gap-3 lg:flex">
+              <div className="min-w-0 flex-1 space-y-2">
                 <CategoryPills product={product} />
                 <h1 className="text-3xl font-display font-semibold text-foreground">{product.name}</h1>
               </div>
-              <ProductShareBar product={product} className="ml-auto shrink-0" />
+              <ProductShareBar product={product} />
             </div>
 
             {images.length > 1 ? (

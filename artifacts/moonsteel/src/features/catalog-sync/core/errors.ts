@@ -88,9 +88,30 @@ export function humanizeMetaError(code: number | string | undefined, message?: s
   });
 }
 
+export function isUnregisteredGcpMessage(message?: string) {
+  const text = (message || "").toLowerCase();
+  return (
+    text.includes("not registered") ||
+    text.includes("register_as_a_developer") ||
+    (text.includes("gcp project") && text.includes("merchant account"))
+  );
+}
+
+export function isAlreadyRegisteredGcpMessage(message?: string) {
+  const text = (message || "").toLowerCase();
+  return text.includes("already_registered") || text.includes("already registered");
+}
+
 export function humanizeGoogleError(status: number | undefined, message?: string): SyncError {
+  if (isUnregisteredGcpMessage(message)) {
+    return new SyncError(googlePermissionMessage(message), {
+      code: SYNC_ERROR_CODES.PERMISSION,
+      retryable: false,
+      detail: message,
+    });
+  }
   if (status === 401) {
-    return new SyncError("Google connection expired. Please reconnect Merchant Center.", {
+    return new SyncError("Google login expired. Click Connect Google — Test connection cannot renew a revoked token.", {
       code: SYNC_ERROR_CODES.TOKEN_EXPIRED,
       retryable: false,
       detail: message,
@@ -126,11 +147,21 @@ export function humanizeGoogleError(status: number | undefined, message?: string
 
 export function googlePermissionMessage(message?: string) {
   const text = (message || "").toLowerCase();
+  const enableUrl = message?.match(/https:\/\/console\.[^\s]+/i)?.[0]?.replace(/[.,)]+$/, "");
+  const project = message?.match(/in project ([a-z0-9-]+)/i)?.[1];
   if (text.includes("has not been used") || text.includes("disabled") || text.includes("enable it by visiting")) {
-    return "Enable Merchant API in this Google Cloud project (APIs & Services → Library → Merchant API), wait a minute, then Test connection.";
+    const link =
+      enableUrl ||
+      `https://console.cloud.google.com/apis/library/merchantapi.googleapis.com${project ? `?project=${project}` : ""}`;
+    return `Enable Merchant API${project ? ` in Cloud project ${project}` : ""}: open ${link} , click Enable, wait a minute, then Test connection.`;
   }
-  if (text.includes("api developer") || text.includes("registergcp") || text.includes("developer registration")) {
-    return "This Google Cloud project is not registered with Merchant Center. Connect again using a Merchant Center Admin Google account so the project can be registered.";
+  if (
+    isUnregisteredGcpMessage(message) ||
+    text.includes("api developer") ||
+    text.includes("registergcp") ||
+    text.includes("developer registration")
+  ) {
+    return "This Google Cloud project is not registered with Merchant Center. Click Connect Google using a Merchant Center Admin account so Moon Steel can register the Cloud project.";
   }
   const detail = message?.trim();
   return detail
