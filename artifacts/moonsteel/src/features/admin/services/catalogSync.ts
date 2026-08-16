@@ -160,7 +160,16 @@ export async function disconnectCatalogConnection(id: string) {
 
 export async function testCatalogConnection(id: string) {
   const response = await fetch(`/api/admin/catalog-sync/connections/${id}/test`, { method: "POST" });
-  return readJson<{ ok: boolean; error?: string | null; displayName?: string }>(response);
+  const json = (await response.json().catch(() => ({}))) as {
+    ok?: boolean;
+    error?: string | null;
+    displayName?: string;
+  };
+  if (typeof json.ok === "boolean") {
+    return { ok: json.ok, error: json.error ?? null, displayName: json.displayName };
+  }
+  if (!response.ok) throw new Error(json.error || "Connection test failed.");
+  return { ok: true, error: null, displayName: json.displayName };
 }
 
 export async function updateCatalogConnection(

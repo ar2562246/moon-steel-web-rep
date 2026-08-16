@@ -42,12 +42,32 @@ export async function refreshGoogleAccessToken(credentials: Record<string, unkno
 
   const json = (await response.json()) as { access_token?: string; error?: string; error_description?: string };
   if (!response.ok || !json.access_token) {
-    throw new SyncError("Google connection expired. Please reconnect Merchant Center.", {
+    throw new SyncError(googleRefreshTokenMessage(json.error, json.error_description), {
       code: SYNC_ERROR_CODES.TOKEN_EXPIRED,
       detail: json.error_description || json.error,
     });
   }
   return json.access_token;
+}
+
+function googleRefreshTokenMessage(error?: string, description?: string) {
+  if (error === "invalid_grant") {
+    return "Google revoked this login. Testing OAuth apps expire refresh tokens after 7 days. Click Connect Google again.";
+  }
+  if (error === "unauthorized_client" || error === "invalid_client") {
+    return "This OAuth client cannot refresh that token. Use the same GOOGLE_OAUTH_CLIENT_ID you authorized, then Connect Google again.";
+  }
+  return description || "Google connection expired. Please reconnect Merchant Center.";
+}
+
+export async function googleAccessToken(credentials: Record<string, unknown>) {
+  const stored = typeof credentials.accessToken === "string" ? credentials.accessToken.trim() : "";
+  try {
+    return await refreshGoogleAccessToken(credentials);
+  } catch (error) {
+    if (stored) return stored;
+    throw error;
+  }
 }
 
 export async function googleMerchantRequest<T>(

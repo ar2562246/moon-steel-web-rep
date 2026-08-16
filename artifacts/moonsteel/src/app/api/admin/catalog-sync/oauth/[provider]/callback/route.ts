@@ -13,6 +13,7 @@ import {
 import { upsertConnection } from "@/features/catalog-sync/connections/store";
 import { metaGraphRequest } from "@/features/catalog-sync/providers/meta/graph";
 import { listMetaBusinessAssets } from "@/features/catalog-sync/providers/meta/assets";
+import { bootstrapGoogleMerchant } from "@/features/catalog-sync/providers/google/accounts";
 
 export const runtime = "nodejs";
 
@@ -129,23 +130,48 @@ export async function GET(request: Request, context: { params: Promise<{ provide
 
     if (provider === "google") {
       const tokens = await exchangeGoogleCode(code, oauthRedirectUri("google", origin));
-      if (!tokens.refreshToken) {
+      if (!tokens.refreshToken || !tokens.accessToken) {
         return adminRedirect(origin, {
           sync_error: "Google did not return a refresh token. Disconnect access in Google Account and connect again.",
         });
       }
+      let merchantId = process.env.GOOGLE_MERCHANT_ID || null;
+      let dataSource = process.env.GOOGLE_MERCHANT_DATASOURCE_ID || null;
+      let displayName = "Google Merchant Center";
+      let lastError: string | null = null;
+      let status: "connected" | "error" = "connected";
+      let accounts: Array<{ id: string; name: string }> = [];
+      try {
+        const access = await bootstrapGoogleMerchant({
+          accessToken: tokens.accessToken,
+          merchantId,
+          dataSource,
+        });
+        merchantId = access.merchantId;
+        dataSource = access.dataSource;
+        displayName = access.merchantName;
+        accounts = access.accounts;
+      } catch (error) {
+        status = "error";
+        lastError = error instanceof Error ? error.message : "Google denied Merchant Center access.";
+      }
       await upsertConnection(admin, {
         provider: "google",
-        displayName: "Google Merchant Center",
-        status: "connected",
+        displayName,
+        status,
         connectedBy: user.id,
+        lastError,
         credentials: { refreshToken: tokens.refreshToken, accessToken: tokens.accessToken },
         config: {
-          merchantId: process.env.GOOGLE_MERCHANT_ID || null,
-          dataSource: process.env.GOOGLE_MERCHANT_DATASOURCE_ID || null,
+          merchantId,
+          dataSource,
           feedLabel: process.env.GOOGLE_MERCHANT_FEED_LABEL || "PK",
+          accounts,
         },
       });
+      if (status === "error" && lastError) {
+        return adminRedirect(origin, { sync_error: lastError });
+      }
       return adminRedirect(origin, { sync_connected: "google" });
     }
 

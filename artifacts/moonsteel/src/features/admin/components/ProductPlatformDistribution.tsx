@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -44,6 +44,7 @@ export function ProductPlatformDistribution({
   const [states, setStates] = useState<CatalogSyncState[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [checks, setChecks] = useState<Record<string, string>>({});
   const [unpublishTarget, setUnpublishTarget] = useState<string | null>(null);
@@ -82,6 +83,12 @@ export function ProductPlatformDistribution({
       return;
     }
     setBusy(true);
+    setJobId(null);
+    setSyncOpen(true);
+    toast({
+      title: action === "SYNC" ? "Sync started" : `${action.charAt(0)}${action.slice(1).toLowerCase()} started`,
+      description: "Progress is updating in the dialog.",
+    });
     try {
       const result = await createCatalogSyncJob({
         action,
@@ -90,6 +97,7 @@ export function ProductPlatformDistribution({
       });
       if (result.jobId) setJobId(result.jobId);
     } catch (error) {
+      setSyncOpen(false);
       toast({
         title: "Could not start sync",
         description: error instanceof Error ? error.message : "Try again.",
@@ -185,17 +193,24 @@ export function ProductPlatformDistribution({
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={!platform.connected || busy}
+                  disabled={!platform.connected || busy || syncOpen}
                   onClick={() => void startJob("SYNC", [platform.id])}
                 >
-                  Sync
+                  {busy || syncOpen ? (
+                    <>
+                      <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                      Syncing
+                    </>
+                  ) : (
+                    "Sync"
+                  )}
                 </Button>
                 {platform.capabilities?.canUnpublish && state?.externalProductId ? (
                   <Button
                     type="button"
                     size="sm"
                     variant="ghost"
-                    disabled={busy}
+                    disabled={busy || syncOpen}
                     onClick={() => setUnpublishTarget(platform.id)}
                   >
                     Unpublish
@@ -208,19 +223,26 @@ export function ProductPlatformDistribution({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button type="button" size="sm" disabled={busy || connected.length === 0} onClick={() => void startJob("SYNC", selected)}>
-          Sync selected
+        <Button type="button" size="sm" disabled={busy || syncOpen || connected.length === 0} onClick={() => void startJob("SYNC", selected)}>
+          {busy || syncOpen ? (
+            <>
+              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+              Syncing
+            </>
+          ) : (
+            "Sync selected"
+          )}
         </Button>
         <Button
           type="button"
           size="sm"
           variant="outline"
-          disabled={busy || connected.length === 0}
+          disabled={busy || syncOpen || connected.length === 0}
           onClick={() => void startJob("SYNC", connected.map((item) => item.id))}
         >
           Sync all available platforms
         </Button>
-        <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void onCheck()}>
+        <Button type="button" size="sm" variant="outline" disabled={busy || syncOpen} onClick={() => void onCheck()}>
           Check before sync
         </Button>
       </div>
@@ -238,8 +260,10 @@ export function ProductPlatformDistribution({
       ) : null}
 
       <SyncJobProgressDialog
+        open={syncOpen}
         jobId={jobId}
         onClose={() => {
+          setSyncOpen(false);
           setJobId(null);
           void load();
         }}

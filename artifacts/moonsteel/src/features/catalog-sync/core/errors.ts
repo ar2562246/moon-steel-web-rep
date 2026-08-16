@@ -97,7 +97,7 @@ export function humanizeGoogleError(status: number | undefined, message?: string
     });
   }
   if (status === 403) {
-    return new SyncError("Google denied this action. Confirm Merchant Center access for this account.", {
+    return new SyncError(googlePermissionMessage(message), {
       code: SYNC_ERROR_CODES.PERMISSION,
       retryable: false,
       detail: message,
@@ -122,4 +122,18 @@ export function humanizeGoogleError(status: number | undefined, message?: string
     retryable: false,
     detail: message,
   });
+}
+
+export function googlePermissionMessage(message?: string) {
+  const text = (message || "").toLowerCase();
+  if (text.includes("has not been used") || text.includes("disabled") || text.includes("enable it by visiting")) {
+    return "Enable Merchant API in this Google Cloud project (APIs & Services → Library → Merchant API), wait a minute, then Test connection.";
+  }
+  if (text.includes("api developer") || text.includes("registergcp") || text.includes("developer registration")) {
+    return "This Google Cloud project is not registered with Merchant Center. Connect again using a Merchant Center Admin Google account so the project can be registered.";
+  }
+  const detail = message?.trim();
+  return detail
+    ? `Google denied Merchant Center access. Sign in with a Google account that is Admin on that Merchant Center, confirm the Merchant ID, and verify the website. Google said: ${detail}`
+    : "Google denied Merchant Center access. Sign in with a Google account that is Admin on Merchant Center, enable Merchant API, and confirm the Merchant ID.";
 }

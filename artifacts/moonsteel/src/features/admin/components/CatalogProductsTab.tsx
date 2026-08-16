@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ExternalLink, GripVertical, ImageDown, Star, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, GripVertical, ImageDown, Loader2, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -163,6 +163,7 @@ export function CatalogProductsTab() {
   const [syncStates, setSyncStates] = useState<CatalogSyncState[]>([]);
   const [selectedPlatformIds, setSelectedPlatformIds] = useState<string[]>([]);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
   const [confirmAll, setConfirmAll] = useState<{ productCount: number; platformCount: number; estimatedOperations: number } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const galleryRef = useRef(gallery);
@@ -479,6 +480,12 @@ export function CatalogProductsTab() {
       toast({ title: "Select at least one connected platform.", variant: "destructive" });
       return;
     }
+    const showProgress = productIds !== "all" || confirm;
+    if (showProgress) {
+      setJobId(null);
+      setSyncOpen(true);
+      toast({ title: "Sync started", description: "Progress is updating in the dialog." });
+    }
     try {
       const result = await createCatalogSyncJob({
         action: "SYNC",
@@ -487,6 +494,7 @@ export function CatalogProductsTab() {
         confirmAll: confirm,
       });
       if (result.requiresConfirmation) {
+        setSyncOpen(false);
         setConfirmAll({
           productCount: result.productCount ?? 0,
           platformCount: result.platformCount ?? 0,
@@ -496,6 +504,7 @@ export function CatalogProductsTab() {
       }
       if (result.jobId) setJobId(result.jobId);
     } catch (error) {
+      setSyncOpen(false);
       toast({
         title: "Could not start sync",
         description: error instanceof Error ? error.message : "Try again.",
@@ -524,10 +533,17 @@ export function CatalogProductsTab() {
             type="button"
             size="sm"
             variant="outline"
-            disabled={selectedProductIds.length === 0}
+            disabled={selectedProductIds.length === 0 || syncOpen}
             onClick={() => void startBulkSync(selectedProductIds)}
           >
-            Sync selected
+            {syncOpen ? (
+              <>
+                <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                Syncing
+              </>
+            ) : (
+              "Sync selected"
+            )}
           </Button>
         </div>
       }
@@ -1014,16 +1030,30 @@ export function CatalogProductsTab() {
         <Button
           type="button"
           size="sm"
-          disabled={selectedProductIds.length === 0}
+          disabled={selectedProductIds.length === 0 || syncOpen}
           onClick={() => void startBulkSync(selectedProductIds)}
         >
-          Sync selected products
+          {syncOpen ? (
+            <>
+              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+              Syncing
+            </>
+          ) : (
+            "Sync selected products"
+          )}
         </Button>
-        <Button type="button" size="sm" variant="outline" onClick={() => void startBulkSync("all")}>
+        <Button type="button" size="sm" variant="outline" disabled={syncOpen} onClick={() => void startBulkSync("all")}>
           Sync all products
         </Button>
       </div>
-      <SyncJobProgressDialog jobId={jobId} onClose={() => setJobId(null)} />
+      <SyncJobProgressDialog
+        open={syncOpen}
+        jobId={jobId}
+        onClose={() => {
+          setSyncOpen(false);
+          setJobId(null);
+        }}
+      />
       <AlertDialog open={Boolean(confirmAll)} onOpenChange={(open) => !open && setConfirmAll(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

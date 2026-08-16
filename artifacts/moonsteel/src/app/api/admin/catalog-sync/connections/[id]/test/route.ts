@@ -29,6 +29,6 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   } catch (error) {
     const message = error instanceof Error ? error.message : "Connection test failed.";
     await updateConnectionConfig(auth.ctx.admin, id, { status: "error", lastError: message });
-    return NextResponse.json({ ok: false, error: message }, { status: 400 });
+    return NextResponse.json({ ok: false, error: message });
   }
 }

@@ -1,7 +1,8 @@
 import { CATALOG_CAPABILITIES, type SocialProvider } from "../../core/types";
 import { commonCatalogIssues } from "../../core/validate-product";
 import { SyncError, SYNC_ERROR_CODES } from "../../core/errors";
-import { googleMerchantRequest, refreshGoogleAccessToken } from "./client";
+import { googleMerchantRequest, googleAccessToken } from "./client";
+import { bootstrapGoogleMerchant } from "./accounts";
 import { googleProductInputName, toGoogleProductInput } from "./transform";
 
 export const GOOGLE_PROVIDER_ID = "google";
@@ -38,19 +39,24 @@ export function createGoogleProvider(): SocialProvider {
     ],
     capabilities: () => CATALOG_CAPABILITIES,
     async validateConnection(ctx) {
-      const token = await refreshGoogleAccessToken(ctx.connection.credentials);
-      const { accountId } = merchantConfig(ctx);
-      await googleMerchantRequest(`https://merchantapi.googleapis.com/accounts/v1/accounts/${accountId}`, {
+      const token = await googleAccessToken(ctx.connection.credentials);
+      const preferredId =
+        typeof ctx.connection.config.merchantId === "string" ? ctx.connection.config.merchantId : "";
+      const preferredSource =
+        typeof ctx.connection.config.dataSource === "string" ? ctx.connection.config.dataSource : "";
+      const access = await bootstrapGoogleMerchant({
         accessToken: token,
+        merchantId: preferredId || process.env.GOOGLE_MERCHANT_ID,
+        dataSource: preferredSource || process.env.GOOGLE_MERCHANT_DATASOURCE_ID,
       });
-      return { ok: true, displayName: ctx.connection.displayName || `Merchant ${accountId}` };
+      return { ok: true, displayName: access.merchantName };
     },
     async validateProduct(product) {
       const issues = commonCatalogIssues(product, { requirePrice: true, requireHttpsImage: true });
       return { ok: issues.length === 0, issues };
     },
     async createProduct(product, ctx) {
-      const token = await refreshGoogleAccessToken(ctx.connection.credentials);
+      const token = await googleAccessToken(ctx.connection.credentials);
       const { accountId, dataSource, feedLabel } = merchantConfig(ctx);
       const body = toGoogleProductInput(product, feedLabel);
       await googleMerchantRequest(
@@ -74,7 +80,7 @@ export function createGoogleProvider(): SocialProvider {
       return { ...created, action: "UPDATE" };
     },
     async deleteProduct(product, ctx) {
-      const token = await refreshGoogleAccessToken(ctx.connection.credentials);
+      const token = await googleAccessToken(ctx.connection.credentials);
       const { accountId, dataSource, feedLabel } = merchantConfig(ctx);
       await googleMerchantRequest(
         `https://merchantapi.googleapis.com/products/v1/${googleProductInputName(accountId, product, feedLabel)}`,

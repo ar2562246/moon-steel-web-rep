@@ -303,6 +303,13 @@ export function PlatformIntegrationsTab() {
         variant: result.ok ? "default" : "destructive",
       });
       await load();
+    } catch (error) {
+      toast({
+        title: "Connection failed",
+        description: error instanceof Error ? error.message : "Try Connect Google again.",
+        variant: "destructive",
+      });
+      await load();
     } finally {
       setBusy(false);
     }
@@ -403,14 +410,40 @@ function GoogleOAuthHint() {
   if (!callback) return null;
 
   return (
-    <p className="text-xs leading-relaxed text-muted-foreground">
-      Google <code className="rounded bg-muted px-1 py-0.5 text-[11px]">redirect_uri_mismatch</code> means this exact
-      URL is missing from the OAuth client. In Google Cloud → Credentials → your Web application client, add it under{" "}
-      <span className="text-foreground">Authorized redirect URIs</span> (not JavaScript origins):
-      <span className="mt-1 block break-all font-mono text-[11px] text-foreground">{callback}</span>
-      Also add JavaScript origin <span className="font-mono text-foreground">http://localhost:3000</span> for local
-      testing. Use this admin URL: localhost, not 0.0.0.0.
-    </p>
+    <div className="space-y-2 text-xs leading-relaxed text-muted-foreground">
+      <p>
+        <span className="font-medium text-foreground">Google hasn’t verified this app</span> is expected until you
+        submit verification. Merchant Center needs the Content API scope. For your own login, keep the consent screen
+        in <span className="text-foreground">Testing</span> and add the Google account you sign in with as a{" "}
+        <span className="text-foreground">Test user</span> (Google Cloud → APIs &amp; Services → OAuth consent screen).
+        Then on the warning page click <span className="text-foreground">Advanced</span> →{" "}
+        <span className="text-foreground">Go to Moon Steel (unsafe)</span>. Only you should do that; customers never
+        connect this app.
+      </p>
+      <p>
+        <span className="font-medium text-foreground">Google denied Merchant Center access</span> usually means the
+        Google account is not Admin on that Merchant Center, Merchant API is off in Google Cloud, or this Cloud project
+        is not registered. Enable{" "}
+        <a
+          className="text-foreground underline"
+          href="https://console.cloud.google.com/apis/library/merchantapi.googleapis.com"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Merchant API
+        </a>
+        , then in Merchant Center → Settings → People confirm the Google account you click Connect with is Admin. The
+        website must be verified. Connect again so Moon Steel can register this Cloud project with Merchant Center.
+      </p>
+      <p>
+        Google <code className="rounded bg-muted px-1 py-0.5 text-[11px]">redirect_uri_mismatch</code> means this exact
+        URL is missing from the OAuth client. In Google Cloud → Credentials → your Web application client, add it under{" "}
+        <span className="text-foreground">Authorized redirect URIs</span> (not JavaScript origins):
+        <span className="mt-1 block break-all font-mono text-[11px] text-foreground">{callback}</span>
+        Also add JavaScript origin <span className="font-mono text-foreground">http://localhost:3000</span> for local
+        testing. Use this admin URL: localhost, not 0.0.0.0.
+      </p>
+    </div>
   );
 }
 
