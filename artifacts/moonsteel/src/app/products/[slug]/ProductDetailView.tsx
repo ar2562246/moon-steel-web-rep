@@ -8,6 +8,7 @@ import { getCatalogCategoryFilterPath, getCatalogProductImages } from "@/feature
 import type { CatalogProduct } from "@/features/catalog/types";
 import { catalogItem, trackViewItem } from "@/lib/analytics/gtag";
 import { readProductBackLink, type ProductBackLink } from "@/features/catalog/product-back";
+import { ProductBuyForm } from "@/app/products/[slug]/ProductBuyForm";
 
 type ProductDetailViewProps = {
   product: CatalogProduct;
@@ -61,17 +62,17 @@ function CategoryPills({ product }: { product: CatalogProduct }) {
   );
 }
 
-function QuoteButton({ className }: { className?: string }) {
+function BuyJumpButton({ className }: { className?: string }) {
   return (
-    <Link
-      href="/contact"
+    <a
+      href="#buy"
       className={
         className ??
         "inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
       }
     >
-      Request a quote
-    </Link>
+      Buy
+    </a>
   );
 }
 
@@ -102,7 +103,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               <h1 className="text-2xl font-display font-semibold leading-snug text-foreground">
                 {product.name}
               </h1>
-              <QuoteButton />
+              <BuyJumpButton />
             </div>
 
             <div className="space-y-3">
@@ -113,10 +114,12 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             </div>
           </div>
 
-          <aside className="hidden space-y-6 rounded-2xl border border-border p-6 lg:block layer-1">
-            <CategoryPills product={product} />
+          <aside className="space-y-6 rounded-2xl border border-border p-6 layer-1">
+            <div className="hidden lg:block">
+              <CategoryPills product={product} />
+            </div>
 
-            <div className="space-y-2">
+            <div className="hidden space-y-2 lg:block">
               <h1 className="text-3xl font-display font-semibold text-foreground">{product.name}</h1>
             </div>
 
@@ -124,7 +127,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               <p className="text-sm text-muted-foreground">{images.length} product photos</p>
             ) : null}
 
-            <QuoteButton />
+            <ProductBuyForm product={product} />
           </aside>
         </div>
       </div>

@@ -67,18 +67,44 @@ export async function GET(request: Request, context: { params: Promise<{ provide
         search: { fields: "id,name" },
       });
       const pages = await metaGraphRequest<{
-        data?: Array<{ id: string; name?: string; instagram_business_account?: { id: string } }>;
+        data?: Array<{
+          id: string;
+          name?: string;
+          username?: string;
+          instagram_business_account?: { id: string; username?: string };
+        }>;
       }>("me/accounts", {
         accessToken,
-        search: { fields: "id,name,instagram_business_account" },
-      }).catch(() => ({ data: [] as Array<{ id: string; name?: string; instagram_business_account?: { id: string } }> }));
+        search: { fields: "id,name,username,instagram_business_account{id,username}" },
+      }).catch(() =>
+        metaGraphRequest<{
+          data?: Array<{
+            id: string;
+            name?: string;
+            username?: string;
+            instagram_business_account?: { id: string; username?: string };
+          }>;
+        }>("me/accounts", {
+          accessToken,
+          search: { fields: "id,name,instagram_business_account" },
+        }).catch(() => ({
+          data: [] as Array<{
+            id: string;
+            name?: string;
+            username?: string;
+            instagram_business_account?: { id: string; username?: string };
+          }>,
+        }))
+      );
 
       const pageList = (pages.data ?? []).map((page) => ({
         id: page.id,
         name: page.name,
+        username: page.username ?? null,
         instagramAccountId: page.instagram_business_account?.id ?? null,
+        instagramUsername: page.instagram_business_account?.username ?? null,
       }));
-      const { businesses, catalogs } = await listMetaBusinessAssets(accessToken, pageList);
+      const { businesses, catalogs, wabas } = await listMetaBusinessAssets(accessToken, pageList);
 
       const page = pageList[0];
       const catalog = catalogs[0];
@@ -92,11 +118,14 @@ export async function GET(request: Request, context: { params: Promise<{ provide
           userId: me.id,
           pageId: page?.id ?? null,
           pageName: page?.name ?? null,
+          pageUsername: page?.username ?? null,
           instagramAccountId: page?.instagramAccountId ?? null,
+          instagramUsername: page?.instagramUsername ?? null,
           catalogId: catalog?.id ?? null,
           catalogName: catalog?.name ?? null,
           pages: pageList,
           catalogs,
+          wabas,
           businesses: businesses.map((business) => ({ id: business.id, name: business.name })),
         },
       });

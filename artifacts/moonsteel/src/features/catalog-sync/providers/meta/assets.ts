@@ -9,6 +9,8 @@ type MetaBusiness = {
   name?: string;
   owned_product_catalogs?: CatalogEdge;
   client_product_catalogs?: CatalogEdge;
+  owned_whatsapp_business_accounts?: CatalogEdge;
+  client_whatsapp_business_accounts?: CatalogEdge;
 };
 
 export function uniqueNamedAssets(items: MetaNamedAsset[]): MetaNamedAsset[] {
@@ -31,6 +33,15 @@ export function flattenBusinessCatalogs(businesses: MetaBusiness[]): MetaNamedAs
   return uniqueNamedAssets(catalogs);
 }
 
+export function flattenBusinessWhatsAppAccounts(businesses: MetaBusiness[]): MetaNamedAsset[] {
+  const accounts: MetaNamedAsset[] = [];
+  for (const business of businesses) {
+    accounts.push(...(business.owned_whatsapp_business_accounts?.data ?? []));
+    accounts.push(...(business.client_whatsapp_business_accounts?.data ?? []));
+  }
+  return uniqueNamedAssets(accounts);
+}
+
 export async function listMetaBusinessAssets(accessToken: string, pages: MetaNamedAsset[] = []) {
   const businessesResponse = await metaGraphRequest<{ data?: MetaBusiness[] }>("me/businesses", {
     accessToken,
@@ -41,6 +52,7 @@ export async function listMetaBusinessAssets(accessToken: string, pages: MetaNam
 
   const businesses = businessesResponse.data ?? [];
   let catalogs = flattenBusinessCatalogs(businesses);
+  let wabas = flattenBusinessWhatsAppAccounts(businesses);
 
   if (catalogs.length === 0) {
     const fromEdges = await Promise.all(
@@ -66,5 +78,21 @@ export async function listMetaBusinessAssets(accessToken: string, pages: MetaNam
     catalogs = uniqueNamedAssets(fromPages.flatMap((edge) => edge.data ?? []));
   }
 
-  return { businesses, catalogs };
+  if (wabas.length === 0 && businesses.length > 0) {
+    const fromWabas = await Promise.all(
+      businesses.flatMap((business) => [
+        metaGraphRequest<{ data?: MetaNamedAsset[] }>(`${business.id}/owned_whatsapp_business_accounts`, {
+          accessToken,
+          search: { fields: "id,name" },
+        }).catch(() => ({ data: [] as MetaNamedAsset[] })),
+        metaGraphRequest<{ data?: MetaNamedAsset[] }>(`${business.id}/client_whatsapp_business_accounts`, {
+          accessToken,
+          search: { fields: "id,name" },
+        }).catch(() => ({ data: [] as MetaNamedAsset[] })),
+      ])
+    );
+    wabas = uniqueNamedAssets(fromWabas.flatMap((edge) => edge.data ?? []));
+  }
+
+  return { businesses, catalogs, wabas };
 }

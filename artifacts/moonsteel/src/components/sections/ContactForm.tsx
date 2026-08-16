@@ -93,6 +93,17 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
     const project = params.get("project");
     const gpm = params.get("gpm");
     const size = params.get("size");
+    const product = params.get("product");
+    const productName = params.get("name");
+    if (product) {
+      form.setValue("projectType", "catalog-order");
+      if (!form.getValues("message")) {
+        form.setValue(
+          "message",
+          `I want to buy ${productName || product.replace(/-/g, " ")} (https://moonsteelfab.com/products/${product}).`,
+        );
+      }
+    }
     if (project === "grease-trap") {
       form.setValue("projectType", "grease-trap");
       if (!form.getValues("message")) {
@@ -368,6 +379,7 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                           <SelectItem value="exhaust-system">Exhaust System</SelectItem>
                           <SelectItem value="sinks-tables">Sinks & Tables</SelectItem>
                           <SelectItem value="custom-fabrication">Custom Fabrication</SelectItem>
+                          <SelectItem value="catalog-order">Catalog product order</SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
@@ -486,9 +498,13 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   {statusLabel ?? "Submit Request"}
                 </Button>
                 <p className="max-w-sm text-right text-xs leading-relaxed text-muted-foreground">
-                  We use your details only to prepare a quote. See our{" "}
+                  We use your details only to prepare a quote or complete an order. See our{" "}
                   <Link href="/privacy" className="text-foreground underline-offset-4 hover:underline">
                     Privacy Policy
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/returns" className="text-foreground underline-offset-4 hover:underline">
+                    Return and refund policy
                   </Link>
                   .
                 </p>

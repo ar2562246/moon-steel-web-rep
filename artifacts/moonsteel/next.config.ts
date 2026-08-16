@@ -38,6 +38,21 @@ const nextConfig: NextConfig = {
         destination: "/privacy",
         permanent: true,
       },
+      {
+        source: "/return-policy",
+        destination: "/returns",
+        permanent: true,
+      },
+      {
+        source: "/refund-policy",
+        destination: "/returns",
+        permanent: true,
+      },
+      {
+        source: "/returns-and-refunds",
+        destination: "/returns",
+        permanent: true,
+      },
       ...legacyWordpressRedirects,
     ];
   },

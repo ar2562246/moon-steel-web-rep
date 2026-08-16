@@ -19,6 +19,37 @@ import {
   type CatalogSyncPlatform,
 } from "@/features/admin/services/catalogSync";
 
+function pageAssets(value: unknown): Array<{
+  id: string;
+  name?: string;
+  username?: string | null;
+  instagramAccountId?: string | null;
+  instagramUsername?: string | null;
+}> {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object" || !("id" in item) || typeof (item as { id: unknown }).id !== "string") {
+      return [];
+    }
+    const row = item as {
+      id: string;
+      name?: unknown;
+      username?: unknown;
+      instagramAccountId?: unknown;
+      instagramUsername?: unknown;
+    };
+    return [
+      {
+        id: row.id,
+        name: typeof row.name === "string" ? row.name : undefined,
+        username: typeof row.username === "string" ? row.username : null,
+        instagramAccountId: typeof row.instagramAccountId === "string" ? row.instagramAccountId : null,
+        instagramUsername: typeof row.instagramUsername === "string" ? row.instagramUsername : null,
+      },
+    ];
+  });
+}
+
 function optionList(value: unknown): Array<{ id: string; name?: string }> {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is { id: string; name?: string } => {
@@ -45,6 +76,8 @@ export function PlatformIntegrationsTab() {
     const google = overview.connections.find((item) => item.provider === "google");
     if (typeof google?.config.merchantId === "string") setGoogleMerchantId(google.config.merchantId);
     if (typeof google?.config.dataSource === "string") setGoogleDataSource(google.config.dataSource);
+    const whatsappConn = overview.connections.find((item) => item.provider === "whatsapp");
+    if (typeof whatsappConn?.config.wabaId === "string") setWabaId(whatsappConn.config.wabaId);
   };
 
   useEffect(() => {
@@ -91,7 +124,7 @@ export function PlatformIntegrationsTab() {
 
         <ProviderCard
           title="Meta"
-          subtitle="Facebook and Instagram share one Commerce catalog."
+          subtitle="Facebook and Instagram share one Commerce catalog. Sync does not turn on Facebook Shop; enable that in Meta Business Suite if you want a public shop on the Page."
           connected={meta?.status === "connected"}
           name={meta?.displayName}
           error={meta?.lastError}
@@ -116,7 +149,7 @@ export function PlatformIntegrationsTab() {
 
         <ProviderCard
           title="WhatsApp Business"
-          subtitle="Uses the Meta catalog linked to a WhatsApp Business Account. Consumer WhatsApp accounts are not supported."
+          subtitle="Customers only see products in WhatsApp after a Cloud API WhatsApp Business Account is linked to the same Meta catalog. A personal WhatsApp number is not enough."
           connected={whatsapp?.status === "connected"}
           name={whatsapp?.displayName}
           error={whatsapp?.lastError}
@@ -125,10 +158,38 @@ export function PlatformIntegrationsTab() {
             <p className="text-sm text-muted-foreground">Connect Meta first, then link the WhatsApp Business Account.</p>
           ) : (
             <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="waba-id">WhatsApp Business Account ID</Label>
-                <Input id="waba-id" value={wabaId} onChange={(event) => setWabaId(event.target.value)} placeholder="WABA ID" />
-              </div>
+              {optionList(meta.config.wabas).length > 0 ? (
+                <div className="space-y-1.5">
+                  <Label htmlFor="waba-id">WhatsApp Business Account</Label>
+                  <select
+                    id="waba-id"
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={wabaId}
+                    onChange={(event) => setWabaId(event.target.value)}
+                  >
+                    <option value="">Select a WhatsApp account</option>
+                    {optionList(meta.config.wabas).map((account) => (
+                      <option key={account.id} value={account.id}>
+                        {account.name || account.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <Label htmlFor="waba-id">WhatsApp Business Account ID</Label>
+                  <Input
+                    id="waba-id"
+                    value={wabaId}
+                    onChange={(event) => setWabaId(event.target.value)}
+                    placeholder="WABA ID from Business Suite"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This Meta login has no WhatsApp Business Accounts. Create one in Business Suite → Accounts →
+                    WhatsApp accounts, then reconnect Meta. Do not paste a Facebook Page ID or catalog ID.
+                  </p>
+                </div>
+              )}
               <Button
                 size="sm"
                 disabled={busy || !wabaId.trim()}
@@ -343,7 +404,7 @@ function MetaConfig({
   connection: CatalogSyncConnection;
   onSave: (connection: CatalogSyncConnection, config: Record<string, unknown>) => Promise<void>;
 }) {
-  const pages = optionList(connection.config.pages);
+  const pages = pageAssets(connection.config.pages);
   const catalogs = optionList(connection.config.catalogs);
   const [pageId, setPageId] = useState(String(connection.config.pageId ?? ""));
   const [catalogId, setCatalogId] = useState(String(connection.config.catalogId ?? ""));
@@ -406,6 +467,9 @@ function MetaConfig({
           void onSave(connection, {
             pageId,
             pageName: pages.find((page) => page.id === pageId)?.name,
+            pageUsername: pages.find((page) => page.id === pageId)?.username ?? null,
+            instagramAccountId: pages.find((page) => page.id === pageId)?.instagramAccountId ?? null,
+            instagramUsername: pages.find((page) => page.id === pageId)?.instagramUsername ?? null,
             catalogId,
             catalogName: catalogs.find((catalog) => catalog.id === catalogId)?.name,
           })

@@ -1,10 +1,20 @@
-import { CATALOG_CAPABILITIES, type SocialProvider } from "../../core/types";
+import { CATALOG_CAPABILITIES, type ProviderContext, type SocialProvider } from "../../core/types";
 import { commonCatalogIssues } from "../../core/validate-product";
-import { SyncError, SYNC_ERROR_CODES } from "../../core/errors";
-import { metaAccessToken, metaGraphRequest } from "../meta/graph";
+import { metaAccessToken } from "../meta/graph";
 import { deleteMetaCatalogProduct, upsertMetaCatalogProduct } from "../meta/catalog";
+import { requireWhatsAppAccount, verifyWhatsAppBusinessAccount } from "./account";
 
 export const WHATSAPP_PROVIDER_ID = "whatsapp";
+
+async function assertLinkedWhatsApp(ctx: ProviderContext) {
+  requireWhatsAppAccount(
+    await verifyWhatsAppBusinessAccount({
+      accessToken: metaAccessToken(ctx.connection.credentials),
+      wabaId: typeof ctx.connection.config.wabaId === "string" ? ctx.connection.config.wabaId : "",
+      catalogId: typeof ctx.connection.config.catalogId === "string" ? ctx.connection.config.catalogId : "",
+    })
+  );
+}
 
 export function createWhatsAppProvider(): SocialProvider {
   return {
@@ -24,45 +34,32 @@ export function createWhatsAppProvider(): SocialProvider {
       canPublish: false,
     }),
     async validateConnection(ctx) {
-      const wabaId = ctx.connection.config.wabaId;
-      const catalogId = ctx.connection.config.catalogId;
-      if (typeof wabaId !== "string" || !wabaId) {
-        throw new SyncError("Select a WhatsApp Business Account before syncing.", {
-          code: SYNC_ERROR_CODES.VALIDATION,
-        });
-      }
-      if (typeof catalogId !== "string" || !catalogId) {
-        throw new SyncError("Link a Meta catalog to the WhatsApp Business Account before syncing.", {
-          code: SYNC_ERROR_CODES.VALIDATION,
-        });
-      }
-      const token = metaAccessToken(ctx.connection.credentials);
-      const catalogs = await metaGraphRequest<{ data?: Array<{ id: string }> }>(`${wabaId}/product_catalogs`, {
-        accessToken: token,
+      const check = await verifyWhatsAppBusinessAccount({
+        accessToken: metaAccessToken(ctx.connection.credentials),
+        wabaId: typeof ctx.connection.config.wabaId === "string" ? ctx.connection.config.wabaId : "",
+        catalogId: typeof ctx.connection.config.catalogId === "string" ? ctx.connection.config.catalogId : "",
       });
-      const linked = (catalogs.data ?? []).some((item) => item.id === catalogId);
-      if (!linked) {
-        return {
-          ok: false,
-          error: "The selected catalog is not linked to this WhatsApp Business Account.",
-        };
-      }
-      return { ok: true, displayName: ctx.connection.displayName || "WhatsApp Business" };
+      if (!check.ok) return { ok: false, error: check.error };
+      return { ok: true, displayName: check.name || ctx.connection.displayName || "WhatsApp Business" };
     },
     async validateProduct(product) {
       const issues = commonCatalogIssues(product, { requirePrice: true, requireHttpsImage: true });
       return { ok: issues.length === 0, issues };
     },
     async createProduct(product, ctx) {
+      await assertLinkedWhatsApp(ctx);
       return upsertMetaCatalogProduct(product, ctx);
     },
     async updateProduct(product, ctx, externalProductId) {
+      await assertLinkedWhatsApp(ctx);
       return upsertMetaCatalogProduct(product, ctx, externalProductId);
     },
     async deleteProduct(product, ctx) {
+      await assertLinkedWhatsApp(ctx);
       return deleteMetaCatalogProduct(product, ctx);
     },
     async unpublishProduct(product, ctx, externalProductId) {
+      await assertLinkedWhatsApp(ctx);
       return upsertMetaCatalogProduct({ ...product, availability: "out_of_stock" }, ctx, externalProductId);
     },
   };

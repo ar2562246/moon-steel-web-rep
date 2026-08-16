@@ -105,6 +105,10 @@ export default async function CatalogProductPage({ params }: PageProps) {
     slug: product.slug,
     images,
     categoryNames: product.categories.map((category) => category.name),
+    price: product.price,
+    currency: product.currency,
+    sku: product.sku,
+    availability: product.availability,
   });
 
   return (

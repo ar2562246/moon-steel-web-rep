@@ -215,6 +215,7 @@ export function Footer() {
               <li><a href="/collaboration/food-fusion" className="text-sm text-muted-foreground hover:text-primary transition-colors">Food Fusion Collab</a></li>
               <li><a href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact Us</a></li>
               <li><a href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Request a Quote</a></li>
+              <li><a href="/returns" className="text-sm text-muted-foreground hover:text-primary transition-colors">Returns & refunds</a></li>
             </ul>
           </div>
 
@@ -229,6 +230,10 @@ export function Footer() {
             <span aria-hidden="true">·</span>
             <a href="/terms" className="hover:text-primary transition-colors">
               Terms
+            </a>
+            <span aria-hidden="true">·</span>
+            <a href="/returns" className="hover:text-primary transition-colors">
+              Returns
             </a>
             <span aria-hidden="true">·</span>
             <a href="/data-deletion" className="hover:text-primary transition-colors">

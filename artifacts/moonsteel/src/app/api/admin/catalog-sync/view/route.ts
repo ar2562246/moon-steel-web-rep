@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/requireAdminApi";
 import { getConnectionForPlatform } from "@/features/catalog-sync/connections/store";
 import { metaAccessToken } from "@/features/catalog-sync/providers/meta/graph";
-import { findMetaCatalogProductId, metaCommerceManagerUrl } from "@/features/catalog-sync/providers/meta/catalog";
+import {
+  catalogListingRedirectUrl,
+  digitsOnly,
+  findMetaCatalogProductId,
+} from "@/features/catalog-sync/providers/meta/catalog";
+import { WHATSAPP_E164 } from "@/lib/contact/details";
 
 export const runtime = "nodejs";
 
@@ -28,12 +33,6 @@ export async function GET(request: Request) {
   }
 
   const catalogId = configString(connection.config, "catalogId");
-  const wabaId = configString(connection.config, "wabaId");
-
-  if (platformId === "whatsapp" && !catalogId && wabaId) {
-    return NextResponse.redirect(`https://business.facebook.com/latest/whatsapp_manager/catalog?asset_id=${encodeURIComponent(wabaId)}`);
-  }
-
   if (!catalogId) {
     return NextResponse.json({ error: "Select a Meta product catalog before viewing." }, { status: 400 });
   }
@@ -49,5 +48,18 @@ export async function GET(request: Request) {
     metaProductId = null;
   }
 
-  return NextResponse.redirect(metaCommerceManagerUrl(catalogId, metaProductId));
+  const destination = catalogListingRedirectUrl({
+    platformId,
+    catalogId,
+    metaProductId,
+    pageUsername: configString(connection.config, "pageUsername"),
+    pageId: configString(connection.config, "pageId"),
+    instagramUsername: configString(connection.config, "instagramUsername"),
+    whatsappPhone:
+      configString(connection.config, "displayPhoneDigits") ||
+      digitsOnly(configString(connection.config, "displayPhone")) ||
+      WHATSAPP_E164,
+  });
+
+  return NextResponse.redirect(destination);
 }

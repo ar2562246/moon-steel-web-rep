@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/requireAdminApi";
 import { getConnectedProvider, upsertConnection } from "@/features/catalog-sync/connections/store";
+import { metaAccessToken } from "@/features/catalog-sync/providers/meta/graph";
+import { verifyWhatsAppBusinessAccount } from "@/features/catalog-sync/providers/whatsapp/account";
 
 export const runtime = "nodejs";
 
@@ -26,17 +28,29 @@ export async function POST(request: Request) {
     );
   }
 
+  const check = await verifyWhatsAppBusinessAccount({
+    accessToken: metaAccessToken(meta.credentials),
+    wabaId: body.wabaId,
+    catalogId,
+    attachIfMissing: true,
+  });
+  if (!check.ok) {
+    return NextResponse.json({ error: check.error }, { status: 400 });
+  }
+
   const connection = await upsertConnection(auth.ctx.admin, {
     provider: "whatsapp",
-    displayName: body.displayName || "WhatsApp Business",
+    displayName: body.displayName || check.name || "WhatsApp Business",
     status: "connected",
     connectedBy: auth.ctx.userId,
     credentials: meta.credentials,
     config: {
-      wabaId: body.wabaId,
+      wabaId: check.wabaId,
       catalogId,
       catalogName: meta.config.catalogName ?? null,
       sharedMetaConnectionId: meta.id,
+      displayPhone: check.displayPhone,
+      displayPhoneDigits: check.displayPhoneDigits,
     },
   });
 

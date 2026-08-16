@@ -17,10 +17,10 @@ export function TermsPageView() {
             <section className="space-y-3">
               <h2 className="text-xl font-display font-semibold text-foreground">About this site</h2>
               <p>
-                moonsteelfab.com is operated by Moon Steel Fabricators, {STREET_ADDRESS}, Karachi, Pakistan. The site
-                describes stainless steel equipment we manufacture and lets you request a quote. It is not an online
-                checkout. Prices shown in catalogs or on product pages are informational unless we confirm them in a
-                written quotation.
+                moonsteelfab.com is operated by Moon Steel Fabricators, {STREET_ADDRESS}, Karachi, Pakistan. You can
+                buy listed catalog products on each product page. Custom fabrication from drawings is quoted in writing
+                before we start work. Catalog prices are confirmed on the order unless a written quotation says
+                otherwise.
               </p>
             </section>
 
@@ -36,14 +36,13 @@ export function TermsPageView() {
             <section className="space-y-3">
               <h2 className="text-xl font-display font-semibold text-foreground">Returns and refunds</h2>
               <p>
-                Custom fabricated stainless equipment is not sold on a retail try-before-you-buy basis and is generally
-                not returnable once manufactured to an approved drawing. If goods are damaged in transit or do not
-                match the agreed specification, contact us promptly at{" "}
-                <a href={`mailto:${EMAIL}`} className="text-foreground underline-offset-4 hover:underline">
-                  {EMAIL}
-                </a>{" "}
-                or {PHONE_DISPLAY}. We will inspect and repair, replace, or otherwise resolve the issue as agreed for
-                that order. Any deposit or payment terms are those stated on the quotation.
+                Standard catalog products may be returned within 7 days of delivery. Custom and made-to-spec equipment
+                is not returnable or exchangeable once manufacture has started, except for transit damage, defects, or
+                goods that do not match the approved specification. The full public policy is at{" "}
+                <Link href="/returns" className="text-foreground underline-offset-4 hover:underline">
+                  /returns
+                </Link>
+                .
               </p>
             </section>
 

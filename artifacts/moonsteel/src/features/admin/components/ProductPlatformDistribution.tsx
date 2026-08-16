@@ -125,7 +125,8 @@ export function ProductPlatformDistribution({
       <div>
         <h3 className="text-sm font-semibold">Platform distribution</h3>
         <p className="text-xs text-muted-foreground">
-          The website catalog is the master record. External catalogs update only when you sync.
+          Sync writes inventory into Meta Commerce Manager. A public Facebook Shop or WhatsApp catalog is a
+          separate Meta setting and does not appear automatically after Sync.
         </p>
       </div>
 

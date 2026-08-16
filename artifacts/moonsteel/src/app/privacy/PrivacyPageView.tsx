@@ -262,8 +262,12 @@ export function PrivacyPageView() {
                 . See also our{" "}
                 <Link href="/terms" className="text-foreground underline-offset-4 hover:underline">
                   Terms of Use
-                </Link>{" "}
-                and{" "}
+                </Link>
+                ,{" "}
+                <Link href="/returns" className="text-foreground underline-offset-4 hover:underline">
+                  Return and refund policy
+                </Link>
+                , and{" "}
                 <Link href="/contact" className="text-foreground underline-offset-4 hover:underline">
                   contact page
                 </Link>

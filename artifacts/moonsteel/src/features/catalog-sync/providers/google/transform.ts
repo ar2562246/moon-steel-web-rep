@@ -32,9 +32,9 @@ export function toGoogleProductInput(product: NormalizedProduct, feedLabel: stri
         amountMicros: micros,
         currencyCode: product.currency,
       },
+      identifierExists: false,
       canonicalLink: product.canonicalUrl,
       productTypes: product.category ? [product.category] : undefined,
-      identifierExists: false,
     },
   };
 }

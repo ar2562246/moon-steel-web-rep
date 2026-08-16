@@ -32,6 +32,7 @@ const body = `# Moon Steel Fabricators
 - [Contact](${PRODUCTION_SITE_URL}/contact): Request a fabrication quote
 - [Privacy policy](${PRODUCTION_SITE_URL}/privacy): How we use enquiry data and product catalogs on Meta and Google
 - [Terms](${PRODUCTION_SITE_URL}/terms): Quotes, custom fabrication, and catalog listings
+- [Return and refund policy](${PRODUCTION_SITE_URL}/returns): 7-day returns on standard catalog products; custom made-to-spec work is not returnable except for damage or defects
 - [Food Fusion collaboration](${PRODUCTION_SITE_URL}/collaboration/food-fusion): Concept-to-product stainless fabrication
 
 ## Facts

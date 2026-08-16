@@ -22,12 +22,55 @@ type BatchResponse = {
   }>;
 };
 
-export function metaCommerceManagerUrl(catalogId: string, metaProductId?: string | null) {
-  const catalog = encodeURIComponent(catalogId);
-  if (metaProductId) {
-    return `https://business.facebook.com/latest/commerce_manager/catalog/product_details?asset_id=${catalog}&product_id=${encodeURIComponent(metaProductId)}`;
+export function digitsOnly(value: string | null | undefined) {
+  const digits = value?.replace(/\D/g, "") ?? "";
+  return digits.length >= 8 ? digits : null;
+}
+
+export function metaCommerceManagerUrl(catalogId: string, _metaProductId?: string | null) {
+  return `https://business.facebook.com/commerce/catalogs/${encodeURIComponent(catalogId)}`;
+}
+
+export function facebookShopUrl(input: { pageUsername?: string | null; pageId?: string | null }) {
+  const handle = input.pageUsername?.replace(/^@/, "").trim() || input.pageId?.trim();
+  if (!handle) return null;
+  return `https://www.facebook.com/${encodeURIComponent(handle)}/shop/`;
+}
+
+export function instagramProfileUrl(username?: string | null) {
+  const handle = username?.replace(/^@/, "").trim();
+  if (!handle) return null;
+  return `https://www.instagram.com/${encodeURIComponent(handle)}/`;
+}
+
+export function whatsappStorefrontUrl(input: { phoneDigits?: string | null; metaProductId?: string | null }) {
+  const phone = digitsOnly(input.phoneDigits);
+  if (!phone) return null;
+  if (input.metaProductId && /^\d+$/.test(input.metaProductId)) {
+    return `https://wa.me/p/${input.metaProductId}/${phone}`;
   }
-  return `https://business.facebook.com/latest/commerce_manager/catalog?asset_id=${catalog}`;
+  return `https://wa.me/c/${phone}`;
+}
+
+export function catalogListingRedirectUrl(input: {
+  platformId: string;
+  catalogId: string;
+  metaProductId?: string | null;
+  pageUsername?: string | null;
+  pageId?: string | null;
+  instagramUsername?: string | null;
+  whatsappPhone?: string | null;
+}) {
+  if (input.platformId === "whatsapp") {
+    return (
+      whatsappStorefrontUrl({ phoneDigits: input.whatsappPhone, metaProductId: input.metaProductId }) ??
+      metaCommerceManagerUrl(input.catalogId)
+    );
+  }
+  if (input.platformId === "instagram") {
+    return instagramProfileUrl(input.instagramUsername) ?? metaCommerceManagerUrl(input.catalogId);
+  }
+  return metaCommerceManagerUrl(input.catalogId, input.metaProductId);
 }
 
 export async function findMetaCatalogProductId(options: {
