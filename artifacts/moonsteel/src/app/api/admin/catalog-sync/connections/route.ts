@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth/requireAdminApi";
 import { listPublicConnections, upsertConnection } from "@/features/catalog-sync/connections/store";
-import { registerCatalogSyncProviders, visiblePlatforms, isMockSyncEnabled } from "@/features/catalog-sync/core/register";
+import { registerCatalogSyncProviders, describeVisiblePlatforms, isMockSyncEnabled } from "@/features/catalog-sync/core/register";
 import { MOCK_PROVIDER_ID } from "@/features/catalog-sync/providers/mock/provider";
 
 export const runtime = "nodejs";
@@ -10,21 +10,10 @@ export async function GET() {
   const auth = await requireAdminApi();
   if (!auth.ok) return auth.response;
 
-  const registry = registerCatalogSyncProviders();
+  registerCatalogSyncProviders();
   const connections = await listPublicConnections(auth.ctx.admin);
-  const platforms = visiblePlatforms().map((platform) => {
-    const provider = registry.require(platform.providerId);
-    const connection = connections.find((item) => item.provider === platform.providerId && item.status === "connected");
-    return {
-      ...platform,
-      capabilities: provider.capabilities(platform.id),
-      connected: Boolean(connection),
-      connection: connection ?? null,
-    };
-  });
-
   return NextResponse.json({
-    platforms,
+    platforms: describeVisiblePlatforms(connections),
     connections,
     mockEnabled: isMockSyncEnabled(),
   });

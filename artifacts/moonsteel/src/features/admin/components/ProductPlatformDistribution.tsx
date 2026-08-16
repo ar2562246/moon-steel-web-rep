@@ -177,7 +177,7 @@ export function ProductPlatformDistribution({
                 >
                   Sync
                 </Button>
-                {platform.capabilities.canUnpublish && state?.externalProductId ? (
+                {platform.capabilities?.canUnpublish && state?.externalProductId ? (
                   <Button
                     type="button"
                     size="sm"

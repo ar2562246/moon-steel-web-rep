@@ -31,4 +31,17 @@ export function visiblePlatforms() {
   });
 }
 
+export function describeVisiblePlatforms<T extends { provider: string; status: string }>(connections: T[]) {
+  const registry = registerCatalogSyncProviders();
+  return visiblePlatforms().map((platform) => {
+    const connection = connections.find((item) => item.provider === platform.providerId && item.status === "connected") ?? null;
+    return {
+      ...platform,
+      capabilities: registry.require(platform.providerId).capabilities(platform.id),
+      connected: Boolean(connection),
+      connection,
+    };
+  });
+}
+
 export { providerRegistry };

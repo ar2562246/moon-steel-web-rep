@@ -5,7 +5,7 @@ export type CatalogSyncPlatform = {
   shortLabel: string;
   description: string;
   connected: boolean;
-  capabilities: {
+  capabilities?: {
     canCreateProduct: boolean;
     canUpdateProduct: boolean;
     canDeleteProduct: boolean;
