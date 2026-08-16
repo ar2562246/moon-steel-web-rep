@@ -11,6 +11,7 @@ import {
 } from "@/features/catalog-sync/connections/oauth";
 import { upsertConnection } from "@/features/catalog-sync/connections/store";
 import { metaGraphRequest } from "@/features/catalog-sync/providers/meta/graph";
+import { listMetaBusinessAssets } from "@/features/catalog-sync/providers/meta/assets";
 import { getSiteUrl } from "@/lib/site";
 
 export const runtime = "nodejs";
@@ -65,21 +66,22 @@ export async function GET(request: Request, context: { params: Promise<{ provide
         accessToken,
         search: { fields: "id,name" },
       });
-      const pages = await metaGraphRequest<{ data?: Array<{ id: string; name?: string; instagram_business_account?: { id: string } }> }>(
-        "me/accounts",
-        { accessToken, search: { fields: "id,name,instagram_business_account" } }
-      );
-      const catalogs = await metaGraphRequest<{ data?: Array<{ id: string; name?: string }> }>("me/owned_product_catalogs", {
+      const pages = await metaGraphRequest<{
+        data?: Array<{ id: string; name?: string; instagram_business_account?: { id: string } }>;
+      }>("me/accounts", {
         accessToken,
-        search: { fields: "id,name" },
-      });
-      const wabas = await metaGraphRequest<{ data?: Array<{ id: string; name?: string }> }>("me/businesses", {
-        accessToken,
-        search: { fields: "id,name" },
-      }).catch(() => ({ data: [] as Array<{ id: string; name?: string }> }));
+        search: { fields: "id,name,instagram_business_account" },
+      }).catch(() => ({ data: [] as Array<{ id: string; name?: string; instagram_business_account?: { id: string } }> }));
 
-      const page = pages.data?.[0];
-      const catalog = catalogs.data?.[0];
+      const pageList = (pages.data ?? []).map((page) => ({
+        id: page.id,
+        name: page.name,
+        instagramAccountId: page.instagram_business_account?.id ?? null,
+      }));
+      const { businesses, catalogs } = await listMetaBusinessAssets(accessToken, pageList);
+
+      const page = pageList[0];
+      const catalog = catalogs[0];
       await upsertConnection(admin, {
         provider: "meta",
         displayName: page?.name || me.name || "Meta",
@@ -90,16 +92,12 @@ export async function GET(request: Request, context: { params: Promise<{ provide
           userId: me.id,
           pageId: page?.id ?? null,
           pageName: page?.name ?? null,
-          instagramAccountId: page?.instagram_business_account?.id ?? null,
+          instagramAccountId: page?.instagramAccountId ?? null,
           catalogId: catalog?.id ?? null,
           catalogName: catalog?.name ?? null,
-          pages: (pages.data ?? []).map((page) => ({
-            id: page.id,
-            name: page.name,
-            instagramAccountId: page.instagram_business_account?.id ?? null,
-          })),
-          catalogs: catalogs.data ?? [],
-          businesses: wabas.data ?? [],
+          pages: pageList,
+          catalogs,
+          businesses: businesses.map((business) => ({ id: business.id, name: business.name })),
         },
       });
       return adminRedirect(origin, { sync_connected: "meta" });

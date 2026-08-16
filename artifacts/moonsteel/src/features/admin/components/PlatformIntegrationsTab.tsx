@@ -373,9 +373,10 @@ function MetaConfig({
           <select
             id="meta-catalog"
             className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-            value={catalogId}
+            value={catalogs.some((catalog) => catalog.id === catalogId) ? catalogId : ""}
             onChange={(event) => setCatalogId(event.target.value)}
           >
+            <option value="">Select a catalog</option>
             {catalogs.map((catalog) => (
               <option key={catalog.id} value={catalog.id}>
                 {catalog.name || catalog.id}
@@ -384,10 +385,19 @@ function MetaConfig({
           </select>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          No catalogs were returned. Create a Commerce catalog in Meta Business Suite, then reconnect.
+        <p className="text-sm text-muted-foreground sm:col-span-2">
+          No catalogs were listed. Paste the catalog ID from Meta Business Suite → Commerce Manager.
         </p>
       )}
+      <div className="space-y-1.5 sm:col-span-2">
+        <Label htmlFor="meta-catalog-id">Catalog ID</Label>
+        <Input
+          id="meta-catalog-id"
+          value={catalogId}
+          onChange={(event) => setCatalogId(event.target.value.trim())}
+          placeholder="Numeric catalog ID"
+        />
+      </div>
       <Button
         type="button"
         size="sm"
