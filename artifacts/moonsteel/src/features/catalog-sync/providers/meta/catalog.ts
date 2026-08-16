@@ -22,6 +22,34 @@ type BatchResponse = {
   }>;
 };
 
+export function metaCommerceManagerUrl(catalogId: string, metaProductId?: string | null) {
+  const catalog = encodeURIComponent(catalogId);
+  if (metaProductId) {
+    return `https://business.facebook.com/latest/commerce_manager/catalog/product_details?asset_id=${catalog}&product_id=${encodeURIComponent(metaProductId)}`;
+  }
+  return `https://business.facebook.com/latest/commerce_manager/catalog?asset_id=${catalog}`;
+}
+
+export async function findMetaCatalogProductId(options: {
+  catalogId: string;
+  retailerId: string;
+  accessToken: string;
+}): Promise<string | null> {
+  const filter = JSON.stringify({ retailer_id: { eq: options.retailerId } });
+  const listed = await metaGraphRequest<{ data?: Array<{ id?: string }> }>(`${options.catalogId}/products`, {
+    accessToken: options.accessToken,
+    search: { fields: "id,retailer_id", filter, limit: "5" },
+  }).catch(() => ({ data: [] as Array<{ id?: string }> }));
+  const match = listed.data?.find((item) => item.id);
+  if (match?.id) return match.id;
+
+  const direct = await metaGraphRequest<{ id?: string }>(`${options.catalogId}:${options.retailerId}`, {
+    accessToken: options.accessToken,
+    search: { fields: "id" },
+  }).catch(() => ({ id: undefined as string | undefined }));
+  return direct.id ?? null;
+}
+
 async function submitItem(
   product: NormalizedProduct,
   ctx: ProviderContext,
@@ -34,7 +62,8 @@ async function submitItem(
       ? { id: product.id }
       : item;
 
-  const response = await metaGraphRequest<BatchResponse>(`${catalogId(ctx)}/items_batch`, {
+  const catalog = catalogId(ctx);
+  const response = await metaGraphRequest<BatchResponse>(`${catalog}/items_batch`, {
     accessToken: token,
     method: "POST",
     body: {
@@ -54,11 +83,18 @@ async function submitItem(
     });
   }
 
+  const metaProductId =
+    method === "DELETE"
+      ? product.id
+      : (await findMetaCatalogProductId({ catalogId: catalog, retailerId: product.id, accessToken: token }).catch(
+          () => null
+        )) ?? product.id;
+
   return {
     ok: true,
     action: method === "DELETE" ? "DELETE" : method === "CREATE" ? "CREATE" : "UPDATE",
-    externalProductId: product.id,
-    externalUrl: product.canonicalUrl,
+    externalProductId: metaProductId,
+    externalUrl: metaCommerceManagerUrl(catalog, metaProductId === product.id ? null : metaProductId),
   };
 }
 

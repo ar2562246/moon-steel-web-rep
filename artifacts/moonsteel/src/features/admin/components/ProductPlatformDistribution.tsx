@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -24,6 +25,7 @@ import {
 } from "@/features/admin/services/catalogSync";
 import { PlatformStatusDot, platformStatusLabel } from "@/features/admin/components/PlatformStatusDot";
 import { SyncJobProgressDialog } from "@/features/admin/components/SyncJobProgressDialog";
+import { platformListingUrl } from "@/features/admin/lib/platformListingUrl";
 
 function formatWhen(value: string | null) {
   if (!value) return "Never";
@@ -131,8 +133,9 @@ export function ProductPlatformDistribution({
         {platforms.map((platform) => {
           const state = stateFor(platform.id);
           const checked = selected.includes(platform.id);
+          const viewUrl = platformListingUrl(platform, state);
           return (
-            <label
+            <div
               key={platform.id}
               className="flex items-start gap-3 rounded-lg border border-border px-3 py-2.5"
             >
@@ -145,6 +148,7 @@ export function ProductPlatformDistribution({
                   );
                 }}
                 className="mt-1"
+                aria-label={`Select ${platform.label}`}
               />
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -168,6 +172,14 @@ export function ProductPlatformDistribution({
                 ) : null}
               </div>
               <div className="flex shrink-0 flex-col gap-1">
+                {viewUrl ? (
+                  <Button type="button" size="sm" variant="outline" asChild>
+                    <a href={viewUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink className="mr-1 h-3.5 w-3.5" />
+                      View
+                    </a>
+                  </Button>
+                ) : null}
                 <Button
                   type="button"
                   size="sm"
@@ -189,7 +201,7 @@ export function ProductPlatformDistribution({
                   </Button>
                 ) : null}
               </div>
-            </label>
+            </div>
           );
         })}
       </div>

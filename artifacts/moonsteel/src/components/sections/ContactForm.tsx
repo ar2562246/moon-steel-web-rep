@@ -30,6 +30,7 @@ import { FileDropzone } from "@/components/ui/FileDropzone";
 import { Spinner } from "@/components/ui/spinner";
 import { ParentBackLink } from "@/components/layout/ParentBackLink";
 import { TrackedContactLink } from "@/components/analytics/TrackedContactLink";
+import Link from "next/link";
 import { ContactVCardQr } from "@/components/ContactVCardQr";
 import { trackGenerateLead } from "@/lib/analytics/gtag";
 import {
@@ -484,6 +485,13 @@ export function ContactForm({ standalone = false }: { standalone?: boolean }) {
                   )}
                   {statusLabel ?? "Submit Request"}
                 </Button>
+                <p className="max-w-sm text-right text-xs leading-relaxed text-muted-foreground">
+                  We use your details only to prepare a quote. See our{" "}
+                  <Link href="/privacy" className="text-foreground underline-offset-4 hover:underline">
+                    Privacy Policy
+                  </Link>
+                  .
+                </p>
                 </div>
               </form>
             </Form>

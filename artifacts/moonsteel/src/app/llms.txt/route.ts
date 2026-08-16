@@ -30,6 +30,8 @@ const body = `# Moon Steel Fabricators
 - [Clients](${PRODUCTION_SITE_URL}/clients): Hotels, QSRs, hospitals, and industrial clients
 - [About](${PRODUCTION_SITE_URL}/about): Family fabrication business in Karachi since 1947
 - [Contact](${PRODUCTION_SITE_URL}/contact): Request a fabrication quote
+- [Privacy policy](${PRODUCTION_SITE_URL}/privacy): How we use enquiry data and product catalogs on Meta and Google
+- [Terms](${PRODUCTION_SITE_URL}/terms): Quotes, custom fabrication, and catalog listings
 - [Food Fusion collaboration](${PRODUCTION_SITE_URL}/collaboration/food-fusion): Concept-to-product stainless fabrication
 
 ## Facts

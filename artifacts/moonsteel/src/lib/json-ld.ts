@@ -54,6 +54,13 @@ export function organizationGraph() {
         publisher: { "@id": ORGANIZATION_ID },
         inLanguage: "en",
       },
+      {
+        "@type": "WebPage",
+        "@id": `${siteUrl}/privacy`,
+        url: `${siteUrl}/privacy`,
+        name: "Privacy Policy",
+        isPartOf: { "@id": WEBSITE_ID },
+      },
     ],
   };
 }

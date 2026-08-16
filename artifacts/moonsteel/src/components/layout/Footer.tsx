@@ -222,6 +222,19 @@ export function Footer() {
 
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} Moon Steel Fabricators. All rights reserved.</p>
+          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <a href="/privacy" className="hover:text-primary transition-colors">
+              Privacy Policy
+            </a>
+            <span aria-hidden="true">·</span>
+            <a href="/terms" className="hover:text-primary transition-colors">
+              Terms
+            </a>
+            <span aria-hidden="true">·</span>
+            <a href="/data-deletion" className="hover:text-primary transition-colors">
+              Data deletion
+            </a>
+          </p>
         </div>
       </div>
 
