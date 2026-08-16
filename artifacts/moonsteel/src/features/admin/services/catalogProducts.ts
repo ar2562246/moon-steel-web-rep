@@ -86,6 +86,10 @@ type ProductPayload = {
   sort_order: number;
   published: boolean;
   category_ids: string[];
+  sku?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  availability?: "in_stock" | "out_of_stock" | "preorder" | "available_for_order" | null;
 };
 
 export type CatalogImageSlot = { kind: "url"; url: string } | { kind: "file"; file: File };
@@ -114,6 +118,7 @@ async function resolveOrderedImageUrls(slots: CatalogImageSlot[]) {
 }
 
 function productInsertPayload(payload: ProductPayload, imageUrls: string[]) {
+  const sku = payload.sku?.trim() || null;
   return {
     name: payload.name.trim(),
     slug: normalizeSlug(payload.slug, payload.name),
@@ -122,6 +127,10 @@ function productInsertPayload(payload: ProductPayload, imageUrls: string[]) {
     published: payload.published,
     image_urls: imageUrls,
     image_url: imageUrls[0],
+    sku,
+    price: payload.price ?? null,
+    currency: (payload.currency || "PKR").toUpperCase(),
+    availability: payload.availability || "in_stock",
   };
 }
 

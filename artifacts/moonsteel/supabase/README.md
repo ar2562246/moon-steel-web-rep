@@ -12,6 +12,7 @@ Run these scripts in order in the **Supabase SQL Editor** (Dashboard → SQL →
 | 6 | `testimonials.sql` | Homepage testimonials CMS |
 | 7 | `clients.sql` | Client directory + reference letters + storage |
 | 8 | `blogs.sql` | Blog posts CMS + cover image storage |
+| 9 | `migrations/20260816153000_catalog_platform_sync.sql` | Manual platform catalog sync (Meta / WhatsApp / Google) |
 
 After running `profiles.sql`, promote your admin user:
 

@@ -5,6 +5,7 @@ export type AdminTabKey =
   | "products"
   | "categories"
   | "catalog-products"
+  | "social-channels"
   | "projects"
   | "testimonials"
   | "blogs";

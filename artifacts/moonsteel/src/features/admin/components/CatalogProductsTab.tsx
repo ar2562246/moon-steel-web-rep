@@ -12,10 +12,21 @@ import {
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ExternalLink, GripVertical, ImageDown, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { FileDropzone, filterFilesByAccept, hasFileDrag } from "@/components/ui/FileDropzone";
 import { slugify } from "@/lib/slugify";
@@ -42,6 +53,15 @@ import {
 } from "@/features/admin/lib/optimizeImageToWeb43";
 import { useToast } from "@/hooks/use-toast";
 import type { CatalogProduct } from "@/features/catalog/types";
+import { ProductPlatformDistribution } from "@/features/admin/components/ProductPlatformDistribution";
+import { PlatformStatusDot } from "@/features/admin/components/PlatformStatusDot";
+import { SyncJobProgressDialog } from "@/features/admin/components/SyncJobProgressDialog";
+import {
+  createCatalogSyncJob,
+  fetchCatalogSyncStatus,
+  type CatalogSyncPlatform,
+  type CatalogSyncState,
+} from "@/features/admin/services/catalogSync";
 
 const initialForm = {
   name: "",
@@ -49,6 +69,10 @@ const initialForm = {
   details: "",
   sort_order: 100,
   published: true,
+  sku: "",
+  price: "",
+  currency: "PKR",
+  availability: "in_stock" as "in_stock" | "out_of_stock" | "preorder" | "available_for_order",
 };
 
 type GalleryEntry =
@@ -134,8 +158,30 @@ export function CatalogProductsTab() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [optimizingId, setOptimizingId] = useState<string | "all" | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [syncPlatforms, setSyncPlatforms] = useState<CatalogSyncPlatform[]>([]);
+  const [syncStates, setSyncStates] = useState<CatalogSyncState[]>([]);
+  const [selectedPlatformIds, setSelectedPlatformIds] = useState<string[]>([]);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [confirmAll, setConfirmAll] = useState<{ productCount: number; platformCount: number; estimatedOperations: number } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const galleryRef = useRef(gallery);
   galleryRef.current = gallery;
+
+  useEffect(() => {
+    if (products.length === 0) return;
+    void fetchCatalogSyncStatus(products.map((product) => product.id))
+      .then((result) => {
+        setSyncPlatforms(result.platforms);
+        setSyncStates(result.states);
+        setSelectedPlatformIds((current) =>
+          current.length > 0
+            ? current
+            : result.platforms.filter((platform) => platform.connected).map((platform) => platform.id)
+        );
+      })
+      .catch(() => undefined);
+  }, [products]);
 
   useEffect(() => {
     return () => {
@@ -363,6 +409,10 @@ export function CatalogProductsTab() {
       details: product.details,
       sort_order: product.sort_order,
       published: product.published,
+      sku: product.sku ?? "",
+      price: product.price == null ? "" : String(product.price),
+      currency: product.currency || "PKR",
+      availability: product.availability || "in_stock",
     });
     setSelectedCategoryIds(product.categories.map((category) => category.id));
     setGallery(
@@ -390,6 +440,10 @@ export function CatalogProductsTab() {
       sort_order: Number(form.sort_order) || 100,
       published: form.published,
       category_ids: selectedCategoryIds,
+      sku: form.sku.trim() || null,
+      price: form.price.trim() ? Number(form.price) : null,
+      currency: form.currency.trim() || "PKR",
+      availability: form.availability,
     };
     const images = gallery.map((entry) =>
       entry.kind === "url" ? { kind: "url" as const, url: entry.url } : { kind: "file" as const, file: entry.file }
@@ -414,9 +468,45 @@ export function CatalogProductsTab() {
     const ok = await remove(product);
     if (!ok) return;
     if (editingProduct?.id === product.id) closeEditor();
+    setConfirmDelete(false);
+  };
+
+  const startBulkSync = async (productIds: string[] | "all", confirm = false) => {
+    const platformIds = selectedPlatformIds.filter((id) =>
+      syncPlatforms.some((platform) => platform.id === id && platform.connected)
+    );
+    if (platformIds.length === 0) {
+      toast({ title: "Select at least one connected platform.", variant: "destructive" });
+      return;
+    }
+    try {
+      const result = await createCatalogSyncJob({
+        action: "SYNC",
+        productIds,
+        platformIds,
+        confirmAll: confirm,
+      });
+      if (result.requiresConfirmation) {
+        setConfirmAll({
+          productCount: result.productCount ?? 0,
+          platformCount: result.platformCount ?? 0,
+          estimatedOperations: result.estimatedOperations ?? 0,
+        });
+        return;
+      }
+      if (result.jobId) setJobId(result.jobId);
+    } catch (error) {
+      toast({
+        title: "Could not start sync",
+        description: error instanceof Error ? error.message : "Try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
+    <div className="flex h-full min-h-0 flex-col">
+    <div className="min-h-0 flex-1 overflow-hidden">
     <AdminMasterDetail
       title="Catalog Products"
       description={
@@ -428,6 +518,19 @@ export function CatalogProductsTab() {
       addLabel="Add Product"
       onAdd={startCreate}
       addDisabled={categoriesLoading || categories.length === 0}
+      headerActions={
+        <div className="hidden items-center gap-1 lg:flex">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={selectedProductIds.length === 0}
+            onClick={() => void startBulkSync(selectedProductIds)}
+          >
+            Sync selected
+          </Button>
+        </div>
+      }
       onBack={closeEditor}
       formId="admin-catalog-product-form"
       canSubmit={canSubmit}
@@ -447,13 +550,26 @@ export function CatalogProductsTab() {
         ) : (
           products.map((product) => {
             const selected = isEditorOpen && editingProduct?.id === product.id;
+            const checked = selectedProductIds.includes(product.id);
+            const productStates = syncStates.filter((row) => row.productId === product.id);
             return (
-              <AdminSidebarCard
-                key={product.id}
-                selected={selected}
-                compact
-                onClick={() => startEdit(product)}
-              >
+              <div key={product.id} className="flex items-stretch gap-1">
+                <Checkbox
+                  checked={checked}
+                  className="mt-4"
+                  onCheckedChange={(value) => {
+                    setSelectedProductIds((current) =>
+                      value === true ? [...current, product.id] : current.filter((id) => id !== product.id)
+                    );
+                  }}
+                  aria-label={`Select ${product.name}`}
+                />
+                <AdminSidebarCard
+                  selected={selected}
+                  compact
+                  onClick={() => startEdit(product)}
+                  className="flex-1"
+                >
                 <AdminSidebarThumb src={getCatalogProductCover(product)} alt={product.name} />
                 <div className={adminSidebarBodyClass()}>
                   <p className={adminSidebarTitleClass(selected)}>{product.name}</p>
@@ -467,11 +583,27 @@ export function CatalogProductsTab() {
                     </div>
                   ) : null}
                   <p className={`${adminSidebarMutedClass(selected)} break-all`}>/products/{product.slug}</p>
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
+                    {syncPlatforms
+                      .filter((platform) => platform.id !== "mock")
+                      .map((platform) => (
+                        <PlatformStatusDot
+                          key={platform.id}
+                          label={platform.shortLabel}
+                          status={
+                            platform.connected
+                              ? productStates.find((row) => row.platform === platform.id)?.status
+                              : "NOT_SYNCED"
+                          }
+                        />
+                      ))}
+                  </div>
                   {!product.published ? (
                     <p className={adminSidebarMutedClass(selected)}>Draft</p>
                   ) : null}
                 </div>
               </AdminSidebarCard>
+              </div>
             );
           })
         )
@@ -491,7 +623,7 @@ export function CatalogProductsTab() {
                 View
               </Link>
             </Button>
-            <Button variant="outline" size="sm" type="button" onClick={() => void onDelete(editingProduct)}>
+            <Button variant="outline" size="sm" type="button" onClick={() => setConfirmDelete(true)}>
               <Trash2 className="mr-2 h-3.5 w-3.5" />
               Delete
             </Button>
@@ -572,6 +704,36 @@ export function CatalogProductsTab() {
                       className="max-w-[10rem]"
                     />
                   </Field>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="SKU" htmlFor="product-sku" hint="Optional. Used as the catalog identifier when set; otherwise the slug is used.">
+                      <Input
+                        id="product-sku"
+                        value={form.sku}
+                        onChange={(e) => setForm((current) => ({ ...current, sku: e.target.value }))}
+                        placeholder="GT-221512"
+                      />
+                    </Field>
+                    <Field label="Catalog price" htmlFor="product-price" hint="Required by Facebook, Instagram, WhatsApp, and Google catalogs. Leave blank if you only publish on the website.">
+                      <div className="flex gap-2">
+                        <Input
+                          id="product-price"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={form.price}
+                          onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))}
+                          placeholder="0.00"
+                        />
+                        <Input
+                          aria-label="Currency"
+                          value={form.currency}
+                          onChange={(e) => setForm((current) => ({ ...current, currency: e.target.value.toUpperCase() }))}
+                          className="w-24"
+                        />
+                      </div>
+                    </Field>
+                  </div>
 
                   <Field label="Categories">
                     <div className="flex flex-wrap gap-2">
@@ -820,7 +982,92 @@ export function CatalogProductsTab() {
                     </Button>
                   </div>
                 </section>
+
+                {editingProduct ? (
+                  <ProductPlatformDistribution productId={editingProduct.id} productName={editingProduct.name} />
+                ) : null}
               </form>
     </AdminMasterDetail>
+    </div>
+      <div className="flex flex-wrap items-center gap-2 border-t border-border px-3 py-2 text-xs">
+        <Button type="button" size="sm" variant="outline" onClick={() => setSelectedProductIds(products.map((product) => product.id))}>
+          Select all
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => setSelectedProductIds([])}>
+          Clear
+        </Button>
+        {syncPlatforms
+          .filter((platform) => platform.connected)
+          .map((platform) => (
+            <label key={platform.id} className="inline-flex items-center gap-1">
+              <Checkbox
+                checked={selectedPlatformIds.includes(platform.id)}
+                onCheckedChange={(value) => {
+                  setSelectedPlatformIds((current) =>
+                    value === true ? [...current, platform.id] : current.filter((id) => id !== platform.id)
+                  );
+                }}
+              />
+              {platform.shortLabel}
+            </label>
+          ))}
+        <Button
+          type="button"
+          size="sm"
+          disabled={selectedProductIds.length === 0}
+          onClick={() => void startBulkSync(selectedProductIds)}
+        >
+          Sync selected products
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => void startBulkSync("all")}>
+          Sync all products
+        </Button>
+      </div>
+      <SyncJobProgressDialog jobId={jobId} onClose={() => setJobId(null)} />
+      <AlertDialog open={Boolean(confirmAll)} onOpenChange={(open) => !open && setConfirmAll(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sync all products?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You&apos;re about to sync {confirmAll?.productCount ?? 0} products to {confirmAll?.platformCount ?? 0}{" "}
+              platforms. Estimated operations: up to {confirmAll?.estimatedOperations ?? 0}. This may take several
+              minutes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConfirmAll(null);
+                void startBulkSync("all", true);
+              }}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete from the website only?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the product from Moon Steel. External catalogs are left unchanged until you unpublish them
+              from Platform distribution.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (editingProduct) void onDelete(editingProduct);
+              }}
+            >
+              Delete website product
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

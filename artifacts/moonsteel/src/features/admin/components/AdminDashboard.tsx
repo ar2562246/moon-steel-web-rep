@@ -11,6 +11,7 @@ import { HeroImagesTab } from "@/features/admin/components/HeroImagesTab";
 import { ProductCategoriesTab } from "@/features/admin/components/ProductCategoriesTab";
 import { CatalogCategoriesTab } from "@/features/admin/components/CatalogCategoriesTab";
 import { CatalogProductsTab } from "@/features/admin/components/CatalogProductsTab";
+import { PlatformIntegrationsTab } from "@/features/admin/components/PlatformIntegrationsTab";
 import { ProjectsTab } from "@/features/admin/components/ProjectsTab";
 import { TestimonialsTab } from "@/features/admin/components/TestimonialsTab";
 import { BlogsTab } from "@/features/admin/components/BlogsTab";
@@ -30,6 +31,7 @@ const tabConfig: TabConfig[] = [
   { key: "products", label: "Product Lines", shortLabel: "Lines" },
   { key: "categories", label: "Categories", shortLabel: "Categories" },
   { key: "catalog-products", label: "Catalog Products", shortLabel: "Products" },
+  { key: "social-channels", label: "Social Channels", shortLabel: "Channels" },
   { key: "projects", label: "Projects", shortLabel: "Projects" },
   { key: "testimonials", label: "Testimonials", shortLabel: "Quotes" },
   { key: "blogs", label: "Blog", shortLabel: "Blog" },
@@ -57,6 +59,7 @@ function AdminTabBody({ tab }: { tab: AdminTabKey }) {
   if (tab === "products") return <ProductCategoriesTab />;
   if (tab === "categories") return <CatalogCategoriesTab />;
   if (tab === "catalog-products") return <CatalogProductsTab />;
+  if (tab === "social-channels") return <PlatformIntegrationsTab />;
   if (tab === "projects") return <ProjectsTab />;
   if (tab === "testimonials") return <TestimonialsTab />;
   if (tab === "blogs") return <BlogsTab />;

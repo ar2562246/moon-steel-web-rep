@@ -37,8 +37,11 @@ function extractCategories(
 function normalizeProductRow(row: CatalogProductRow): CatalogProduct {
   const { catalog_product_categories, ...rest } = row;
   const categories = extractCategories(catalog_product_categories);
+  const rawPrice = rest.price as unknown;
+  const price = rawPrice == null || rawPrice === "" ? null : Number(rawPrice);
   return normalizeCatalogProduct({
     ...rest,
+    price: price != null && Number.isFinite(price) ? price : null,
     categories,
   });
 }
@@ -89,7 +92,7 @@ export async function listPublishedCatalogProducts(
       .from("catalog_products")
       .select(
         `
-        id,slug,name,details,image_url,image_urls,sort_order,published,created_at,updated_at,
+        id,slug,name,details,image_url,image_urls,sort_order,published,sku,price,currency,availability,created_at,updated_at,
         catalog_product_categories!inner (
           category_id,
           catalog_categories (
@@ -139,6 +142,23 @@ export async function getCatalogProductBySlug(supabase: SupabaseClient, slug: st
 
   if (error) throw error;
   return data ? normalizeProductRow(data as CatalogProductRow) : null;
+}
+
+export async function getCatalogProductById(supabase: SupabaseClient, id: string) {
+  const { data, error } = await supabase
+    .from("catalog_products")
+    .select(CATALOG_PRODUCT_SELECT)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? normalizeProductRow(data as CatalogProductRow) : null;
+}
+
+export async function listCatalogProductIds(supabase: SupabaseClient) {
+  const { data, error } = await supabase.from("catalog_products").select("id").order("sort_order");
+  if (error) throw error;
+  return ((data ?? []) as { id: string }[]).map((row) => row.id);
 }
 
 export async function getPublishedCatalogProductById(supabase: SupabaseClient, id: string) {

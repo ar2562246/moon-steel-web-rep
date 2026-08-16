@@ -9,6 +9,8 @@ export type CatalogCategory = {
   updated_at?: string;
 };
 
+export type CatalogProductAvailability = "in_stock" | "out_of_stock" | "preorder" | "available_for_order";
+
 export type CatalogProduct = {
   id: string;
   slug: string;
@@ -18,6 +20,10 @@ export type CatalogProduct = {
   image_urls?: string[];
   sort_order: number;
   published: boolean;
+  sku?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  availability?: CatalogProductAvailability | null;
   created_at: string;
   updated_at?: string;
   categories: CatalogCategorySummary[];
@@ -34,7 +40,7 @@ export const CATALOG_CATEGORY_SELECT =
   "id,slug,name,description,sort_order,published,created_at,updated_at";
 
 export const CATALOG_PRODUCT_SELECT = `
-  id,slug,name,details,image_url,image_urls,sort_order,published,created_at,updated_at,
+  id,slug,name,details,image_url,image_urls,sort_order,published,sku,price,currency,availability,created_at,updated_at,
   catalog_product_categories (
     catalog_categories (
       id, slug, name

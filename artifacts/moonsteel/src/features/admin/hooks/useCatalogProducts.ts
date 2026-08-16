@@ -17,6 +17,10 @@ type ProductInput = {
   sort_order: number;
   published: boolean;
   category_ids: string[];
+  sku?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  availability?: "in_stock" | "out_of_stock" | "preorder" | "available_for_order" | null;
 };
 
 type UpdateInput = ProductInput & {
